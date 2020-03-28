@@ -1,0 +1,54 @@
+import { Schema } from 'mongoose';
+import { IUser } from '.';
+import { IUserPopulated, IUserModel } from './user.types';
+import { AuthService } from '@/modules/services';
+
+export const UserSchema = new Schema<IUser>({
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: String,
+  username: {
+    type: String,
+    unique: true,
+    required: true,
+    lowercase: true,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  company: {
+    type: Schema.Types.ObjectId,
+    ref: 'Company',
+    required: true,
+  },
+  friends: [
+    {
+      type: String,
+    },
+  ],
+});
+
+// Virtuals
+UserSchema.virtual('fullName').get(function (this: IUser) {
+  return this.firstName + this.lastName;
+});
+
+// Static methods
+UserSchema.statics.findMyCompany = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
+  return this.findById(id).populate('company').exec();
+};
+
+// Document middlewares
+UserSchema.pre<IUser>('save', function (next) {
+  if (this.isModified('password')) {
+    this.password = AuthService.hashPassword(this.password);
+  }
+});
+
+// Query middlewares
+UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
+  // Do anything
+});
