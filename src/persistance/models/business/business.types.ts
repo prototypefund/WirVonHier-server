@@ -31,7 +31,7 @@ export interface IBusiness extends IBusinessBase {
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
-  sompePopulatedValue: any;
+  sompePopulatedValue: unknown;
 }
 
 export interface IBusinessModel extends Model<IBusiness> {

@@ -33,7 +33,7 @@ export const BusinessSchema = new Schema<IBusiness>({
 
 // Virtuals
 BusinessSchema.virtual('something').get(function (this: IBusiness) {
-  return this.name + this.phone;
+  return this.name + this.contact.phone;
 });
 
 // Static methods
