@@ -18,9 +18,12 @@ class BusinessesService {
     return Business.findById(id).exec();
   }
 
-  async getFilteredBusinesses(filter: IBusinessFilter) {
+  // TODO Write getFilteredBusinesses()
+  async getFilteredBusinesses(filter: IBusinessFilter): Promise<IBusiness[]> {
     // calculate min/max lat + min/max long based on request location + max distance
     // filter businesses based on filter params
+    await Business.findById(filter).exec();
+    return [];
   }
 }
 

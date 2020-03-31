@@ -41,14 +41,18 @@ UserSchema.statics.findMyCompany = async function (this: IUserModel, id: string)
   return this.findById(id).populate('company').exec();
 };
 
+// TODO Write Document Middlewares
 // Document middlewares
 UserSchema.pre<IUser>('save', async function (next) {
   if (this.isModified('password')) {
     this.password = await hs.hashPassword(this.password);
+    next();
   }
 });
 
+// TODO Write Query Middlewares
 // Query middlewares
 UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
   // Do anything
+  doc;
 });

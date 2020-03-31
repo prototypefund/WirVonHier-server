@@ -18,9 +18,12 @@ class UserService {
     return User.findById(id).exec();
   }
 
-  async getFilteredUsers(filter: IUserFilter) {
+  // TODO Write getFilteredUsers()
+  async getFilteredUsers(filter: IUserFilter): Promise<IUser[]> {
     // calculate min/max lat + min/max long based on request location + max distance
     // filter businesses based on filter params
+    await User.findById(filter).exec();
+    return [];
   }
 }
 
