@@ -6,6 +6,7 @@ export async function mongooseLoader(): Promise<void> {
   const { user, pass, path } = config.mongo;
   const mongoURI = `mongodb://${user}:${pass}${path}`;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await mongoose.connect(mongoURI, (err: any) => {
     if (err) {
       console.log(err.message);

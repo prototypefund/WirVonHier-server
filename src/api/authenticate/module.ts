@@ -2,7 +2,8 @@ import { Application } from 'express';
 import { authenticationRouter } from './router';
 import { authenticationMiddleware } from './middleware';
 
-export function registerAuthenticationModule(app: Application) {
+// TODO Define return type
+export function registerAuthenticationModule(app: Application): void {
   app.use(authenticationRouter);
   app.use(authenticationMiddleware);
 }
