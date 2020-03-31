@@ -1,7 +1,10 @@
 import { Document, Types, Model } from 'mongoose';
 import { IBusiness } from '../business';
+import { IRole } from '../role';
 
 interface IUserSchema extends Document {
+  email: string;
+  roles: Array<IRole['name']>;
   firstName: string;
   lastName?: string;
   username: string;

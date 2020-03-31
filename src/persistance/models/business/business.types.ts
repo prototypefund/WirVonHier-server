@@ -38,6 +38,6 @@ export interface IBusinessModel extends Model<IBusiness> {
   any: string;
 }
 
-export interface IUserModel extends Model<IBusiness> {
+export interface IBusinessModel extends Model<IBusiness> {
   anyMethod(id: string): Promise<IBusinessPopulated>;
 }

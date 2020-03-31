@@ -1,21 +1,16 @@
-import dotenv from 'dotenv';
-9;
+import 'dotenv/config';
 import express from 'express';
 import { loader } from './loader';
-dotenv.config();
 
 const port = Number(process.env.PORT);
 
-async function startServer() {
+async function startServer(): Promise<void> {
   const app = express();
 
   await loader.init(app);
 
-  app.listen(port, (err) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
+  app.listen(port, () => {
+    // eslint-disable-next-line no-console
     console.log(`Server running at port: ${port}`);
   });
 }

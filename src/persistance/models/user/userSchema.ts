@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
 import { IUser } from '.';
 import { IUserPopulated, IUserModel } from './user.types';
-import { AuthService } from '@/modules/services';
+import { hashingService as hs } from 'modules/services';
 
 export const UserSchema = new Schema<IUser>({
   firstName: {
@@ -42,9 +42,9 @@ UserSchema.statics.findMyCompany = async function (this: IUserModel, id: string)
 };
 
 // Document middlewares
-UserSchema.pre<IUser>('save', function (next) {
+UserSchema.pre<IUser>('save', async function (next) {
   if (this.isModified('password')) {
-    this.password = AuthService.hashPassword(this.password);
+    this.password = await hs.hashPassword(this.password);
   }
 });
 
