@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { BusinessesController as bc } from '../controller';
+import { businessesController as bc } from '../controller';
 
 export const businessesRouter = Router();
 

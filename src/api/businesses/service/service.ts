@@ -1,8 +1,9 @@
-import { IBusinessFilter } from './service.types';
-import { Business, IBusiness } from '@/persistance/models';
+import { Business, IBusiness } from 'persistance/models';
+import { BusinessFilter } from 'modules/services/filter';
 
 class BusinessesService {
   createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
+    // TODO: Validate Docs in Controller!
     return Business.create(businesses);
   }
 
@@ -11,6 +12,7 @@ class BusinessesService {
   }
 
   async updateOneBusiness(id: string, fieldsToUpdate: Partial<IBusiness>): Promise<IBusiness | null> {
+    // TODO: Validate fields in Controller!
     return await Business.findByIdAndUpdate(id, fieldsToUpdate, { new: true });
   }
 
@@ -18,12 +20,10 @@ class BusinessesService {
     return Business.findById(id).exec();
   }
 
-  // TODO Write getFilteredBusinesses()
-  async getFilteredBusinesses(filter: IBusinessFilter): Promise<IBusiness[]> {
-    // calculate min/max lat + min/max long based on request location + max distance
-    // filter businesses based on filter params
-    await Business.findById(filter).exec();
-    return [];
+  getFilteredBusinesses(query: string): Promise<IBusiness[]> {
+    const bf = new BusinessFilter(Business.find());
+    bf.parseQueryString(query);
+    return bf.applyFilter().exec();
   }
 }
 
