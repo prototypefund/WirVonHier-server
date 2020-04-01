@@ -19,7 +19,10 @@ class BusinessesController implements IBusinessesController {
   /**
    * Creates businesses, returns the created businesses
    */
-  public allBusinesses: RequestHandler = async function createBusinesses(req: Request, res: Response): Promise<void> {
+  public createBusinesses: RequestHandler = async function createBusinesses(
+    req: Request,
+    res: Response,
+  ): Promise<void> {
     const businesses = req.body.businesses; // TODO: Validate input
     const createdBusinesses = await bs.createBusinesses(businesses);
     res.status(200).json(createdBusinesses);
@@ -27,7 +30,7 @@ class BusinessesController implements IBusinessesController {
   /**
    * Returns the business with passed id or nothing
    */
-  public allBusinesses: RequestHandler = async function oneBusiness(req: Request, res: Response): Promise<void> {
+  public oneBusiness: RequestHandler = async function oneBusiness(req: Request, res: Response): Promise<void> {
     const businessId = req.params.id;
     const business = await bs.getOneBusinessById(businessId);
     res.status(200).json(business);
@@ -36,7 +39,7 @@ class BusinessesController implements IBusinessesController {
   /**
    * Updates the business with passed id, returns nothing
    */
-  public allBusinesses: RequestHandler = async function updateBusiness(req: Request, res: Response): Promise<void> {
+  public updateBusiness: RequestHandler = async function updateBusiness(req: Request, res: Response): Promise<void> {
     const businessId = req.params.id;
     const updates = req.body.business; // TODO: Validate input
     const updatedBusiness = await bs.updateOneBusiness(businessId, updates);
@@ -46,7 +49,7 @@ class BusinessesController implements IBusinessesController {
   /**
    * Deletes the business with passed id, returns nothing
    */
-  public allBusinesses: RequestHandler = async function deleteBusiness(req: Request, res: Response): Promise<void> {
+  public deleteBusiness: RequestHandler = async function deleteBusiness(req: Request, res: Response): Promise<void> {
     const businessId = req.params.id;
     try {
       await bs.deleteOneBusiness(businessId);

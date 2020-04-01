@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import * as mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import { config } from 'config';
 
 export async function mongooseLoader(): Promise<void> {
@@ -8,7 +8,7 @@ export async function mongooseLoader(): Promise<void> {
 
   await mongoose.connect(mongoURI, (err: any) => {
     if (err) {
-      console.log(err.message);
+      console.log('Mongoose error: ', err.message);
     } else {
       console.log('Successfully Connected mongoDB!');
     }

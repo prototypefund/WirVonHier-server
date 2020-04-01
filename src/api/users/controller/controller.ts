@@ -1,7 +1,6 @@
 import { Request, Response } from 'express-serve-static-core';
 import { IUserController } from './controller.types';
 import { userService as us } from '../service';
-import { FilterService } from '@/modules';
 
 export class UserController implements IUserController {
   [key: string]: import('express').RequestHandler<import('express-serve-static-core').ParamsDictionary>;
@@ -12,8 +11,8 @@ export class UserController implements IUserController {
    * Pagination applies
    */
   static async allUsers(req: Request, res: Response): Promise<void> {
-    const filter = FilterService.parseQuery(req.query);
-    const allUsers = await us.getFilteredUsers(filter);
+    const { query } = req;
+    const allUsers = await us.getFilteredUsers(query);
     res.status(200).json(allUsers);
   }
 
