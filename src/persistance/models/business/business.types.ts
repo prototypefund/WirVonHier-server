@@ -1,25 +1,34 @@
 import { Document, Model } from 'mongoose';
 
 interface IBusinessSchema extends Document {
+  created: string;
+  modified: string;
   name: string;
   lat: string;
-  long: string;
-  contact: {
-    phone: string[];
-    email: string[];
-    address: {
-      street: string;
-      streetNumber: string;
-      zip: string;
-      city: string;
-      state: string;
-      country: string;
-    };
+  lng: string;
+  website: string;
+  phone: string[];
+  whatsApp: string;
+  instagram: string;
+  facebook: string;
+  twitter: string;
+  email: string[];
+  address: {
+    street: string;
+    streetNumber: string;
+    zip: string;
+    city: string;
+    state: string;
+    country: string;
   };
-  media: {
-    images: {};
-    video: {};
-  };
+  ownerFirstName: string;
+  ownerLastName: string;
+  ownerFullName: string;
+  description: string;
+  delivery: string[];
+  category: string[];
+  images: {};
+  video: {};
 }
 
 export interface IBusinessBase extends IBusinessSchema {
