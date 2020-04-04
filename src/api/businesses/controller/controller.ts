@@ -23,10 +23,15 @@ class BusinessesController implements IBusinessesController {
     req: Request,
     res: Response,
   ): Promise<void> {
+    if (req.token) {
+      res.status(401);
+      return;
+    }
     const businesses = req.body.businesses; // TODO: Validate input
     const createdBusinesses = await bs.createBusinesses(businesses);
     res.status(200).json(createdBusinesses);
   };
+
   /**
    * Returns the business with passed id or nothing
    */
@@ -40,6 +45,10 @@ class BusinessesController implements IBusinessesController {
    * Updates the business with passed id, returns nothing
    */
   public updateBusiness: RequestHandler = async function updateBusiness(req: Request, res: Response): Promise<void> {
+    if (req.token) {
+      res.status(401);
+      return;
+    }
     const businessId = req.params.id;
     const updates = req.body.business; // TODO: Validate input
     const updatedBusiness = await bs.updateOneBusiness(businessId, updates);
@@ -50,6 +59,10 @@ class BusinessesController implements IBusinessesController {
    * Deletes the business with passed id, returns nothing
    */
   public deleteBusiness: RequestHandler = async function deleteBusiness(req: Request, res: Response): Promise<void> {
+    if (req.token) {
+      res.status(401);
+      return;
+    }
     const businessId = req.params.id;
     try {
       await bs.deleteOneBusiness(businessId);
