@@ -4,6 +4,20 @@ import { IUserPopulated, IUserModel } from './user.types';
 import { hashingService as hs } from 'modules/services';
 
 export const UserSchema = new Schema<IUser>({
+  created: {
+    type: String,
+    required: true,
+    default(): string {
+      return new Date(Date.now()).toLocaleString();
+    },
+  },
+  modified: {
+    type: String,
+    required: true,
+    default(): string {
+      return new Date(Date.now()).toLocaleString();
+    },
+  },
   firstName: {
     type: String,
     required: true,
@@ -19,9 +33,14 @@ export const UserSchema = new Schema<IUser>({
     type: String,
     required: true,
   },
-  company: {
+  businesses: {
     type: Schema.Types.ObjectId,
-    ref: 'Company',
+    ref: 'Business',
+    required: true,
+  },
+  acceptedDataProtStatements: {
+    type: [Schema.Types.ObjectId],
+    ref: 'DataProtStatement',
     required: true,
   },
   friends: [
@@ -37,7 +56,7 @@ UserSchema.virtual('fullName').get(function (this: IUser) {
 });
 
 // Static methods
-UserSchema.statics.findMyCompany = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
+UserSchema.statics.findMyCompanies = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
   return this.findById(id).populate('company').exec();
 };
 
@@ -53,6 +72,5 @@ UserSchema.pre<IUser>('save', async function (next) {
 // TODO Write Query Middlewares
 // Query middlewares
 UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
-  // Do anything
-  doc;
+  doc.modified = Date.now().toLocaleString();
 });
