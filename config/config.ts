@@ -27,6 +27,6 @@ export const config = {
   mongo: {
     user: envVars.MONGO_USER,
     pass: envVars.MONGO_PASSWORD,
-    path: envVars.MONGO_PASSWORD,
+    path: envVars.MONGO_PATH,
   },
 };

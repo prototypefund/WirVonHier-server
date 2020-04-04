@@ -32,9 +32,9 @@ export class Filter<T extends Document> {
     this.query = query;
   }
 
-  public parseQueryString(filterString: string): void {
-    this.rawFilterData = filterString.split('&').map((query) => {
-      const [name, val] = query.split('=');
+  public parseQueryString(filterQuery: { [key: string]: string }): void {
+    this.rawFilterData = Object.keys(filterQuery).map((name) => {
+      const val = filterQuery[name];
       const operator = val.includes(':') ? val[0] : null;
       const value = this.parseValue(val.includes(':') ? val[1] : val);
       return { name, operator, value };

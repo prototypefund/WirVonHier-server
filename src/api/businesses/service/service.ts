@@ -20,7 +20,7 @@ class BusinessesService {
     return Business.findById(id).exec();
   }
 
-  getFilteredBusinesses(query: string): Promise<IBusiness[]> {
+  getFilteredBusinesses(query: { [key: string]: string }): Promise<IBusiness[]> {
     const bf = new BusinessFilter(Business.find());
     bf.parseQueryString(query);
     return bf.applyFilter().exec();
