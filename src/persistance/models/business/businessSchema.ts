@@ -3,7 +3,8 @@ import { IBusiness } from '.';
 import { normalizeName } from 'modules/util';
 import { LocationSchema } from '../location/locationSchema';
 import { UserSchema } from '../user/userSchema';
-import { Video } from '../video';
+import { VideoSchema } from '../video';
+import { ImageSchema } from '../image';
 // import { GeoService } from 'modules/services';
 
 export const BusinessSchema = new Schema<IBusiness>({
@@ -86,8 +87,8 @@ export const BusinessSchema = new Schema<IBusiness>({
     enum: ['paypal', 'cash', 'creditcard', 'invoice', 'sofort', 'amazon', 'ondelivery', 'sepa', 'other'],
   },
   media: {
-    images: [Image],
-    videos: [Video],
+    images: [ImageSchema],
+    videos: [VideoSchema],
   },
 });
 
