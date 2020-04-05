@@ -102,7 +102,7 @@ export class Filter<T extends Document> {
     const byParameter = this.operatorParameterNameMap.get(name);
     if (byParameter) return this.normalizeValue(byParameter);
 
-    return [];
+    return ['equals'];
   }
 
   private normalizeValue<V>(value: V | V[]): V[] {
@@ -116,6 +116,9 @@ export class Filter<T extends Document> {
         case 'near': {
           const res = this.validateCoordinates(value);
           return res ? { spherical: true, center: res.center, maxDistance: res.maxDistance } : null;
+        }
+        case 'regex': {
+          return new RegExp(`${value}`, 'i');
         }
         default:
           return value;
