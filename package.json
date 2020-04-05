@@ -1,7 +1,8 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "description": "",
+  "description": "WirVonHier server application",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "tsc",

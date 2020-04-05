@@ -1,10 +1,13 @@
 import { Business, IBusiness } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
+import { GeoService } from 'modules';
 
 class BusinessesService {
-  createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
+  async createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
     // TODO: Validate Docs in Controller!
-    return Business.create(businesses);
+    const newBusinesses = await Business.create(businesses);
+    GeoService.patchLocations(newBusinesses);
+    return newBusinesses;
   }
 
   async deleteOneBusiness(id: string): Promise<void> {

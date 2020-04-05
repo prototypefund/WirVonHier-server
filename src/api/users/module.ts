@@ -1,6 +1,7 @@
 import { Application } from 'express';
 import { userRouter } from './router';
 
-export function registerUserModule(app: Application) {
+// TODO Define return type
+export function registerUserModule(app: Application): void {
   app.use(userRouter);
 }

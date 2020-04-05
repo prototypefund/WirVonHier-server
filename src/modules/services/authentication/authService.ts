@@ -33,8 +33,9 @@ class AuthService {
     const token = header.split(' ')[1];
     const payload = ts.verify(token);
 
+    // TODO token does not exist on Request
     if (!payload) return next();
-    req.token = payload;
+    //req.token = payload;
     next();
   }
 }
