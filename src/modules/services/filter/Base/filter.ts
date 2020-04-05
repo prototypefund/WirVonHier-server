@@ -1,6 +1,5 @@
 import { DocumentQuery, Document, Model } from 'mongoose';
 import { IQueryOperation, IQueryOperator, IParsedQuery, IObjectQuery, IQueryData } from './filter.types';
-//import util from 'util';
 
 export class Filter<T extends Document> {
   private FILTER_IDENTIFIER = 'filter_';
