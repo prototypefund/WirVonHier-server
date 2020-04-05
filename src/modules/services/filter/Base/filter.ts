@@ -1,113 +1,153 @@
-import { DocumentQuery, Document } from 'mongoose';
-
-// TODO: write all valid QueryOperators down
-// TODO: write operatorMap (explicit operator mapping from query parameter)
-// TODO: write operatorParameterNameMap (mapping from parameterName to operators)
-
-export type IQueryOperator = 'where' | 'lte' | 'gte' | 'equals' | 'circle';
-
-export interface IRawFilterData {
-  name: string;
-  operator: string | null;
-  value: string | string[];
-}
-export interface IFilterData {
-  operator: IQueryOperator;
-  args: string | string[];
-}
-
-export interface IFilter<T extends Document> {
-  (query: DocumentQuery<T[], T, {}>): DocumentQuery<T[], T, {}>;
-}
+import { DocumentQuery, Document, Model } from 'mongoose';
+import { IQueryOperation, IQueryOperator, IParsedQuery, IObjectQuery, IQueryData } from './filter.types';
+import util from 'util';
 
 export class Filter<T extends Document> {
-  private query: DocumentQuery<T[], T, {}>;
-  private rawFilterData: IRawFilterData[] = [];
-  private filterData: IFilterData[][] = [];
-  private filters: Array<IFilter<T>> = [];
-  private operatorMap: Map<string, IQueryOperator | IQueryOperator[]> = new Map();
-  private operatorParameterNameMap: Map<string, IQueryOperator | IQueryOperator[]> = new Map();
+  private FILTER_IDENTIFIER = 'filter_';
+  private queryOperations: IQueryOperation<T>[] = [];
+  private operatorMap: Map<string, IQueryOperator | IQueryOperator[]> = new Map([
+    ['lte', 'lte'],
+    ['gte', 'gte'],
+    ['equals', 'equals'],
+    ['contains', 'regex'],
+  ]);
+  private operatorParameterNameMap: Map<string, IQueryOperator | IQueryOperator[]> = new Map([['location', 'near']]);
 
-  constructor(query: DocumentQuery<T[], T, {}>) {
-    this.query = query;
+  public isValidQuery(rawQuery: unknown): boolean {
+    if (typeof rawQuery === 'object') {
+      return !!rawQuery && Object.keys(rawQuery).every((key) => typeof key === 'string');
+    }
+    return false;
   }
 
-  public parseQueryString(filterQuery: { [key: string]: string }): void {
-    this.rawFilterData = Object.keys(filterQuery).map((name) => {
-      const val = filterQuery[name];
-      const operator = val.includes(':') ? val[0] : null;
-      const value = this.parseValue(val.includes(':') ? val[1] : val);
-      return { name, operator, value };
-    });
-    this.generateFilterData();
-    this.createFilters();
+  public addQuery(query: unknown): boolean {
+    if (!this.isValidQuery(query)) return false;
+    try {
+      let parsedQuery!: IParsedQuery[];
+      if (typeof query === 'object') {
+        parsedQuery = this.parseObjectQuery(query as IObjectQuery);
+      }
+      const interpretedQuery = parsedQuery.map((raw) => this.interpretParsedQuery(raw));
+      const newQueryOperatrions = this.createQueryOperations(interpretedQuery);
+      this.queryOperations.push(...newQueryOperatrions);
+      return true;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Adding Query failed: ', e);
+      return false;
+    }
   }
 
-  public applyFilter(): DocumentQuery<T[], T, {}> {
-    return this.filters.reduce((acc, filter) => filter(acc), this.query);
+  public execOn(model: Model<T, {}>): Promise<T[]> {
+    const documentQuery = model.find();
+    const finalQuery = this.queryOperations.reduce((acc, queryOperation) => {
+      return queryOperation(acc);
+    }, documentQuery);
+    return finalQuery.exec();
   }
 
-  private generateFilterData(): void {
-    this.filterData = this.rawFilterData.map((raw) => this.interpretRawFilterData(raw));
+  public limit(size: string | number): void {
+    const number = Number(size);
+    if (!number) return;
+    this.queryOperations.push((q) => q.limit(number));
   }
 
-  private interpretRawFilterData(data: IRawFilterData): IFilterData[] {
+  private parseObjectQuery(filterQuery: IObjectQuery): IParsedQuery[] {
+    return Object.keys(filterQuery)
+      .filter((key) => key.includes(this.FILTER_IDENTIFIER))
+      .map((name) => {
+        const propertyName = name.split('_')[1];
+        const val = filterQuery[name];
+        const operator = val.includes(':') ? val.split(':')[0] : null;
+        const value = this.parseValue(val.includes(':') ? val.split(':')[1] : val);
+        return { name: propertyName, operator, value };
+      });
+  }
+
+  private parseValue(value: string): string | string[] {
+    return value.includes('|') ? value.split('|') : value;
+  }
+
+  private interpretParsedQuery(data: IParsedQuery): IQueryData[] {
+    const queryOperations = [
+      {
+        operator: 'where' as IQueryOperator,
+        args: data.name,
+      },
+    ];
     const operators = this.deduceOperators(data);
     const args = this.deduceArgs(operators, data);
 
-    return operators.map((o, i) => {
-      return {
-        operator: o,
-        args: args[i],
-      };
-    });
+    const ops: IQueryData[] = operators
+      .filter((_, i) => args[i] !== null)
+      .map((o, i) => {
+        return {
+          operator: o,
+          args: args[i] as (string | object)[],
+        };
+      });
+    return ops.length > 0 ? [...queryOperations, ...ops] : [];
   }
 
-  private deduceOperators(data: IRawFilterData): IQueryOperator[] {
+  private deduceOperators(data: IParsedQuery): IQueryOperator[] {
     const { operator, name, value } = data;
     if (!name || !value) return [];
-    if (operator) {
-      const op = this.operatorMap.get(operator);
-      if (!op) return [];
-      return op instanceof Array ? op : [op];
-    }
+
     if (value instanceof Array) {
-      return [];
+      return ['in'];
     }
-    const op = this.operatorParameterNameMap.get(name);
-    if (!op) return [];
-    return op instanceof Array ? op : [op];
+
+    const byOperator = operator && this.operatorMap.get(operator);
+    if (byOperator) return this.normalizeValue(byOperator);
+
+    const byParameter = this.operatorParameterNameMap.get(name);
+    if (byParameter) return this.normalizeValue(byParameter);
+
+    return [];
   }
 
-  private deduceArgs(operators: string[], data: IRawFilterData): (string | string[])[] {
-    const { name, value } = data;
-    if (name === 'location') {
-      return ['location', 'area'];
-    }
+  private normalizeValue<V>(value: V | V[]): V[] {
+    return value instanceof Array ? value : [value];
+  }
+
+  private deduceArgs(operators: string[], data: IParsedQuery): (string | object | null)[] {
+    const { value } = data;
     return operators.map((o) => {
       switch (o) {
-        case 'where':
-          return name;
-        case 'circle':
-          return 'create area objecct';
+        case 'near': {
+          const res = this.validateCoordinates(value);
+          return res ? { spherical: true, center: res.center, maxDistance: res.maxDistance } : null;
+        }
         default:
-          // 'equal'
           return value;
       }
     });
   }
 
-  private createFilters(): void {
-    this.filters = this.filterData.reduce((acc: IFilter<T>[], data) => {
+  // coordinates need to be: [ lng, lat ]
+  private validateCoordinates(value: string | string[]): { center: object; maxDistance: number } | null {
+    if (value instanceof Array) return null;
+    const [lng, lat, maxDistance] = value.split(',');
+    const LNG = parseFloat(lng);
+    const LAT = parseFloat(lat);
+    const MAXDISTANCE = parseFloat(maxDistance);
+    if (!LNG || !LAT || (!MAXDISTANCE && MAXDISTANCE !== 0)) return null;
+    const center = {
+      type: 'Point',
+      coordinates: [LNG, LAT],
+    };
+    return { center, maxDistance: MAXDISTANCE };
+  }
+
+  private createQueryOperations(interpretedQuery: IQueryData[][]): IQueryOperation<T>[] {
+    return interpretedQuery.reduce((acc: IQueryOperation<T>[], data) => {
       return [
         ...acc,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...data.map((filter) => (query: any): DocumentQuery<T[], T, {}> => query[filter.operator](...filter.args)),
+        ...data.map((filter) => (query: any): DocumentQuery<T[], T, {}> => {
+          return query[filter.operator](filter.args);
+        }),
       ];
     }, []);
-  }
-
-  private parseValue(value: string): string | string[] {
-    return value.includes('|') ? value.split('|') : value;
   }
 }

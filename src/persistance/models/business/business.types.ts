@@ -1,11 +1,12 @@
 import { Document, Model } from 'mongoose';
+import { ILocation } from '..';
 
 interface IBusinessSchema extends Document {
+  id: string;
   created: string;
   modified: string;
   name: string;
-  lat: string;
-  lng: string;
+  location: ILocation;
   website: string;
   phone: string[];
   whatsApp: string;

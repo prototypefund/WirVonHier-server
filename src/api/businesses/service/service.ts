@@ -17,13 +17,14 @@ class BusinessesService {
   }
 
   getOneBusinessById(id: string): Promise<IBusiness | null> {
-    return Business.findById(id).exec();
+    return Business.findOne({ id }).exec();
   }
 
   getFilteredBusinesses(query: { [key: string]: string }): Promise<IBusiness[]> {
-    const bf = new BusinessFilter(Business.find());
-    bf.parseQueryString(query);
-    return bf.applyFilter().exec();
+    const filter = new BusinessFilter();
+    filter.addQuery(query);
+    filter.limit(query.limit || 50);
+    return filter.execOn(Business);
   }
 }
 

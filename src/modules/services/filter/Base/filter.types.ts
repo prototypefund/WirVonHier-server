@@ -1,12 +1,22 @@
 import { Document, DocumentQuery } from 'mongoose';
 
-export interface IQueryDefinition {
-  propertyName: string;
-  operator: string;
-  value: string;
+export interface IObjectQuery {
+  [key: string]: string;
 }
 
-export interface IQuery<T extends Document> {
-  // tslint:disable-next-line callable-types (This is extended from and can't extend from a type alias in ts<2.2
+export interface IParsedQuery {
+  name: string;
+  operator: string | null;
+  value: string | string[];
+}
+
+export type IQueryOperator = 'lte' | 'gte' | 'equals' | 'in' | 'near' | 'regex' | 'geometry';
+
+export interface IQueryData {
+  operator: IQueryOperator;
+  args: string | string[] | object;
+}
+
+export interface IQueryOperation<T extends Document> {
   (query: DocumentQuery<T[], T, {}>): DocumentQuery<T[], T, {}>;
 }

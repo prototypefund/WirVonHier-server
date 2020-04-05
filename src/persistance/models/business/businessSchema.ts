@@ -1,6 +1,8 @@
 import { Schema } from 'mongoose';
 import { IBusiness } from '.';
 import { IBusinessPopulated, IBusinessModel } from './business.types';
+import { normalizeName } from 'modules/util';
+import { LocationSchema } from '../location/locationSchema';
 // import { GeoService } from 'modules/services';
 
 export const BusinessSchema = new Schema<IBusiness>({
@@ -16,6 +18,12 @@ export const BusinessSchema = new Schema<IBusiness>({
       return new Date(Date.now()).toLocaleString();
     },
   },
+  id: {
+    type: String,
+    requierd: true,
+    unique: true,
+    index: true,
+  },
   name: {
     type: String,
     unique: true,
@@ -23,16 +31,7 @@ export const BusinessSchema = new Schema<IBusiness>({
     lowercase: true,
     trim: true,
   },
-  lat: {
-    type: Number,
-    index: true,
-    required: true,
-  },
-  lng: {
-    type: Number,
-    index: true,
-    required: true,
-  },
+  location: LocationSchema,
   website: {
     type: String,
   },
@@ -91,6 +90,8 @@ export const BusinessSchema = new Schema<IBusiness>({
   },
 });
 
+BusinessSchema.index({ location: '2dsphere' });
+
 // Virtuals
 BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
   return this.ownerFirstName + ' ' + this.ownerLastName;
@@ -104,14 +105,12 @@ BusinessSchema.statics.anyMethod = async function (
   return this.findById(id).populate('company').exec();
 };
 
-// // Document pre Hook
-// BusinessSchema.pre<IBusiness>('save', function (_next, doc: Partial<IBusiness>) {
-//   if (doc.address) {
-//     const { lat, lang } = GeoService.getCoordinates(doc.address);
-//     this.lat = lat;
-//     this.lng = lang;
-//   }
-// });
+// Document pre Hook
+BusinessSchema.pre<IBusiness>('save', function () {
+  if (this.isModified('name')) {
+    this.id = normalizeName(this.name);
+  }
+});
 
 // Document post Hook
 BusinessSchema.post<IBusiness>('save', function (doc) {
