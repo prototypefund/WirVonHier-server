@@ -12,7 +12,7 @@ class AuthenticationController implements IAuthenticationController {
 
   register: RequestHandler = async function login(req, res, next): Promise<void> {
     const type = req.query.strategy || 'local';
-    const { token, error } = await as.loginUser(type, req, res, next);
+    const { token, error } = await as.registerUser(type, req, res, next);
     if (error) res.status(error.status).send(error.message);
     if (token) res.status(200).json({ token });
   };

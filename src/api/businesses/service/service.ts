@@ -1,9 +1,13 @@
-import { IBusinessFilter } from './service.types';
-import { Business, IBusiness } from '@/persistance/models';
+import { Business, IBusiness } from 'persistance/models';
+import { BusinessFilter } from 'modules/services/filter';
+import { GeoService } from 'modules';
 
 class BusinessesService {
-  createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
-    return Business.create(businesses);
+  async createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
+    // TODO: Validate Docs in Controller!
+    const newBusinesses = await Business.create(businesses);
+    GeoService.patchLocations(newBusinesses);
+    return newBusinesses;
   }
 
   async deleteOneBusiness(id: string): Promise<void> {
@@ -11,19 +15,19 @@ class BusinessesService {
   }
 
   async updateOneBusiness(id: string, fieldsToUpdate: Partial<IBusiness>): Promise<IBusiness | null> {
+    // TODO: Validate fields in Controller!
     return await Business.findByIdAndUpdate(id, fieldsToUpdate, { new: true });
   }
 
   getOneBusinessById(id: string): Promise<IBusiness | null> {
-    return Business.findById(id).exec();
+    return Business.findOne({ id }).exec();
   }
 
-  // TODO Write getFilteredBusinesses()
-  async getFilteredBusinesses(filter: IBusinessFilter): Promise<IBusiness[]> {
-    // calculate min/max lat + min/max long based on request location + max distance
-    // filter businesses based on filter params
-    await Business.findById(filter).exec();
-    return [];
+  getFilteredBusinesses(query: { [key: string]: string }): Promise<IBusiness[]> {
+    const filter = new BusinessFilter();
+    filter.addQuery(query);
+    filter.limit(query.limit || 50);
+    return filter.execOn(Business);
   }
 }
 
