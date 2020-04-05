@@ -1,7 +1,7 @@
 import { Schema } from 'mongoose';
-import { IDataProtStatement } from '.';
+import { IVideo } from '.';
 
-export const DataProtectionStatementSchema = new Schema<IDataProtStatement>({
+export const VideoSchema = new Schema<IVideo>({
   created: {
     type: String,
     default(): string {
@@ -14,25 +14,18 @@ export const DataProtectionStatementSchema = new Schema<IDataProtStatement>({
       return new Date(Date.now()).toISOString();
     },
   },
-  version: {
-    type: String,
-    requierd: true,
-    index: true,
-    unique: true,
-  },
-  type: {
-    type: String,
-    required: true,
-    index: true,
-    unique: true,
-  },
-  text: {
+  title: {
     type: String,
     required: true,
   },
-  language: {
+  description: String,
+  caption: String,
+  src: {
     type: String,
     required: true,
-    enum: ['de', 'en'],
+  },
+  rank: Number,
+  ratio: {
+    type: String,
   },
 });
