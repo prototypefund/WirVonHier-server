@@ -1,9 +1,16 @@
 import { DocumentQuery, Document, Model } from 'mongoose';
 import { IQueryOperation, IQueryOperator, IParsedQuery, IObjectQuery, IQueryData } from './filter.types';
+import zipCodesGermany from './zipCodes/germany.json';
+
+const convertedZipCodes: Iterable<readonly [string, number[]]> = zipCodesGermany.map((loc) => {
+  const [lat, lng] = loc['Geo Point'].split(' ').join('').split(',');
+  return [loc['Postleitzahl'], [parseFloat(lng), parseFloat(lat)]];
+});
 
 export class Filter<T extends Document> {
   private FILTER_IDENTIFIER = 'filter_';
   private queryOperations: IQueryOperation<T>[] = [];
+  private zipCodes: Map<string, number[]> = new Map(convertedZipCodes);
   private operatorMap: Map<string, IQueryOperator | IQueryOperator[]> = new Map([
     ['lte', 'lte'],
     ['gte', 'gte'],
@@ -102,7 +109,7 @@ export class Filter<T extends Document> {
     const byParameter = this.operatorParameterNameMap.get(name);
     if (byParameter) return this.normalizeValue(byParameter);
 
-    return [];
+    return ['equals'];
   }
 
   private normalizeValue<V>(value: V | V[]): V[] {
@@ -117,6 +124,9 @@ export class Filter<T extends Document> {
           const res = this.validateCoordinates(value);
           return res ? { spherical: true, center: res.center, maxDistance: res.maxDistance } : null;
         }
+        case 'regex': {
+          return new RegExp(`${value}`, 'i');
+        }
         default:
           return value;
       }
@@ -126,10 +136,22 @@ export class Filter<T extends Document> {
   // coordinates need to be: [ lng, lat ]
   private validateCoordinates(value: string | string[]): { center: object; maxDistance: number } | null {
     if (value instanceof Array) return null;
-    const [lng, lat, maxDistance] = value.split(',');
-    const LNG = parseFloat(lng);
-    const LAT = parseFloat(lat);
-    const MAXDISTANCE = parseFloat(maxDistance);
+    const params = value.split(',');
+    let LNG: number | undefined = 0;
+    let LAT: number | undefined = 0;
+    let MAXDISTANCE = 0;
+    if (params.length === 2) {
+      const zip = params[0];
+      const entry = this.zipCodes.get(zip);
+      LNG = entry && entry[0];
+      LAT = entry && entry[1];
+      MAXDISTANCE = parseFloat(params[1]);
+    } else {
+      LNG = parseFloat(params[0]);
+      LAT = parseFloat(params[1]);
+      MAXDISTANCE = parseFloat(params[2]);
+    }
+
     if (!LNG || !LAT || (!MAXDISTANCE && MAXDISTANCE !== 0)) return null;
     const center = {
       type: 'Point',

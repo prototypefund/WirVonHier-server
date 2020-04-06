@@ -1,5 +1,6 @@
 import { Document, Model } from 'mongoose';
-import { ILocation } from '..';
+import { ILocation, IVideo } from '..';
+import { IImage } from '../image';
 
 interface IBusinessSchema extends Document {
   id: string;
@@ -8,12 +9,12 @@ interface IBusinessSchema extends Document {
   name: string;
   location: ILocation;
   website: string;
-  phone: string[];
+  phone: string;
   whatsApp: string;
   instagram: string;
   facebook: string;
   twitter: string;
-  email: string[];
+  email: string;
   address: {
     street: string;
     streetNumber: string;
@@ -22,14 +23,14 @@ interface IBusinessSchema extends Document {
     state: string;
     country: string;
   };
-  ownerFirstName: string;
-  ownerLastName: string;
-  ownerFullName: string;
   description: string;
   delivery: string[];
   category: string[];
-  images: {};
-  video: {};
+  // analytic fields
+  // Activity of business
+  // time-viewed
+  // users visited
+  //
 }
 
 export interface IBusinessBase extends IBusinessSchema {
@@ -37,15 +38,14 @@ export interface IBusinessBase extends IBusinessSchema {
 }
 
 export interface IBusiness extends IBusinessBase {
-  sompePopulatedValue: string; // as ID
+  media: {
+    images: IImage['id'][];
+    videos: IVideo['id'][];
+  };
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
   sompePopulatedValue: unknown;
-}
-
-export interface IBusinessModel extends Model<IBusiness> {
-  any: string;
 }
 
 export interface IBusinessModel extends Model<IBusiness> {

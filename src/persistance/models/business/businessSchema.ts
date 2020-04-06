@@ -1,21 +1,23 @@
 import { Schema } from 'mongoose';
 import { IBusiness } from '.';
-import { IBusinessPopulated, IBusinessModel } from './business.types';
 import { normalizeName } from 'modules/util';
 import { LocationSchema } from '../location/locationSchema';
+import { UserSchema } from '../user/userSchema';
+import { VideoSchema } from '../video';
+import { ImageSchema } from '../image';
 // import { GeoService } from 'modules/services';
 
 export const BusinessSchema = new Schema<IBusiness>({
   created: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toLocaleString();
+      return new Date(Date.now()).toISOString();
     },
   },
   modified: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toLocaleString();
+      return new Date(Date.now()).toISOString();
     },
   },
   id: {
@@ -31,13 +33,17 @@ export const BusinessSchema = new Schema<IBusiness>({
     lowercase: true,
     trim: true,
   },
+  owner: {
+    type: UserSchema,
+    required: true,
+  },
+  members: [UserSchema],
   location: LocationSchema,
   website: {
     type: String,
   },
   phone: {
-    type: [String],
-    required: true,
+    type: String,
   },
   whatsApp: {
     type: String,
@@ -52,7 +58,7 @@ export const BusinessSchema = new Schema<IBusiness>({
     type: String,
   },
   email: {
-    type: [String],
+    type: String,
     required: true,
   },
   address: {
@@ -62,12 +68,6 @@ export const BusinessSchema = new Schema<IBusiness>({
     city: String,
     state: String,
     country: String,
-  },
-  ownerFirstName: {
-    type: String,
-  },
-  ownerLastName: {
-    type: String,
   },
   description: {
     type: String,
@@ -82,11 +82,13 @@ export const BusinessSchema = new Schema<IBusiness>({
     // enum: ['food', 'beverages', 'clothing', 'lifestyle', 'accessories', 'crafts', 'service', 'hairdresse', 'education'],
     required: true,
   },
-  images: {
+  paymentMethods: {
     type: [String],
+    enum: ['paypal', 'cash', 'creditcard', 'invoice', 'sofort', 'amazon', 'ondelivery', 'sepa', 'other'],
   },
-  videos: {
-    type: [String],
+  media: {
+    images: [ImageSchema],
+    videos: [VideoSchema],
   },
 });
 
@@ -94,16 +96,13 @@ BusinessSchema.index({ location: '2dsphere' });
 
 // Virtuals
 BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
-  return this.ownerFirstName + ' ' + this.ownerLastName;
+  return '';
 });
 
 // Static methods
-BusinessSchema.statics.anyMethod = async function (
-  this: IBusinessModel,
-  id: string,
-): Promise<IBusinessPopulated | null> {
-  return this.findById(id).populate('company').exec();
-};
+// BusinessSchema.statics.anyMethod = async function (this: IBusinessModel): Promise<IBusinessPopulated | null> {
+//   return '';
+// };
 
 // Document pre Hook
 BusinessSchema.pre<IBusiness>('save', function () {
