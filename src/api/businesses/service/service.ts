@@ -23,11 +23,13 @@ class BusinessesService {
     return Business.findOne({ id }).exec();
   }
 
-  getFilteredBusinesses(query: { [key: string]: string }): Promise<IBusiness[]> {
+  async getFilteredBusinesses(query: { [key: string]: string }): Promise<{ businesses?: IBusiness[]; error?: Error }> {
     const filter = new BusinessFilter();
-    filter.addQuery(query);
+    const { error } = filter.addQuery(query);
+    if (error) return { error };
     filter.limit(query.limit || 50);
-    return filter.execOn(Business);
+    const businesses = await filter.execOn(Business);
+    return { businesses };
   }
 }
 

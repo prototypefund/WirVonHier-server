@@ -26,8 +26,8 @@ export class Filter<T extends Document> {
     return false;
   }
 
-  public addQuery(query: unknown): boolean {
-    if (!this.isValidQuery(query)) return false;
+  public addQuery(query: unknown): { status?: string; error?: Error } {
+    if (!this.isValidQuery(query)) return { error: new Error('Invalid Query String.') };
     try {
       let parsedQuery!: IParsedQuery[];
       if (typeof query === 'object') {
@@ -36,11 +36,9 @@ export class Filter<T extends Document> {
       const interpretedQuery = parsedQuery.map((raw) => this.interpretParsedQuery(raw));
       const newQueryOperatrions = this.createQueryOperations(interpretedQuery);
       this.queryOperations.push(...newQueryOperatrions);
-      return true;
+      return { status: 'success' };
     } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log('Adding Query failed: ', e);
-      return false;
+      return { error: e };
     }
   }
 
@@ -81,17 +79,16 @@ export class Filter<T extends Document> {
         args: data.name,
       },
     ];
+
     const operators = this.deduceOperators(data);
     const args = this.deduceArgs(operators, data);
 
-    const ops: IQueryData[] = operators
-      .filter((_, i) => args[i] !== null)
-      .map((o, i) => {
-        return {
-          operator: o,
-          args: args[i] as (string | object)[],
-        };
-      });
+    const ops: IQueryData[] = operators.map((o, i) => {
+      return {
+        operator: o,
+        args: args[i] as (string | object)[],
+      };
+    });
     return ops.length > 0 ? [...queryOperations, ...ops] : [];
   }
 
@@ -143,16 +140,27 @@ export class Filter<T extends Document> {
     if (params.length === 2) {
       const zip = params[0];
       const entry = this.zipCodes.get(zip);
-      LNG = entry && entry[0];
-      LAT = entry && entry[1];
-      MAXDISTANCE = parseFloat(params[1]);
+      if (!entry) throw new Error(`ZIP-Code ${zip} does not exist.`);
+      LNG = entry[0];
+      LAT = entry[1];
+      MAXDISTANCE = Number(params[1]);
     } else {
-      LNG = parseFloat(params[0]);
-      LAT = parseFloat(params[1]);
-      MAXDISTANCE = parseFloat(params[2]);
+      LNG = Number(params[0]);
+      LAT = Number(params[1]);
+      MAXDISTANCE = Number(params[2]);
     }
-
-    if (!LNG || !LAT || (!MAXDISTANCE && MAXDISTANCE !== 0)) return null;
+    if (LNG !== 0 && !LNG)
+      throw new Error(
+        `Invalid value passed as longitude (first parameter) to "location" filter: "${params[0]}". Must be number between -180 and 180.`,
+      );
+    if (LAT !== 0 && !LAT)
+      throw new Error(
+        `Invalid value passed as latitude (second parameter) to "location" filter: "${params[1]}". Must be number between -180 and 180.`,
+      );
+    if (!MAXDISTANCE && MAXDISTANCE !== 0)
+      throw new Error(
+        `Invalid value passed as maxDistance to "location" filter: "${params[2]}". Must be number (in meters)`,
+      );
     const center = {
       type: 'Point',
       coordinates: [LNG, LAT],
