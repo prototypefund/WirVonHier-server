@@ -1,7 +1,13 @@
 import { IBusiness, Business } from '../../../persistance/models';
+import { IGeoResponseSearch } from './geolocation.types';
 
 // TODO Write Geolocation Service
+//GET https://nominatim.openstreetmap.org/search?format=json&email=e.rom@gmx.net&addressdetails=1&q=55+gostenhofer+hauptstrasse+nuernberg
+
 export class GeoService {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private static _ID: any;
+  private static validatedQuery = '';
   private static nominatimURL = 'https://nominatim.openstreetmap.org';
   private static getCoordsURL =
     GeoService.nominatimURL +
@@ -23,141 +29,69 @@ export class GeoService {
 
   // * Update an array of businesses
   // - Convert adresses in coordinates, update db entries ////, send mail to subscribers
-  static async patchLocations(businesses: IBusiness[]): Promise<void> {
+  static patchLocations(businesses: IBusiness[]): void {
     for (const business of businesses) {
-      const coordinates = await this.addressToCoordinates(business.address);
-      const location = {
-        type: 'Point',
-        coordinates,
-      };
-      Business.findOneAndUpdate({ _id: business._id }, { location });
+      this._ID = business._id;
+      // build query String
+      const searchQuery =
+        this.getCoordsURL +
+        business.address.street +
+        '+' +
+        business.address.streetNumber +
+        ',+' +
+        business.address.zip +
+        '+' +
+        business.address.city +
+        ',+' +
+        business.address.state +
+        ',+' +
+        business.address.country;
+
+      this.validatedQuery = searchQuery.trim().replace(/\s/g, '+');
       //// GlobalEventEmitter.emit('business_localized'); // Event for modules/subscribers
     }
   }
-  // * Convert a address to coordinates; return [lat, lon];
-  static async addressToCoordinates(address: Record<string, string>): Promise<number[]> {
-    // 'street+streetNr,+zip+city,+state,+country'
-    const query =
-      address.street +
-      '+' +
-      address.streetNumber +
-      ',+' +
-      address.zip +
-      '+' +
-      address.city +
-      ',+' +
-      address.state +
-      ',+' +
-      address.country;
-    // Regex Pattern /\s/g : Find all whitespace occurrences within a string
-    const response = await this.sendQuery(this.getCoordsURL + query.trim().replace(/\s/g, '+'));
-    const latLon = [response[0].lat, response[0].lon];
-
-    // query latlng from response +
-    // add lat,lng to IBusiness with id
-
-    //
-    return latLon;
+  // ! ===============================================
+  static getSearchQuery(): string {
+    return this.validatedQuery;
   }
-  // * Request Handler
+  // ! ===============================================/
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static async sendQuery(queryURL: string): Promise<any[]> {
-    // Add Job Request Handler for GeoService
+  private static getBusinessID(): any {
+    return this._ID;
+  }
+
+  // ! ===============================================
+  // Request Handler
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  static sendQuery(queryURL: any): IGeoResponseSearch[] {
     // send req 1 per sec
     const xhr = new XMLHttpRequest();
 
+    xhr.onload = (): void => {
+      if (xhr.status != 200) {
+        // eslint-disable-next-line no-console
+        console.error(`Error ${xhr.status}: ${xhr.statusText}`);
+      } else {
+        return JSON.parse(xhr.responseText);
+      }
+    };
+    xhr.onerror = function (): void {
+      // eslint-disable-next-line no-console
+      console.error('Error ' + xhr.status + ': ' + 'xhr.statusText');
+    };
+
     xhr.open('GET', queryURL);
     xhr.send();
+    return JSON.parse('{}');
+  }
 
-    // xhr.onload = (): void => {
-    //   if (xhr.status == 200) {
-    //     const data = JSON.parse(xhr.responseText);
-    //     // search database for entry =name, add lat, lon
-    //     data;
-    //   }
-    // };
-    return await xhr.response;
+  // ! ===============================================
+  static updateData(response: IGeoResponseSearch[]): void {
+    const location = {
+      type: 'Point',
+      coordinates: [parseFloat(response[0].lon), parseFloat(response[0].lat)],
+    };
+    Business.findOneAndUpdate({ _id: GeoService.getBusinessID() }, { location });
   }
 }
-
-// ! Response of /search?q=
-/* 
-
-HTTP/1.1 200 OK
-Date: Sun, 05 Apr 2020 00:52:27 GMT
-Server: Apache/2.4.29 (Ubuntu)
-Access-Control-Allow-Origin: *
-Access-Control-Allow-Methods: OPTIONS,GET
-Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
-Expect-CT: max-age=0, report-uri="https://openstreetmap.report-uri.com/r/d/ct/reportOnly"
-Upgrade: h2
-Connection: Upgrade, close
-Transfer-Encoding: chunked
-Content-Type: application/json; charset=UTF-8
-
-[
-  {
-    "place_id": 59126144,
-    "licence": "Data © OpenStreetMap contributors, ODbL 1.0. https://osm.org/copyright",
-    "osm_type": "node",
-    "osm_id": 4924382183,
-    "boundingbox": [
-      "49.4460499",
-      "49.4461499",
-      "11.062586",
-      "11.062686"
-    ],
-    "lat": "49.4460999",
-    "lon": "11.062636",
-    "display_name": "55, Gostenhofer Hauptstraße, Gostenhof, Nürnberg, Bayern, 90443, Deutschland",
-    "class": "place",
-    "type": "house",
-    "importance": 0.21100000000000002,
-    "address": {
-      "house_number": "55",
-      "road": "Gostenhofer Hauptstraße",
-      "neighbourhood": "Gostenhof",
-      "suburb": "Gostenhof",
-      "city": "Nürnberg",
-      "state": "Bayern",
-      "postcode": "90443",
-      "country": "Deutschland",
-      "country_code": "de"
-    }
-  }
-]
-
-
-*/
-
-// Worker job
-/*
-const sendRequestsToGeocoder = function (requestArr: string[]): void {
-  requestArr.forEach((req) => {
-    setTimeout(() => {
-      const xhr = new XMLHttpRequest();
-      xhr.onload = (): void => {
-        if (xhr.status != 200) {
-          // analyze HTTP status of the response
-          console.error(`Error ${xhr.status}: ${xhr.statusText}`); // e.g. 404: Not Found
-        } else {
-          const data = JSON.parse(xhr.responseText);
-          // search database for entry =name, add lat, lon
-          data;
-        }
-      };
-      // xhr.onprogress = function (event): void {
-      //   // triggers periodically
-      //   // event.loaded - how many bytes downloaded
-      //   console.info(`Received ${event.loaded} bytes`);
-      // };
-      // only triggers if the request couldn't be made at all
-      xhr.onerror = function (): void {
-        console.error('Error ' + xhr.status + ': ' + 'xhr.statusText');
-      };
-      xhr.open('GET', req);
-      xhr.send();
-    }, 1000);
-  });
-};
-*/
