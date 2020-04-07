@@ -1,6 +1,7 @@
 import https from 'https';
-import { IBusiness, Business } from '../../../persistance/models';
+import { IBusiness, Business, Location, User } from 'persistance/models';
 import { IGeoResponseSearch } from './geolocation.types';
+import cryptoRandomString from 'crypto-random-string';
 
 //GET https://nominatim.openstreetmap.org/search?format=json&email=e.rom@gmx.net&addressdetails=1&q=55+gostenhofer+hauptstrasse+nuernberg
 
@@ -65,7 +66,8 @@ export class GeoService {
             data += chunk;
           });
           res.on('end', () => {
-            resolve(JSON.parse(data));
+            const resp = JSON.parse(data);
+            resolve(resp);
           });
         })
         .on('error', (error): void => {
@@ -80,11 +82,22 @@ export class GeoService {
   updateData(response: IGeoResponseSearch[], businessId: string): void {
     const loc = response[0];
     if (loc) {
-      const location = {
-        type: 'Point',
-        coordinates: [parseFloat(loc.lon), parseFloat(loc.lat)],
-      };
-      Business.findOne({ _id: businessId }).update({ location });
+      Business.findOne({ _id: businessId }).then(async (business) => {
+        if (!business) return;
+        if (!business.owner) {
+          const owner = await User.create({ email: business.email, password: cryptoRandomString({ length: 16 }) });
+          if (owner) {
+            business.owner = owner;
+            await business.save();
+          }
+        }
+        const location = new Location({
+          type: 'Point',
+          coordinates: [parseFloat(loc.lon), parseFloat(loc.lat)],
+        });
+        business.location = location;
+        business.save();
+      });
     }
 
     const newQueue = this.queue.filter((business) => business._id !== businessId);
@@ -98,7 +111,8 @@ export class GeoService {
     });
     const sorted = indexes.filter((i) => i !== -1).sort();
     const splitHere = sorted[0];
-    return string.split('').slice(0, splitHere).join('');
+    const res = string.split('').slice(0, splitHere).join('');
+    return res;
   }
 }
 
