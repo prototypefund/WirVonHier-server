@@ -3,15 +3,14 @@ import { IAuthResponse } from './authService.types';
 import * as providers from './providers';
 import { tokenService as ts } from 'modules/services';
 
-export type AuthStrategy = 'local' | 'facebook' | 'google';
-
+export type AuthStrategy = 'local';
 class AuthService {
   /**
    * Registers a new user with choosen strategy;
    * @param type = 'local' | 'facebook' | 'google';
    */
-  registerUser(type: AuthStrategy, req: Request, res: Response, next: NextFunction): Promise<IAuthResponse> {
-    return providers[type].register(req, res, next);
+  registerUser(type: AuthStrategy, req: Request): Promise<IAuthResponse> {
+    return providers[type].register(req);
   }
 
   /**
@@ -39,8 +38,8 @@ class AuthService {
     next();
   }
 
-  forgotPassword(req: Request, res: Response, next: NextFunction): void {
-    return providers.local.forgotPassword(req, res, next);
+  async forgotPassword(req: Request): Promise<{ status: number; message?: string }> {
+    return providers.local.forgotPassword(req);
   }
 }
 

@@ -10,15 +10,16 @@ class AuthenticationController implements IAuthenticationController {
     if (token) res.status(200).json({ token });
   };
 
-  register: RequestHandler = async function login(req, res, next): Promise<void> {
+  /* eslint-disable */
+  register: RequestHandler = async function login(req, res): Promise<void> {
     const type = req.query.strategy || 'local';
-    const { token, error } = await as.registerUser(type, req, res, next);
+    const { token, error } = await as.registerUser(type, req);
     if (error) res.status(error.status).send(error.message);
     if (token) res.status(200).json({ token });
   };
 
-  forgotPassword: RequestHandler = async function forgotPassword(req, res, next): Promise<void> {
-    const { status, message } = await as.forgotPassword(req, res, next);
+  forgotPassword: RequestHandler = async function forgotPassword(req, res): Promise<void> {
+    const { status, message } = await as.forgotPassword(req);
     res.status(status).json({ message });
   };
 }

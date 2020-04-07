@@ -11,6 +11,6 @@ export interface IAuthResponse {
 export interface ILocalRegisterBody {
   email: string;
   password: string;
-  dataProtStatement: number;
+  dataProtStatement: string;
   dataProtStatementLang: DataProtLanguageId;
 }

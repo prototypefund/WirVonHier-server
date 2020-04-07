@@ -8,7 +8,7 @@ export enum DataProtLanguageId {
 export interface IDataProtStatement extends Document {
   created: string;
   modified: string;
-  version: number;
+  version: string;
   type: string;
   text: string;
   language: DataProtLanguageId;

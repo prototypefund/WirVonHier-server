@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 
 class Hashingservice {
   async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt(20);
+    const salt = await bcrypt.genSalt(10);
     return await bcrypt.hash(password, salt);
   }
 
