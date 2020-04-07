@@ -48,10 +48,10 @@ class BusinessesService {
   }
 
   private getEmailSubject(type: string, businesses: IBusiness[]): string {
-    return '';
+    return `${type} ${businesses}`;
   }
   private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
-    return '';
+    return `${businesses} ${type} ${user}`;
   }
 }
 

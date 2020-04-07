@@ -8,9 +8,9 @@ interface IUserSchema extends Document {
   modified: string;
   email: string;
   roles: Array<IRole['name']>;
-  firstName: string;
+  firstName?: string;
   lastName?: string;
-  username: string;
+  username?: string;
   password: string;
   acceptedDataProtStatement: Array<IDataProtStatement['_id']>;
   // leave the company field

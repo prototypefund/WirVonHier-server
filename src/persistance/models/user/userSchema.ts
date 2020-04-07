@@ -18,25 +18,24 @@ export const UserSchema = new Schema<IUser>({
       return new Date(Date.now()).toLocaleString();
     },
   },
-  firstName: {
+  email: {
     type: String,
     required: true,
+  },
+  firstName: {
+    type: String,
   },
   lastName: String,
   username: {
     type: String,
-    unique: true,
-    required: true,
-    lowercase: true,
   },
   password: {
     type: String,
     required: true,
   },
   businesses: {
-    type: Schema.Types.ObjectId,
+    type: [Schema.Types.ObjectId],
     ref: 'Business',
-    required: true,
   },
   acceptedDataProtStatements: {
     type: [Schema.Types.ObjectId],
@@ -52,20 +51,21 @@ export const UserSchema = new Schema<IUser>({
 
 // Virtuals
 UserSchema.virtual('fullName').get(function (this: IUser) {
-  return this.firstName + this.lastName;
+  const first = this.firstName;
+  const last = this.lastName;
+  return `${first} ${last}`;
 });
 
 // Static methods
-UserSchema.statics.findMyCompanies = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
-  return this.findById(id).populate('company').exec();
+UserSchema.statics.findMyBusinesses = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
+  return this.findById(id).populate('businesses').exec();
 };
 
 // TODO Write Document Middlewares
 // Document middlewares
-UserSchema.pre<IUser>('save', async function (next) {
+UserSchema.pre<IUser>('save', async function () {
   if (this.isModified('password')) {
     this.password = await hs.hashPassword(this.password);
-    next();
   }
 });
 

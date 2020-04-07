@@ -5,7 +5,6 @@ import { LocationSchema } from '../location/locationSchema';
 import { UserSchema } from '../user/userSchema';
 import { VideoSchema } from '../video';
 import { ImageSchema } from '../image';
-// import { GeoService } from 'modules/services';
 
 export const BusinessSchema = new Schema<IBusiness>({
   created: {

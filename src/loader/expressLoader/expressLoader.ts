@@ -30,8 +30,9 @@ export function expressLoader(app: Application): void {
   // configure cross origin resource sharing
   app.use(
     cors({
-      origin: '*',
-      methods: 'GET,POST,PATCH,DELETE',
+      origin: 'http://0.0.0.0:8080',
+      methods: 'GET,POST,PATCH,OPTIONS,DELETE',
+      credentials: true,
     }),
   );
 
