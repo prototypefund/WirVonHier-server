@@ -4,7 +4,7 @@ import { loader } from './loader';
 
 const port = Number(process.env.PORT);
 
-async function startServer(): Promise<void> {
+export async function startServer(): Promise<void> {
   const app = express();
 
   await loader.init(app);
@@ -14,5 +14,3 @@ async function startServer(): Promise<void> {
     console.log(`Server running at port: ${port}`);
   });
 }
-
-startServer();

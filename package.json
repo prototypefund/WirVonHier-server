@@ -5,9 +5,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc -v && tsc -p tsconfig.json",
     "dev": "ts-node -r tsconfig-paths/register ./src/index.ts",
-    "start": "nodemon ./dist/src/index.js",
+    "start": "nodemon ./dist/src/setup.js",
     "prod": "npm run build && npm run start",
     "lint": "eslint 'src/**/*.{js,ts}'",
     "lint-fix": "eslint --fix 'src/**/*.{js,ts}'"
