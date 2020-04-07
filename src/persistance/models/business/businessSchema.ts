@@ -37,8 +37,11 @@ export const BusinessSchema = new Schema<IBusiness>({
     type: UserSchema,
     required: true,
   },
+  ownerFirstName: String,
+  ownerLastName: String,
   members: [UserSchema],
   location: LocationSchema,
+  onlineShop: String,
   website: {
     type: String,
   },

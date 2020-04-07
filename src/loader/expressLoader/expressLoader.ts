@@ -28,7 +28,12 @@ export function expressLoader(app: Application): void {
   app.use(cookieParser());
 
   // configure cross origin resource sharing
-  app.use(cors());
+  app.use(
+    cors({
+      origin: '*',
+      methods: 'GET,POST,PATCH,DELETE',
+    }),
+  );
 
   registerAuthenticationModule(app);
   registerHealthModule(app);

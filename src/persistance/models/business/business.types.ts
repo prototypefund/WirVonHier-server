@@ -1,5 +1,5 @@
 import { Document, Model } from 'mongoose';
-import { ILocation, IVideo } from '..';
+import { ILocation, IVideo, IUser } from '..';
 import { IImage } from '../image';
 
 interface IBusinessSchema extends Document {
@@ -7,14 +7,18 @@ interface IBusinessSchema extends Document {
   created: string;
   modified: string;
   name: string;
+  ownerFirstName: string;
+  ownerLastName: string;
   location: ILocation;
   website: string;
+  onlineShop: string;
   phone: string;
   whatsApp: string;
   instagram: string;
   facebook: string;
   twitter: string;
   email: string;
+  otherContacts: string;
   address: {
     street: string;
     streetNumber: string;
@@ -25,7 +29,8 @@ interface IBusinessSchema extends Document {
   };
   description: string;
   delivery: string[];
-  category: string[];
+  paymentMethods: string[];
+  category: string | string[];
   // analytic fields
   // Activity of business
   // time-viewed
@@ -38,6 +43,7 @@ export interface IBusinessBase extends IBusinessSchema {
 }
 
 export interface IBusiness extends IBusinessBase {
+  owner: IUser['_id'];
   media: {
     images: IImage['id'][];
     videos: IVideo['id'][];
@@ -45,7 +51,11 @@ export interface IBusiness extends IBusinessBase {
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
-  sompePopulatedValue: unknown;
+  owner: IUser;
+  media: {
+    images: IImage[];
+    videos: IVideo[];
+  };
 }
 
 export interface IBusinessModel extends Model<IBusiness> {
