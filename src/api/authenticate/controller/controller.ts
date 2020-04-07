@@ -16,6 +16,11 @@ class AuthenticationController implements IAuthenticationController {
     if (error) res.status(error.status).send(error.message);
     if (token) res.status(200).json({ token });
   };
+
+  forgotPassword: RequestHandler = async function forgotPassword(req, res, next): Promise<void> {
+    const { status, message } = await as.forgotPassword(req, res, next);
+    res.status(status).json({ message });
+  };
 }
 
 export const authenticationController = new AuthenticationController();

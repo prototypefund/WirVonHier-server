@@ -1,4 +1,5 @@
 import { Request, Response } from 'express-serve-static-core';
+import Joi from 'joi';
 import { IUserController } from './controller.types';
 import { userService as us } from '../service';
 
@@ -11,8 +12,12 @@ export class UserController implements IUserController {
    * Pagination applies
    */
   static async allUsers(req: Request, res: Response): Promise<void> {
-    if (req.token) {
+    if (!req.token) {
       res.status(401);
+      return;
+    }
+    if (req.token.type && req.token.type === 'changeEmail') {
+      res.status(403);
       return;
     }
     const { query } = req;
@@ -24,8 +29,12 @@ export class UserController implements IUserController {
    * Creates users, returns the created users
    */
   static async createUsers(req: Request, res: Response): Promise<void> {
-    if (req.token) {
+    if (!req.token) {
       res.status(401);
+      return;
+    }
+    if (req.token.type && req.token.type === 'changeEmail') {
+      res.status(403);
       return;
     }
     const users = req.body.users; // TODO: Validate input
@@ -49,8 +58,21 @@ export class UserController implements IUserController {
    * Updates the user with passed id, returns nothing
    */
   static async updateUser(req: Request, res: Response): Promise<void> {
-    if (req.token) {
+    if (!req.token) {
       res.status(401);
+      return;
+    }
+    if (req.token.type && req.token.type === 'changeEmail') {
+      const schema = Joi.object().keys({
+        newPassword: Joi.string().required(),
+      });
+      const { error, value } = Joi.validate<{ newPassword: string }>(req.body, schema);
+      if (error) {
+        res.status(400).send(error.details[0].message);
+      }
+      const userId = req.params.id;
+      const { status, message } = await us.updatePassword(userId, value.newPassword);
+      res.status(status).end(message);
       return;
     }
     const userId = req.params.id;
@@ -63,8 +85,12 @@ export class UserController implements IUserController {
    * Deletes the user with passed id, returns nothing
    */
   static async deleteUser(req: Request, res: Response): Promise<void> {
-    if (req.token) {
+    if (!req.token) {
       res.status(401);
+      return;
+    }
+    if (req.token.type && req.token.type === 'changeEmail') {
+      res.status(403);
       return;
     }
     const userId = req.params.id;

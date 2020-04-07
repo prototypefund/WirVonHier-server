@@ -1,13 +1,28 @@
-import { Business, IBusiness } from 'persistance/models';
+import { Business, IBusiness, IUser } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
-import { GeoService } from 'modules';
+import { GeoService, mailService } from 'modules/services';
 
 class BusinessesService {
-  async createBusinesses(businesses: IBusiness[]): Promise<IBusiness[]> {
-    // TODO: Validate Docs in Controller!
-    const newBusinesses = await Business.create(businesses);
-    GeoService.patchLocations(newBusinesses);
-    return newBusinesses;
+  async createBusinesses(
+    user: IUser,
+    businesses: IBusiness[],
+  ): Promise<{ status: number; message?: string; businesses?: IBusiness[] }> {
+    try {
+      for (const business of businesses) {
+        business.owner = user._id;
+      }
+      const newBusinesses = await Business.create(businesses);
+      mailService.send({
+        from: 'info',
+        to: user.email,
+        subject: this.getEmailSubject('businessesCreated', newBusinesses),
+        html: this.getEmailBody('businessesCreated', newBusinesses, user),
+      });
+      GeoService.patchLocations(newBusinesses);
+      return { status: 200, businesses: newBusinesses };
+    } catch (e) {
+      return { status: 500, message: e.message };
+    }
   }
 
   async deleteOneBusiness(id: string): Promise<void> {
@@ -30,6 +45,13 @@ class BusinessesService {
     filter.limit(query.limit || 50);
     const businesses = await filter.execOn(Business);
     return { businesses };
+  }
+
+  private getEmailSubject(type: string, businesses: IBusiness[]): string {
+    return '';
+  }
+  private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
+    return '';
   }
 }
 

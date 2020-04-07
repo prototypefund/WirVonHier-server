@@ -3,14 +3,14 @@ import { IAuthResponse } from './authService.types';
 import * as providers from './providers';
 import { tokenService as ts } from 'modules/services';
 
-type AuthType = 'local' | 'facebook' | 'google';
+export type AuthStrategy = 'local' | 'facebook' | 'google';
 
 class AuthService {
   /**
    * Registers a new user with choosen strategy;
    * @param type = 'local' | 'facebook' | 'google';
    */
-  registerUser(type: AuthType, req: Request, res: Response, next: NextFunction): Promise<IAuthResponse> {
+  registerUser(type: AuthStrategy, req: Request, res: Response, next: NextFunction): Promise<IAuthResponse> {
     return providers[type].register(req, res, next);
   }
 
@@ -18,7 +18,7 @@ class AuthService {
    * Logs a user in with choosen strategy;
    * @param type = 'local' | 'facebook' | 'google';
    */
-  loginUser(type: AuthType, req: Request, res: Response, next: NextFunction): Promise<IAuthResponse> {
+  loginUser(type: AuthStrategy, req: Request, res: Response, next: NextFunction): Promise<IAuthResponse> {
     return providers[type].login(req, res, next);
   }
 
@@ -37,6 +37,10 @@ class AuthService {
     if (!payload) return next();
     //req.token = payload;
     next();
+  }
+
+  forgotPassword(req: Request, res: Response, next: NextFunction): void {
+    return providers.local.forgotPassword(req, res, next);
   }
 }
 

@@ -5,6 +5,8 @@ import { tokenService as ts } from 'modules/services';
 import { hashingService as hs } from 'modules/services';
 import { IAuthResponse, ILocalRegisterBody } from '../../authService.types';
 import { DataProtStatement } from 'persistance/models';
+import { mailService } from 'modules/services';
+import { getEmailSubject, getEmailBody } from 'modules/services/authentication';
 
 export const register: RequestHandler = async function register(req): Promise<IAuthResponse> {
   const schema = Joi.object().keys({
@@ -33,6 +35,15 @@ export const register: RequestHandler = async function register(req): Promise<IA
 
   const newUser = await user.save();
 
+  // Send confirmation Email
+  mailService.send({
+    to: newUser.email,
+    from: 'info',
+    subject: getEmailSubject('local', 'register', newUser),
+    html: getEmailBody('local', 'register', newUser),
+  });
+
+  // Authentication Token
   const token = ts.generateToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
   return { token };
 };
@@ -56,4 +67,26 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
 
   const token = ts.generateToken({ id: user.id, email: user.email, roles: user.roles });
   return { token };
+};
+
+export const forgotPassword: RequestHandler = async function forgotPassword(req, res, next) {
+  const schema = Joi.object().keys({
+    email: Joi.string().required(),
+  });
+  const { error } = Joi.validate<{ email: string; password: string }>(req.body, schema);
+  if (error) {
+    return { error: { status: 406, message: error.details[0].message } };
+  }
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return {
+      status: 400,
+      message: `No user found with e-mail address: ${email}.`,
+    };
+  }
+  mailService.sendForgotPasswordMail(user);
+  return {
+    status: 204,
+  };
 };

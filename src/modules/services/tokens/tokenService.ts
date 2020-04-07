@@ -1,5 +1,6 @@
 import * as JWT from 'jsonwebtoken';
 import { ITokenPayload } from './tokenService.types';
+import { IUser } from 'persistance/models';
 
 class TokenService {
   private secretKey: string;
@@ -24,6 +25,23 @@ class TokenService {
       algorithm: 'HS256',
       expiresIn: expiresIn || this.sessionExpiresIn,
     });
+  }
+
+  createResetPasswordToken(user: IUser): string {
+    const token = JWT.sign(
+      {
+        id: user._id,
+        type: 'changePassword',
+      },
+      this.secretKey,
+      {
+        algorithm: 'HS256',
+        expiresIn: 60 * 30,
+      },
+    );
+
+    user.update({ changeEmailToken: token });
+    return token;
   }
 }
 

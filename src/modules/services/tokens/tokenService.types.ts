@@ -4,4 +4,5 @@ export interface ITokenPayload {
   id: string;
   email: string;
   roles: Array<IRole['name']>;
+  type?: string;
 }

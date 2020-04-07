@@ -1,5 +1,6 @@
 import { IUserFilter } from './service.types';
 import { User, IUser } from 'persistance/models';
+import { mailService } from 'modules';
 
 class UserService {
   createUsers(businesses: IUser[]): Promise<IUser[]> {
@@ -11,7 +12,7 @@ class UserService {
   }
 
   async updateOneUser(id: string, fieldsToUpdate: Partial<IUser>): Promise<IUser | null> {
-    return await User.findByIdAndUpdate(id, fieldsToUpdate, { new: true });
+    return await User.findByIdAndUpdate(id, fieldsToUpdate);
   }
 
   getOneUserById(id: string): Promise<IUser | null> {
@@ -24,6 +25,20 @@ class UserService {
     // filter businesses based on filter params
     await User.findById(filter).exec();
     return [];
+  }
+
+  async updatePassword(userId: string, newPassword: string): Promise<{ status: number; message?: string }> {
+    const updates = {
+      changeEmailToken: undefined,
+      password: newPassword,
+    };
+    try {
+      await this.updateOneUser(userId, updates);
+      mailService.sendPasswordChangedEmail(userId);
+      return { status: 204 };
+    } catch (e) {
+      return { status: 400, message: e.message };
+    }
   }
 }
 
