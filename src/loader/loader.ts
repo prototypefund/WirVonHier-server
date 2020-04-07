@@ -1,11 +1,13 @@
 import { Application } from 'express';
 import { expressLoader } from './expressLoader';
 import { mongooseLoader } from './mongooseLoader';
+import { jobLoader } from './jobLoader';
 
 class Loader {
   public async init(app: Application): Promise<void> {
     expressLoader(app);
-    await mongooseLoader();
+    const db = await mongooseLoader();
+    jobLoader(db);
   }
 }
 

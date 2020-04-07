@@ -1,97 +1,105 @@
+import https from 'https';
 import { IBusiness, Business } from '../../../persistance/models';
 import { IGeoResponseSearch } from './geolocation.types';
 
-// TODO Write Geolocation Service
 //GET https://nominatim.openstreetmap.org/search?format=json&email=e.rom@gmx.net&addressdetails=1&q=55+gostenhofer+hauptstrasse+nuernberg
 
 export class GeoService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static _ID: any;
-  private static validatedQuery = '';
-  private static nominatimURL = 'https://nominatim.openstreetmap.org';
-  private static getCoordsURL =
-    GeoService.nominatimURL +
+  private queue: IBusiness[] = [];
+  private nominatimURL = 'https://nominatim.openstreetmap.org';
+  private getCoordsURL =
+    this.nominatimURL +
     '/search?' +
     'format=json&' +
     'email=wirvonhier.direktzudir@googlemail.com&' +
     'limit=1&' +
     'addressdetails=1&' +
     'q=';
-  // private static getAddressURL =
-  //   GeoService.nominatimURL +
-  //   '/reverse?' +
-  //   'format=json&' +
-  //   'email=wirvonhier.direktzudir@googlemail.com&' +
-  //   'addressdetails=1&' +
-  //   'namedetails=1&' +
-  //   'extratags=1&' +
-  //   'zoom=18&';
 
-  // * Update an array of businesses
-  // - Convert adresses in coordinates, update db entries ////, send mail to subscribers
-  static patchLocations(businesses: IBusiness[]): void {
-    for (const business of businesses) {
-      this._ID = business._id;
-      // build query String
-      const searchQuery =
-        this.getCoordsURL +
-        business.address.street +
-        '+' +
-        business.address.streetNumber +
-        ',+' +
-        business.address.zip +
-        '+' +
-        business.address.city +
-        ',+' +
-        business.address.state +
-        ',+' +
-        business.address.country;
+  public async init(): Promise<void> {
+    const businessesWithoutLocation = await Business.where('location').equals(undefined);
+    this.queue.push(...businessesWithoutLocation);
+  }
 
-      this.validatedQuery = searchQuery.trim().replace(/\s/g, '+');
-      //// GlobalEventEmitter.emit('business_localized'); // Event for modules/subscribers
+  public get nextItem(): IBusiness {
+    return this.queue[0];
+  }
+  public queueForGeolocation(businesses: IBusiness[]): void {
+    this.queue.push(...businesses);
+  }
+
+  public async locateAndUpdate(business: IBusiness): Promise<void> {
+    if (!business || !business.address) {
+      return;
     }
+    const url = this.getGeolocationURL(business);
+    const res = await this.sendQuery(url);
+    this.updateData(res, business._id);
   }
-  // ! ===============================================
-  static getSearchQuery(): string {
-    return this.validatedQuery;
-  }
-  // ! ===============================================/
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private static getBusinessID(): any {
-    return this._ID;
+
+  private getGeolocationURL(business: IBusiness): string {
+    const { street, streetNumber, zip, city, state, country } = business.address;
+
+    let url = `${this.getCoordsURL}`;
+    if (street && streetNumber) url += `${this.normalizeString(street)}+${parseFloat(streetNumber)}`;
+    url += ',+';
+    if (zip) url += `${zip}+`;
+    if (city) url += `${this.normalizeString(city)}`;
+    url += ',+';
+    if (state) url += `${this.normalizeString(state)}`;
+    url += ',+';
+    if (country) url += `${this.normalizeString(country)}`;
+
+    return url.trim().replace(/\s/g, '+');
   }
 
   // ! ===============================================
   // Request Handler
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  static sendQuery(queryURL: any): IGeoResponseSearch[] {
-    // send req 1 per sec
-    const xhr = new XMLHttpRequest();
-
-    xhr.onload = (): void => {
-      if (xhr.status != 200) {
-        // eslint-disable-next-line no-console
-        console.error(`Error ${xhr.status}: ${xhr.statusText}`);
-      } else {
-        return JSON.parse(xhr.responseText);
-      }
-    };
-    xhr.onerror = function (): void {
-      // eslint-disable-next-line no-console
-      console.error('Error ' + xhr.status + ': ' + 'xhr.statusText');
-    };
-
-    xhr.open('GET', queryURL);
-    xhr.send();
-    return JSON.parse('{}');
+  sendQuery(queryURL: string): Promise<IGeoResponseSearch[]> {
+    return new Promise((resolve, reject) => {
+      https
+        .get(queryURL, {}, (res) => {
+          let data = '';
+          res.on('data', (chunk) => {
+            data += chunk;
+          });
+          res.on('end', () => {
+            resolve(JSON.parse(data));
+          });
+        })
+        .on('error', (error): void => {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          reject('failed');
+        });
+    });
   }
 
   // ! ===============================================
-  static updateData(response: IGeoResponseSearch[]): void {
-    const location = {
-      type: 'Point',
-      coordinates: [parseFloat(response[0].lon), parseFloat(response[0].lat)],
-    };
-    Business.findOneAndUpdate({ _id: GeoService.getBusinessID() }, { location });
+  updateData(response: IGeoResponseSearch[], businessId: string): void {
+    const loc = response[0];
+    if (loc) {
+      const location = {
+        type: 'Point',
+        coordinates: [parseFloat(loc.lon), parseFloat(loc.lat)],
+      };
+      Business.findOne({ _id: businessId }).update({ location });
+    }
+
+    const newQueue = this.queue.filter((business) => business._id !== businessId);
+    this.queue = newQueue;
+  }
+
+  private normalizeString(string: string): string {
+    const forbidden = ['/', '_', '#', '%', '&', '$', '§', '?'];
+    const indexes = forbidden.map((forbiddenCharacter) => {
+      return string.indexOf(forbiddenCharacter);
+    });
+    const sorted = indexes.filter((i) => i !== -1).sort();
+    const splitHere = sorted[0];
+    return string.split('').slice(0, splitHere).join('');
   }
 }
+
+export const geoService = new GeoService();

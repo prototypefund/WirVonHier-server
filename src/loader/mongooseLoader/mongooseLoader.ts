@@ -1,8 +1,7 @@
-/* eslint-disable no-console */
 import mongoose from 'mongoose';
 import { config } from 'config';
 
-export async function mongooseLoader(): Promise<void> {
+export async function mongooseLoader(): Promise<typeof mongoose> {
   const { user, pass, path } = config.mongo;
   const mongoURI = `mongodb://${user}:${pass}@${path}`;
 
@@ -11,8 +10,12 @@ export async function mongooseLoader(): Promise<void> {
     useUnifiedTopology: true,
     useCreateIndex: true,
   };
-  await mongoose.connect(mongoURI, options).then(
-    () => console.log('Successfully Connected mongoDB!'),
-    (err) => console.log('Mongoose error: ', err.message),
-  );
+  try {
+    const db = await mongoose.connect(mongoURI, options);
+    // eslint-disable-next-line no-console
+    console.log('Successfully Connected mongoDB!');
+    return db;
+  } catch (err) {
+    throw new Error(`Mongoose error: ${err.message}`);
+  }
 }

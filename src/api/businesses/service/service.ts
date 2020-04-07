@@ -1,6 +1,6 @@
 import { Business, IBusiness, IUser } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
-import { GeoService, mailService } from 'modules/services';
+import { geoService, mailService } from 'modules/services';
 
 class BusinessesService {
   async createBusinesses(
@@ -18,7 +18,7 @@ class BusinessesService {
         subject: this.getEmailSubject('businessesCreated', newBusinesses),
         html: this.getEmailBody('businessesCreated', newBusinesses, user),
       });
-      GeoService.patchLocations(newBusinesses);
+      geoService.queueForGeolocation(newBusinesses);
       return { status: 200, businesses: newBusinesses };
     } catch (e) {
       return { status: 500, message: e.message };
