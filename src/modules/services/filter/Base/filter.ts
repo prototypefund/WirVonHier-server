@@ -42,18 +42,12 @@ export class Filter<T extends Document> {
     }
   }
 
-  public execOn(model: Model<T, {}>): Promise<T[]> {
+  public getQuery(model: Model<T, {}>): DocumentQuery<T[], T, {}> {
     const documentQuery = model.find();
     const finalQuery = this.queryOperations.reduce((acc, queryOperation) => {
       return queryOperation(acc);
     }, documentQuery);
-    return finalQuery.exec();
-  }
-
-  public limit(size: string | number): void {
-    const number = Number(size);
-    if (!number) return;
-    this.queryOperations.push((q) => q.limit(number));
+    return finalQuery;
   }
 
   private parseObjectQuery(filterQuery: IObjectQuery): IParsedQuery[] {

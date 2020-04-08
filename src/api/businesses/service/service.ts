@@ -1,6 +1,7 @@
 import { Business, IBusiness, IUser } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
 import { geoService, mailService } from 'modules/services';
+import { IFilteredBusinesses } from './service.types';
 
 class BusinessesService {
   async createBusinesses(
@@ -38,13 +39,31 @@ class BusinessesService {
     return Business.findOne({ id }).exec();
   }
 
-  async getFilteredBusinesses(query: { [key: string]: string }): Promise<{ businesses?: IBusiness[]; error?: Error }> {
+  async getFilteredBusinesses(requestQuery: { [key: string]: string }): Promise<IFilteredBusinesses | Error> {
     const filter = new BusinessFilter();
-    const { error } = filter.addQuery(query);
-    if (error) return { error };
-    filter.limit(query.limit || 50);
-    const businesses = await filter.execOn(Business);
-    return { businesses };
+    const { error } = filter.addQuery(requestQuery);
+    if (error) return error;
+    const { limit, page, sort, asc } = requestQuery;
+    const normalizedLimit = this.normalizeNumber(limit, 25);
+    const normalizedPage = this.normalizeNumber(page, 0);
+    const query = filter.getQuery(Business);
+    try {
+      const businesses = await query
+        .sort({ [sort || 'modified']: asc ? 1 : -1 })
+        .skip(normalizedPage * normalizedLimit)
+        .limit(normalizedLimit)
+        .exec();
+      const count = await Business.countDocuments(query).exec();
+      return {
+        total: count,
+        page: normalizedPage,
+        perPage: normalizedLimit,
+        lastPage: Math.ceil(count / normalizedLimit),
+        businesses,
+      };
+    } catch (e) {
+      return e;
+    }
   }
 
   private getEmailSubject(type: string, businesses: IBusiness[]): string {
@@ -52,6 +71,13 @@ class BusinessesService {
   }
   private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
     return `${businesses} ${type} ${user}`;
+  }
+
+  normalizeNumber(number: string, fallback: number): number {
+    const num = parseInt(number, 10);
+    if (num === 0) return fallback;
+    if (!num) return fallback;
+    return num;
   }
 }
 
