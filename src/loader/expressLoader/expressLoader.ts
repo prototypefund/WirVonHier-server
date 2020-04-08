@@ -28,9 +28,22 @@ export function expressLoader(app: Application): void {
   app.use(cookieParser());
 
   // configure cross origin resource sharing
+  const corsWhitelist = ['http://0.0.0.0:8080', 'https://api.wirvonhier.net'];
   app.use(
     cors({
-      origin: 'http://0.0.0.0:8080',
+      //origin: 'http://0.0.0.0:8080',
+      origin: (requestOrigin, callback) => {
+        // TODO: remove undefined (= called in the browser directly)
+        if (requestOrigin === undefined) {
+          callback(null, true);
+        } else if (corsWhitelist.includes(requestOrigin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+        //return 'https://api.wirvonhier.net';
+        //return 'http://0.0.0.0:8080';
+      },
       methods: 'GET,POST,PATCH,OPTIONS,DELETE',
       credentials: true,
     }),
