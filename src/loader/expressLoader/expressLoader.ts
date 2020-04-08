@@ -10,6 +10,7 @@ import {
   registerUserModule,
   registerBusinessesModule,
 } from '../../api';
+import { config } from 'config';
 
 export function expressLoader(app: Application): void {
   // some sane defaults for application security
@@ -28,7 +29,7 @@ export function expressLoader(app: Application): void {
   app.use(cookieParser());
 
   // configure cross origin resource sharing
-  const corsWhitelist = ['http://0.0.0.0:8080', 'https://api.wirvonhier.net'];
+  const corsWhitelist = config.hosts;
   app.use(
     cors({
       //origin: 'http://0.0.0.0:8080',
@@ -41,8 +42,6 @@ export function expressLoader(app: Application): void {
         } else {
           callback(new Error('Not allowed by CORS'));
         }
-        //return 'https://api.wirvonhier.net';
-        //return 'http://0.0.0.0:8080';
       },
       methods: 'GET,POST,PATCH,OPTIONS,DELETE',
       credentials: true,

@@ -8,6 +8,9 @@ const envVarsSchema = joi
     MONGO_PASSWORD: joi.string().required(),
     MONGO_PATH: joi.string().required(),
     SENDGRID_API_KEY: joi.string().required(),
+    HOST_LOCAL: joi.string().required(),
+    HOST_TEST: joi.string().required(),
+    HOST_PROD: joi.string().required(),
   })
   .unknown()
   .required();
@@ -33,4 +36,5 @@ export const config = {
   sendgrid: {
     apiKey: envVars.SENDGRID_API_KEY,
   },
+  hosts: [envVars.HOST_LOCAL, envVars.HOST_PROD, envVars.HOST_TEST],
 };
