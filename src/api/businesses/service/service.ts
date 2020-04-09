@@ -53,6 +53,14 @@ class BusinessesService {
         .skip(normalizedPage * normalizedLimit)
         .limit(normalizedLimit)
         .exec();
+
+      await Business.populate(businesses, [
+        { path: 'owner', model: 'User' },
+        { path: 'location', model: 'Location' },
+        { path: 'media.logo', model: 'Image' },
+        { path: 'media.cover.image', model: 'Image' },
+        { path: 'media.stories.images', model: 'Image' },
+      ]);
       const count = await Business.countDocuments(query).exec();
       return {
         total: count,
