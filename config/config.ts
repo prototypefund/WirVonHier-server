@@ -11,6 +11,9 @@ const envVarsSchema = joi
     HOST_LOCAL: joi.string().required(),
     HOST_TEST: joi.string().required(),
     HOST_PROD: joi.string().required(),
+    CLOUDINARY_CLOUD_NAME: joi.string().required(),
+    CLOUDINARY_API_SECRET: joi.string().required(),
+    CLOUDINARY_API_KEY: joi.string().required(),
   })
   .unknown()
   .required();
@@ -37,4 +40,9 @@ export const config = {
     apiKey: envVars.SENDGRID_API_KEY,
   },
   hosts: [envVars.HOST_LOCAL, envVars.HOST_PROD, envVars.HOST_TEST],
+  cloudinary: {
+    cloudName: envVars.CLOUDINARY_CLOUD_NAME,
+    apiKey: envVars.CLOUDINARY_API_KEY,
+    apiSecret: envVars.CLOUDINARY_API_SECRET,
+  },
 };
