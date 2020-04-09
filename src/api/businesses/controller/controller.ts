@@ -64,8 +64,12 @@ class BusinessesController implements IBusinessesController {
    */
   public oneBusiness: RequestHandler = async function oneBusiness(req: Request, res: Response): Promise<void> {
     const businessId = req.params.id;
-    const business = await bs.getOneBusinessById(businessId);
-    res.status(200).json(business);
+    const { status, business } = await bs.getOneBusinessById(businessId);
+    if (status >= 400) {
+      res.status(status);
+      return;
+    }
+    res.status(status).json(business);
   };
 
   /**

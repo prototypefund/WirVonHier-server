@@ -35,8 +35,17 @@ class BusinessesService {
     return await Business.findByIdAndUpdate(id, fieldsToUpdate, { new: true });
   }
 
-  getOneBusinessById(id: string): Promise<IBusiness | null> {
-    return Business.findOne({ id }).exec();
+  async getOneBusinessById(id: string): Promise<{ status: number; business?: IBusiness }> {
+    const business = await Business.findOne({ id }).exec();
+    if (!business) return { status: 400 };
+    await Business.populate(business, [
+      { path: 'owner', model: 'User' },
+      { path: 'location', model: 'Location' },
+      { path: 'media.logo', model: 'Image' },
+      { path: 'media.cover.image', model: 'Image' },
+      { path: 'media.stories.images', model: 'Image' },
+    ]);
+    return { status: 200, business };
   }
 
   async getFilteredBusinesses(requestQuery: { [key: string]: string }): Promise<IFilteredBusinesses | Error> {
