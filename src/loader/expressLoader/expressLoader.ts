@@ -40,7 +40,7 @@ export function expressLoader(app: Application): void {
         } else if (corsWhitelist.includes(requestOrigin)) {
           callback(null, true);
         } else {
-          callback(new Error('Not allowed by CORS'));
+          callback(null, false);
         }
       },
       methods: 'GET,POST,PATCH,OPTIONS,DELETE',
