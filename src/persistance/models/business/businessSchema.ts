@@ -1,22 +1,17 @@
 import { Schema } from 'mongoose';
 import { IBusiness } from '.';
-import { normalizeName } from 'modules/util';
-import { LocationSchema } from '../location/locationSchema';
-import { UserSchema } from '../user/userSchema';
-import { VideoSchema } from '../video';
-import { ImageSchema } from '../image';
 
 export const BusinessSchema = new Schema<IBusiness>({
   created: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toISOString();
+      return new Date(Date.now()).toUTCString();
     },
   },
   modified: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toISOString();
+      return new Date(Date.now()).toUTCString();
     },
   },
   id: {
@@ -33,13 +28,21 @@ export const BusinessSchema = new Schema<IBusiness>({
     trim: true,
   },
   owner: {
-    type: UserSchema,
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true,
   },
+  dataProtStatement: String,
   ownerFirstName: String,
   ownerLastName: String,
-  members: [UserSchema],
-  location: LocationSchema,
+  members: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
+  },
+  location: {
+    type: Schema.Types.ObjectId,
+    ref: 'Location',
+  },
   onlineShop: String,
   website: {
     type: String,
@@ -89,12 +92,42 @@ export const BusinessSchema = new Schema<IBusiness>({
     enum: ['paypal', 'cash', 'creditcard', 'invoice', 'sofort', 'amazon', 'ondelivery', 'sepa', 'other'],
   },
   media: {
-    images: [ImageSchema],
-    videos: [VideoSchema],
+    logo: {
+      type: Schema.Types.ObjectId,
+      ref: 'Image',
+    },
+    cover: {
+      image: {
+        type: Schema.Types.ObjectId,
+        ref: 'Image',
+      },
+      video: {
+        type: Schema.Types.ObjectId,
+        ref: 'Video',
+      },
+    },
+    profile: {
+      image: {
+        type: Schema.Types.ObjectId,
+        ref: 'Image',
+      },
+      video: {
+        type: Schema.Types.ObjectId,
+        ref: 'Video',
+      },
+    },
+    stories: {
+      images: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Image',
+      },
+      videos: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Video',
+      },
+    },
   },
 });
-
-BusinessSchema.index({ location: '2dsphere' });
 
 // Virtuals
 BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
@@ -107,13 +140,13 @@ BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
 // };
 
 // Document pre Hook
-BusinessSchema.pre<IBusiness>('save', function () {
-  if (this.isModified('name')) {
-    this.id = normalizeName(this.name);
-  }
-});
+// BusinessSchema.pre<IBusiness>('save', function () {
+//   if (this.isModified('name')) {
+//     this.id = normalizeName(this.name);
+//   }
+// });
 
 // Document post Hook
 BusinessSchema.post<IBusiness>('save', function (doc) {
-  doc.modified = Date.now().toLocaleString();
+  doc.modified = new Date(Date.now()).toUTCString();
 });

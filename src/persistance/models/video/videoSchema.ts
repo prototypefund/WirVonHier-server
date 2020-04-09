@@ -5,13 +5,13 @@ export const VideoSchema = new Schema<IVideo>({
   created: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toISOString();
+      return new Date(Date.now()).toUTCString();
     },
   },
   modified: {
     type: String,
     default(): string {
-      return new Date(Date.now()).toISOString();
+      return new Date(Date.now()).toUTCString();
     },
   },
   title: {

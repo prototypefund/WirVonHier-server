@@ -9,7 +9,6 @@ interface IBusinessSchema extends Document {
   name: string;
   ownerFirstName: string;
   ownerLastName: string;
-  location: ILocation;
   website: string;
   onlineShop: string;
   phone: string;
@@ -44,17 +43,41 @@ export interface IBusinessBase extends IBusinessSchema {
 
 export interface IBusiness extends IBusinessBase {
   owner: IUser['_id'];
+  location: ILocation['_id'];
   media: {
-    images: IImage['id'][];
-    videos: IVideo['id'][];
+    logo: IImage['_id'];
+    cover: {
+      image: IImage['_id'];
+      video: IVideo['_id'];
+    };
+    profile: {
+      image: IImage['_id'];
+      video: IVideo['_id'];
+    };
+    stories: {
+      images: IImage['_id'][];
+      videos: IVideo['_id'][];
+    };
   };
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
   owner: IUser;
+  location: ILocation;
   media: {
-    images: IImage[];
-    videos: IVideo[];
+    logo: IImage;
+    cover: {
+      image: IImage;
+      video: IVideo;
+    };
+    profile: {
+      image: IImage;
+      video: IVideo;
+    };
+    stories: {
+      images: IImage[];
+      videos: IVideo[];
+    };
   };
 }
 
