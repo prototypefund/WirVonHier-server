@@ -14,3 +14,5 @@ export async function startServer(): Promise<void> {
     console.log(`Server running at port: ${port}`);
   });
 }
+
+startServer();
