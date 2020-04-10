@@ -1,13 +1,19 @@
-import { Business, IBusiness, IUser } from 'persistance/models';
+import { Business, IBusiness, IUser, User } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
 import { geoService, mailService } from 'modules/services';
 import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 
 class BusinessesService {
   async createBusinesses(
-    user: IUser,
+    userId: string,
     businesses: IBusiness[],
-  ): Promise<{ status: number; message?: string; businesses?: IBusiness[] }> {
+  ): Promise<{ status: number; message: string; createdBusinesses?: IBusiness[] }> {
+    const user = await User.findById(userId);
+    if (!user) return { status: 401, message: 'User not found.' };
+    if (!user.hasOneRole(['admin', 'businessowner'])) return { status: 403, message: 'User not authorized' };
+    if (user.hasOneRole(['businessowner']) && user.businesses.length >= 5)
+      return { status: 403, message: 'Max allowed businesses per user reached (5).' };
+
     try {
       for (const business of businesses) {
         business.owner = user._id;
@@ -19,25 +25,49 @@ class BusinessesService {
         subject: this.getEmailSubject('businessesCreated', newBusinesses),
         html: this.getEmailBody('businessesCreated', newBusinesses, user),
       });
-      geoService.queueForGeolocation(newBusinesses);
-      return { status: 200, businesses: newBusinesses };
+      return { status: 200, createdBusinesses: newBusinesses, message: 'All businesses created.' };
+    } catch (e) {
+      return { status: 500, message: e.message, createdBusinesses: [] };
+    }
+  }
+
+  async deleteOneBusiness(business: IBusiness, user: IUser): Promise<{ status: number; message?: string }> {
+    try {
+      if (business.owner.toString() !== user._id.toString())
+        return { status: 403, message: 'User is not owner of this business.' };
+
+      if (!user.roles.includes('businessowner'))
+        return { status: 403, message: 'User does not have the privilege to delete businesses.' };
+
+      await business.remove();
+      return { status: 204 };
     } catch (e) {
       return { status: 500, message: e.message };
     }
   }
 
-  async deleteOneBusiness(id: string): Promise<void> {
-    await Business.deleteOne({ _id: id });
-  }
-
-  async updateOneBusiness(id: string, fieldsToUpdate: Partial<IBusiness>): Promise<IBusiness | null> {
-    // TODO: Validate fields in Controller!
-    return await Business.findByIdAndUpdate(id, fieldsToUpdate, { new: true });
+  async updateOneBusiness(
+    businessId: string,
+    userId: string,
+    fieldsToUpdate: Partial<IBusiness>,
+  ): Promise<{ status: number; message: string; updatedBusiness?: IBusiness }> {
+    const user = await User.findById(userId);
+    if (!user) return { status: 401, message: 'User not found.' };
+    if (!user.hasOneRole(['admin', 'businessowner'])) return { status: 403, message: 'User not authorized' };
+    try {
+      const business = await Business.findOne({ id: businessId });
+      if (!business) return { status: 401, message: `Business with id "${businessId}" does not exist.` };
+      const updatedBusiness = await business.update(fieldsToUpdate);
+      return { status: 200, updatedBusiness, message: 'Business updated.' };
+    } catch (e) {
+      return { status: 500, message: e.message };
+    }
   }
 
   async getOneBusinessById(id: string): Promise<{ status: number; business?: IBusiness }> {
     const business = await Business.findOne({ id }).exec();
     if (!business) return { status: 400 };
+    // TODO: expect coordinates from client - add distance to response
     await Business.populate(business, [
       { path: 'owner', model: 'User' },
       { path: 'location', model: 'Location' },
@@ -65,18 +95,14 @@ class BusinessesService {
     }
   }
 
+  // TODO: create correct email
   private getEmailSubject(type: string, businesses: IBusiness[]): string {
     return `${type} ${businesses}`;
   }
+
+  // TODO: create correct email
   private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
     return `${businesses} ${type} ${user}`;
-  }
-
-  normalizeNumber(number: string, fallback: number): number {
-    const num = parseInt(number, 10);
-    if (num === 0) return fallback;
-    if (!num) return fallback;
-    return num;
   }
 }
 

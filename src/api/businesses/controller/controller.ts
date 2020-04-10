@@ -1,7 +1,7 @@
 import { Request, Response, RequestHandler } from 'express-serve-static-core';
 import { IBusinessesController } from './controller.types';
 import { businessesService as bs } from '../service';
-import { User } from 'persistance/models';
+import { User, Business } from 'persistance/models';
 import { dataImportService } from 'modules/services';
 
 class BusinessesController implements IBusinessesController {
@@ -15,49 +15,20 @@ class BusinessesController implements IBusinessesController {
   public allBusinesses: RequestHandler = async function allBusinesses(req: Request, res: Response): Promise<void> {
     const { query } = req;
     const response = await bs.getFilteredBusinesses(query);
-    if (response instanceof Error) {
-      res.status(400).send(response.message);
-      return;
-    }
-    res.status(200).json(response);
+    if (response instanceof Error) return res.status(400).end(response.message);
+    return res.status(200).json(response).end();
   };
 
   /**
    * Creates businesses, returns the created businesses
    */
-  public createBusinesses: RequestHandler = async function createBusinesses(
-    req: Request,
-    res: Response,
-  ): Promise<void> {
-    if (!req.token) {
-      res.status(401);
-      return;
-    }
-    if (req.token.type && req.token.type === 'changeEmail') {
-      res.status(403);
-      return;
-    }
-    const user = await User.findById(req.token.id);
-    if (!user) {
-      res.status(401).json({ message: 'User not found.' });
-      return;
-    }
-    if (req.query && req.query['data-import']) {
-      if (!user.roles.includes('admin')) {
-        res.status(403);
-        return;
-      }
-      try {
-        const result = await dataImportService.businessImport(req.body);
-        res.status(result.status).json(result);
-      } catch (e) {
-        res.status(400).json(e);
-      }
-    }
-    const businesses = req.body.businesses; // TODO: Validate input
-    const createdBusinesses = await bs.createBusinesses(user, businesses);
-    res.status(201).json(createdBusinesses);
-  };
+  public async createBusinesses(req: Request, res: Response): Promise<void> {
+    if (!req.token) return res.status(401).end();
+    if (req.token.type && req.token.type === 'changeEmail') return res.status(403).end();
+    const businesses = req.body.businesses;
+    const { status, message, createdBusinesses } = await bs.createBusinesses(req.token.id, businesses);
+    return res.status(status).json({ message, createdBusinesses }).end();
+  }
 
   /**
    * Returns the business with passed id or nothing
@@ -65,51 +36,48 @@ class BusinessesController implements IBusinessesController {
   public oneBusiness: RequestHandler = async function oneBusiness(req: Request, res: Response): Promise<void> {
     const businessId = req.params.id;
     const { status, business } = await bs.getOneBusinessById(businessId);
-    if (status >= 400) {
-      res.status(status);
-      return;
-    }
-    res.status(status).json(business);
+    if (status >= 400) return res.status(status).end();
+    return res.status(status).json(business).end();
   };
 
   /**
    * Updates the business with passed id, returns nothing
    */
-  public updateBusiness: RequestHandler = async function updateBusiness(req: Request, res: Response): Promise<void> {
-    if (!req.token) {
-      res.status(401);
-      return;
-    }
-    if (req.token.type && req.token.type === 'changeEmail') {
-      res.status(403);
-      return;
-    }
+  public async updateBusiness(req: Request, res: Response): Promise<void> {
+    if (!req.token) return res.status(401).end();
+    if (req.token.type && req.token.type === 'changeEmail') return res.status(403).end();
     const businessId = req.params.id;
+    const userId = req.token.id;
     const updates = req.body.business; // TODO: Validate input
-    const updatedBusiness = await bs.updateOneBusiness(businessId, updates);
-    res.status(200).json(updatedBusiness);
-  };
+    const { status, message, updatedBusiness } = await bs.updateOneBusiness(businessId, userId, updates);
+    return res.status(status).json({ message, updatedBusiness }).end();
+  }
 
   /**
    * Deletes the business with passed id, returns nothing
    */
-  public deleteBusiness: RequestHandler = async function deleteBusiness(req: Request, res: Response): Promise<void> {
+  public async deleteBusiness(req: Request, res: Response): Promise<void> {
     if (!req.token) {
-      res.status(401);
-      return;
+      return res.status(401).end();
     }
     if (req.token.type && req.token.type === 'changeEmail') {
-      res.status(403);
-      return;
+      return res.status(403).end();
     }
-    const businessId = req.params.id;
+    const user = await User.findById(req.token.id);
+    if (!user) {
+      return res.status(401).end();
+    }
+    const business = await Business.findOne({ id: req.params.id });
+    if (!business) {
+      return res.status(400).end(`No business with ID: "${req.params.id}" was found.`);
+    }
     try {
-      await bs.deleteOneBusiness(businessId);
-      res.status(204);
+      await bs.deleteOneBusiness(business, user);
+      return res.status(204).end();
     } catch (error) {
-      res.status(500).json(error);
+      return res.status(500).json(error).end();
     }
-  };
+  }
 }
 
 export const businessesController = new BusinessesController();

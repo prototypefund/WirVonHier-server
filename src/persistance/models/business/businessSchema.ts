@@ -1,5 +1,7 @@
 import { Schema } from 'mongoose';
 import { IBusiness } from '.';
+import { normalizeName } from 'modules/util';
+import { geoService } from 'modules';
 
 export const BusinessSchema = new Schema<IBusiness>({
   created: {
@@ -146,11 +148,14 @@ BusinessSchema.method('setDistance', function (this: IBusiness, distance: number
 // };
 
 // Document pre Hook
-// BusinessSchema.pre<IBusiness>('save', function () {
-//   if (this.isModified('name')) {
-//     this.id = normalizeName(this.name);
-//   }
-// });
+BusinessSchema.pre<IBusiness>('save', function () {
+  if (this.isModified('name')) {
+    this.id = normalizeName(this.name);
+  }
+  if (this.isModified('address')) {
+    geoService.queueForGeolocation([this]);
+  }
+});
 
 // Document post Hook
 BusinessSchema.post<IBusiness>('save', function (doc) {
