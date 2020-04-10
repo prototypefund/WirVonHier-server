@@ -18,6 +18,10 @@ export const UserSchema = new Schema<IUser>({
       return new Date(Date.now()).toLocaleString();
     },
   },
+  roles: {
+    type: [String],
+    default: ['businessowner'],
+  },
   email: {
     type: String,
     required: true,
@@ -54,6 +58,19 @@ UserSchema.virtual('fullName').get(function (this: IUser) {
   const first = this.firstName;
   const last = this.lastName;
   return `${first} ${last}`;
+});
+
+UserSchema.method('hasOneRole', function (this: IUser, roles: string[]) {
+  for (const role of roles) {
+    if (this.roles.includes(role)) return true;
+  }
+  return false;
+});
+UserSchema.method('hasAllRoles', function (this: IUser, roles: string[]) {
+  for (const role of roles) {
+    if (!this.roles.includes(role)) return false;
+  }
+  return true;
 });
 
 // Static methods

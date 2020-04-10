@@ -20,6 +20,8 @@ interface IUserSchema extends Document {
 // DO NOT export
 interface IUserBase extends IUserSchema {
   fullName: string;
+  hasAllRoles(roles: string[]): boolean;
+  hasOneRole(roles: string[]): boolean;
 }
 
 // Export this for strong typing
