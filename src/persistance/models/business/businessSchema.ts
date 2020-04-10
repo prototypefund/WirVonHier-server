@@ -43,6 +43,9 @@ export const BusinessSchema = new Schema<IBusiness>({
     type: Schema.Types.ObjectId,
     ref: 'Location',
   },
+  distance: {
+    type: Number,
+  },
   onlineShop: String,
   website: {
     type: String,
@@ -134,6 +137,9 @@ BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
   return '';
 });
 
+BusinessSchema.method('setDistance', function (this: IBusiness, distance: number) {
+  this.distance = distance;
+});
 // Static methods
 // BusinessSchema.statics.anyMethod = async function (this: IBusinessModel): Promise<IBusinessPopulated | null> {
 //   return '';

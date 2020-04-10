@@ -1,7 +1,7 @@
 import { Business, IBusiness, IUser } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
 import { geoService, mailService } from 'modules/services';
-import { IFilteredBusinesses } from './service.types';
+import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 
 class BusinessesService {
   async createBusinesses(
@@ -48,36 +48,18 @@ class BusinessesService {
     return { status: 200, business };
   }
 
-  async getFilteredBusinesses(requestQuery: { [key: string]: string }): Promise<IFilteredBusinesses | Error> {
-    const filter = new BusinessFilter();
-    const { error } = filter.addQuery(requestQuery);
-    if (error) return error;
-    const { limit, page, sort, asc } = requestQuery;
-    const normalizedLimit = this.normalizeNumber(limit, 25);
-    const normalizedPage = this.normalizeNumber(page, 0);
-    const query = filter.getQuery(Business);
+  async getFilteredBusinesses(requestQuery: { [key: string]: string }): Promise<IFilterResult | Error> {
     try {
-      const businesses = await query
-        .sort({ [sort || 'modified']: asc ? 1 : -1 })
-        .skip(normalizedPage * normalizedLimit)
-        .limit(normalizedLimit)
-        .exec();
-
-      await Business.populate(businesses, [
+      const filter = new BusinessFilter(requestQuery);
+      const result = await filter.exec(Business);
+      await Business.populate(result.list, [
         { path: 'owner', model: 'User' },
         { path: 'location', model: 'Location' },
         { path: 'media.logo', model: 'Image' },
         { path: 'media.cover.image', model: 'Image' },
         { path: 'media.stories.images', model: 'Image' },
       ]);
-      const count = await Business.countDocuments(query).exec();
-      return {
-        total: count,
-        page: normalizedPage,
-        perPage: normalizedLimit,
-        lastPage: Math.ceil(count / normalizedLimit),
-        businesses,
-      };
+      return result;
     } catch (e) {
       return e;
     }

@@ -7,6 +7,7 @@ interface IBusinessSchema extends Document {
   created: string;
   modified: string;
   name: string;
+  distance?: number;
   ownerFirstName: string;
   ownerLastName: string;
   website: string;
@@ -34,7 +35,7 @@ interface IBusinessSchema extends Document {
   // Activity of business
   // time-viewed
   // users visited
-  //
+  setDistance: (distance: number) => void;
 }
 
 export interface IBusinessBase extends IBusinessSchema {
