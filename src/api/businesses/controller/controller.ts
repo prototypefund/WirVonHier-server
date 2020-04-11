@@ -2,7 +2,6 @@ import { Request, Response, RequestHandler } from 'express-serve-static-core';
 import { IBusinessesController } from './controller.types';
 import { businessesService as bs } from '../service';
 import { User, Business } from 'persistance/models';
-import { dataImportService } from 'modules/services';
 
 class BusinessesController implements IBusinessesController {
   [key: string]: import('express').RequestHandler<import('express-serve-static-core').ParamsDictionary>;

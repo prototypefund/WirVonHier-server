@@ -1,6 +1,6 @@
 import { Business, IBusiness, IUser, User } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
-import { geoService, mailService } from 'modules/services';
+import { mailService } from 'modules/services';
 import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 
 class BusinessesService {
