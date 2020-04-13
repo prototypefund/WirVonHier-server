@@ -9,6 +9,7 @@ const envVarsSchema = joi
     MONGO_PATH: joi.string().required(),
     SENDGRID_API_KEY: joi.string().required(),
     HOST_LOCAL: joi.string().required(),
+    HOST_LOCAL_TWO: joi.string().required(),
     HOST_TEST: joi.string().required(),
     HOST_PROD: joi.string().required(),
     CLOUDINARY_CLOUD_NAME: joi.string().required(),
@@ -39,7 +40,7 @@ export const config = {
   sendgrid: {
     apiKey: envVars.SENDGRID_API_KEY,
   },
-  hosts: [envVars.HOST_LOCAL, envVars.HOST_PROD, envVars.HOST_TEST],
+  hosts: [envVars.HOST_LOCAL_TWO, envVars.HOST_LOCAL, envVars.HOST_PROD, envVars.HOST_TEST],
   cloudinary: {
     cloudName: envVars.CLOUDINARY_CLOUD_NAME,
     apiKey: envVars.CLOUDINARY_API_KEY,
