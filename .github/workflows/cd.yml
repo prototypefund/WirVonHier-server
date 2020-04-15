@@ -1,0 +1,43 @@
+# Build and Deploy into server folder
+name: Continuous Deployment - Server
+
+# Workflow triggers on pull requests targeting production branch
+on:
+  push:
+    branches:
+      - production
+
+jobs:
+  build:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: "Checkout"
+      uses: actions/checkout@production
+
+    - name: "Setup Node.js"
+      uses: actions/setup-node@v1
+      with: 
+        node-version: 12.x
+
+    - name: "Install dependencies"
+      run: npm install 
+      
+    - name: "Build app"
+      run: npm run build --if-present
+    
+#    - name: "Run tests"
+#      run: npm test 
+      
+    - name: "Copy files via ssh key"
+      # https://github.com/marketplace/actions/copy-via-ssh
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: dist
+        host: ${{ secrets.REMOTE_HOST }}
+        port: ${{ secrets.REMOTE_PORT }}
+        remote: ${{ secrets.REMOTE_TARGET_PATH }}
+        username: ${{ secrets.REMOTE_USERNAME }}
+        privateKey: ${{ secrets.REMOTE_PRIVATE_KEY }}
+        passphrase: ${{ secrets.REMOTE_PASSPHRASE }}
