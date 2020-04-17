@@ -3,12 +3,12 @@ import * as Joi from 'joi';
 import { User } from 'persistance/models';
 import { tokenService as ts } from 'modules/services';
 import { hashingService as hs } from 'modules/services';
-import { IAuthResponse, ILocalRegisterBody } from '../../authService.types';
+import { IAuthResponse, ILocalRegisterBody, IAuthErrorResponse } from '../../authService.types';
 import { DataProtStatement } from 'persistance/models';
 import { mailService } from 'modules/services';
 // import { getEmailSubject, getEmailBody } from 'modules/services/authentication';
 
-export async function register(req: Request): Promise<IAuthResponse> {
+export async function register(req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
   const schema = Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
@@ -42,11 +42,13 @@ export async function register(req: Request): Promise<IAuthResponse> {
 
   // Authentication Token
   const token = ts.generateToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
-
-  return { token };
+  const refreshToken = ts.generateRefreshToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
+  newUser.refreshToken = refreshToken;
+  newUser.save();
+  return { token, refreshToken };
 }
 
-export const login: RequestHandler = async function login(req): Promise<IAuthResponse> {
+export const login: RequestHandler = async function login(req): Promise<IAuthResponse | IAuthErrorResponse> {
   const schema = Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
@@ -64,7 +66,15 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
     return { error: { status: 406, message: 'Email or password incorrect.' } };
 
   const token = ts.generateToken({ id: user.id, email: user.email, roles: user.roles });
-  return { token };
+  const refreshToken =
+    user.refreshToken || ts.generateRefreshToken({ id: user.id, email: user.email, roles: user.roles });
+
+  if (!user.refreshToken) {
+    user.refreshToken = refreshToken;
+    user.save();
+  }
+
+  return { token, refreshToken };
 };
 
 export async function forgotPassword(req: Request): Promise<{ status: number; message?: string }> {

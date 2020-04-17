@@ -18,6 +18,9 @@ export const UserSchema = new Schema<IUser>({
       return new Date(Date.now()).toLocaleString();
     },
   },
+  refreshToken: {
+    type: String,
+  },
   roles: {
     type: [String],
     default: ['businessowner'],

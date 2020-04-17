@@ -6,3 +6,4 @@ export const authenticationRouter = Router();
 authenticationRouter.post('/login', ac.login.bind(ac));
 authenticationRouter.post('/register', ac.register.bind(ac));
 authenticationRouter.post('/forgot-password', ac.forgotPassword.bind(ac));
+authenticationRouter.post('/refresh-token', ac.refreshToken.bind(ac));

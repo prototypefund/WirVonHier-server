@@ -5,10 +5,12 @@ import { IUser } from 'persistance/models';
 class TokenService {
   private secretKey: string;
   private sessionExpiresIn: number;
+  private refreshTokenExpiresIn: number;
 
   constructor({ secretKey = 'secret_key', expiresIn = 300 }: { secretKey?: string; expiresIn?: number }) {
     this.secretKey = secretKey;
     this.sessionExpiresIn = expiresIn;
+    this.refreshTokenExpiresIn = 60 * 60 * 24 * 30; // 1 Monat
   }
 
   public verify(token: string): ITokenPayload | null {
@@ -24,6 +26,13 @@ class TokenService {
     return JWT.sign(payload, this.secretKey, {
       algorithm: 'HS256',
       expiresIn: expiresIn || this.sessionExpiresIn,
+    });
+  }
+
+  generateRefreshToken(payload: ITokenPayload): string {
+    return JWT.sign(payload, this.secretKey, {
+      algorithm: 'HS256',
+      expiresIn: this.refreshTokenExpiresIn,
     });
   }
 
