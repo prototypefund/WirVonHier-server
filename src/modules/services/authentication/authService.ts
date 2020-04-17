@@ -32,15 +32,13 @@ class AuthService {
    * Populates req.token { id: userId, roles: userRoles[] } - if valid Authorization header was present.
    */
   authenticateUser(req: Request, _res: Response, next: NextFunction): void {
-    const header = req.headers.authorization;
-    if (typeof header === 'undefined') return next();
-
+    const headers = req.headers.authentication;
+    if (typeof headers === 'undefined') return next();
+    const header = headers instanceof Array ? headers[0] : headers;
     const token = header.split(' ')[1];
     const payload = ts.verify(token);
-
-    // TODO token does not exist on Request
     if (!payload) return next();
-    //req.token = payload;
+    req.token = payload;
     next();
   }
 
