@@ -1,8 +1,13 @@
 import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { IAuthResponse, IAuthErrorResponse } from './authService.types';
 import * as providers from './providers';
-import { tokenService as ts } from 'modules/services';
-import { User } from 'persistance/models';
+import {
+  tokenService as ts,
+  mailService,
+  getEmailVerificationSubject,
+  getEmailVerificationBody,
+} from 'modules/services';
+import { User, IUser } from 'persistance/models';
 
 export type AuthStrategy = 'local';
 class AuthService {
@@ -11,7 +16,7 @@ class AuthService {
    * @param type = 'local' | 'facebook' | 'google';
    */
   registerUser(type: AuthStrategy, req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
-    return providers[type].register(req);
+    return providers[type].register.call(this, req);
   }
 
   /**
@@ -24,7 +29,7 @@ class AuthService {
     res: Response,
     next: NextFunction,
   ): Promise<IAuthResponse | IAuthErrorResponse> {
-    return providers[type].login(req, res, next);
+    return providers[type].login.call(this, req, res, next);
   }
 
   /**
@@ -59,6 +64,36 @@ class AuthService {
     user.refreshToken = newRefreshToken;
     user.save();
     return { token: newToken, refreshToken: newRefreshToken };
+  }
+
+  async verifyUserEmail(req: Request): Promise<{ verified: string } | IAuthErrorResponse> {
+    const verficationToken = req.body.verificationToken;
+    const payload = ts.verify(verficationToken);
+    if (!payload) return { error: { status: 406, message: 'Verification failed. Invalid token.' } };
+    const user = await User.findById(payload.id);
+    if (!user) return { error: { status: 404, message: 'Verification failed. User not found.' } };
+    if (user.verificationToken !== verficationToken) return { error: { status: 500, message: "Tokens don't match." } };
+    user.verification.email = new Date().toUTCString();
+    user.save();
+    return { verified: user.verification.email };
+  }
+
+  async sendVerificationEmail(user: IUser): Promise<{ to: string } | IAuthErrorResponse> {
+    const verificationLink = await this.getVerificationLink(user);
+    mailService.send({
+      to: user.email,
+      from: 'info',
+      subject: getEmailVerificationSubject(),
+      html: getEmailVerificationBody(verificationLink),
+    });
+    return { to: user.email };
+  }
+
+  private async getVerificationLink(user: IUser): Promise<string> {
+    const token = ts.createVerificationToken(user);
+    user.verificationToken = token;
+    await user.save();
+    return `${APP_BASE_URL || 'http://localhost:8080'}/verify?token=${token}`;
   }
 }
 

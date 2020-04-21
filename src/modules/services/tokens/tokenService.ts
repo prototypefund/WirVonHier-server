@@ -52,6 +52,21 @@ class TokenService {
     user.update({ changeEmailToken: token });
     return token;
   }
+
+  createVerificationToken(user: IUser): string {
+    const token = JWT.sign(
+      {
+        id: user._id,
+        type: 'emailVerification',
+      },
+      this.secretKey,
+      {
+        algorithm: 'HS256',
+        expiresIn: 60 * 30,
+      },
+    );
+    return token;
+  }
 }
 
 export const tokenService = new TokenService({});

@@ -6,9 +6,9 @@ import { hashingService as hs } from 'modules/services';
 import { IAuthResponse, ILocalRegisterBody, IAuthErrorResponse } from '../../authService.types';
 import { DataProtStatement } from 'persistance/models';
 import { mailService } from 'modules/services';
-// import { getEmailSubject, getEmailBody } from 'modules/services/authentication';
+import { authService } from 'modules/services/authentication';
 
-export async function register(req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
+export async function register(this: typeof authService, req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
   const schema = Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
@@ -32,19 +32,13 @@ export async function register(req: Request): Promise<IAuthResponse | IAuthError
   if (user) return { error: { status: 406, message: 'User already exists.' } };
   const newUser = await User.create({ email, password, acceptedDataProtStatements: [dataProtStatement._id] });
 
-  // Send confirmation Email
-  // mailService.send({
-  //   to: newUser.email,
-  //   from: 'info',
-  //   subject: getEmailSubject('local', 'register', newUser),
-  //   html: getEmailBody('local', 'register', newUser),
-  // });
+  this.sendVerificationEmail(newUser);
 
   // Authentication Token
   const token = ts.generateToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
   const refreshToken = ts.generateRefreshToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
   newUser.refreshToken = refreshToken;
-  newUser.save();
+  await newUser.save();
   return { token, refreshToken };
 }
 

@@ -100,6 +100,12 @@ module.exports = async function (env, argv) {
       new CleanWebpackPlugin({
         verbose: false,
       }),
+
+      new webpack.DefinePlugin({
+        VERSION: JSON.stringify(VERSION),
+        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+        APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
+      }),
     ].filter(Boolean),
     optimization: {
       minimize: false,

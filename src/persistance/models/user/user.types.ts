@@ -7,6 +7,7 @@ interface IUserSchema extends Document {
   created: string;
   modified: string;
   refreshToken?: string;
+  verificationToken?: string;
   email: string;
   roles: Array<IRole['name']>;
   firstName?: string;
@@ -16,6 +17,11 @@ interface IUserSchema extends Document {
   acceptedDataProtStatement: Array<IDataProtStatement['_id']>;
   // leave the company field
   friends: Types.Array<string>;
+  verification: {
+    [key: string]: string | null;
+    email: string | null;
+  };
+  verified: boolean;
 }
 
 // DO NOT export
