@@ -6,6 +6,11 @@ interface IBusinessSchema extends Document {
   id: string;
   created: string;
   modified: string;
+  verification: {
+    [key: string]: string | null;
+    email: string | null;
+  };
+  verified: boolean;
   name: string;
   distance?: number;
   ownerFirstName: string;

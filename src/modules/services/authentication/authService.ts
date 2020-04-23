@@ -90,6 +90,16 @@ class AuthService {
     return { to: user.email };
   }
 
+  async authenticateMe(req: Request): Promise<string | void> {
+    const refreshToken = req.cookies.refresh_token;
+    if (!refreshToken) return;
+    const payload = ts.verify(refreshToken);
+    if (!payload) return;
+    const user = await User.findById(payload.id);
+    if (!user) return;
+    return user.id;
+  }
+
   private async getVerificationLink(user: IUser): Promise<string> {
     const token = ts.createVerificationToken(user);
     user.verificationToken = token;

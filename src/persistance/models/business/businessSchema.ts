@@ -3,140 +3,157 @@ import { IBusiness } from '.';
 import { normalizeName } from 'modules/util';
 import { geoService } from 'modules';
 
-export const BusinessSchema = new Schema<IBusiness>({
-  created: {
-    type: String,
-    default(): string {
-      return new Date(Date.now()).toUTCString();
+export const BusinessSchema = new Schema<IBusiness>(
+  {
+    created: {
+      type: String,
+      default(): string {
+        return new Date(Date.now()).toUTCString();
+      },
     },
-  },
-  modified: {
-    type: String,
-    default(): string {
-      return new Date(Date.now()).toUTCString();
+    modified: {
+      type: String,
+      default(): string {
+        return new Date(Date.now()).toUTCString();
+      },
     },
-  },
-  id: {
-    type: String,
-    requierd: true,
-    unique: true,
-    index: true,
-  },
-  name: {
-    type: String,
-    unique: true,
-    required: true,
-    lowercase: true,
-    trim: true,
-  },
-  owner: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  dataProtStatement: String,
-  ownerFirstName: String,
-  ownerLastName: String,
-  members: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  },
-  location: {
-    type: Schema.Types.ObjectId,
-    ref: 'Location',
-  },
-  distance: {
-    type: Number,
-  },
-  onlineShop: String,
-  website: {
-    type: String,
-  },
-  phone: {
-    type: String,
-  },
-  whatsApp: {
-    type: String,
-  },
-  instagram: {
-    type: String,
-  },
-  facebook: {
-    type: String,
-  },
-  twitter: {
-    type: String,
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  address: {
-    street: String,
-    streetNumber: String,
-    zip: String,
-    city: String,
-    state: String,
-    country: String,
-  },
-  description: {
-    type: String,
-    maxlength: 1500,
-  },
-  delivery: {
-    type: [String],
-    enum: ['collect', 'deliveryByOwner', 'deliveryByService'],
-  },
-  category: {
-    type: [String],
-    // enum: ['food', 'beverages', 'clothing', 'lifestyle', 'accessories', 'crafts', 'service', 'hairdresse', 'education'],
-    required: true,
-  },
-  paymentMethods: {
-    type: [String],
-    enum: ['paypal', 'cash', 'creditcard', 'invoice', 'sofort', 'amazon', 'ondelivery', 'sepa', 'other'],
-  },
-  media: {
-    logo: {
+    verification: {
+      email: {
+        type: String,
+      },
+    },
+    id: {
+      type: String,
+      requierd: true,
+      unique: true,
+      index: true,
+    },
+    name: {
+      type: String,
+      unique: true,
+      required: true,
+      lowercase: true,
+      trim: true,
+    },
+    owner: {
       type: Schema.Types.ObjectId,
-      ref: 'Image',
+      ref: 'User',
+      required: true,
     },
-    cover: {
-      image: {
+    dataProtStatement: String,
+    ownerFirstName: String,
+    ownerLastName: String,
+    members: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    location: {
+      type: Schema.Types.ObjectId,
+      ref: 'Location',
+    },
+    distance: {
+      type: Number,
+    },
+    onlineShop: String,
+    website: {
+      type: String,
+    },
+    phone: {
+      type: String,
+    },
+    whatsApp: {
+      type: String,
+    },
+    instagram: {
+      type: String,
+    },
+    facebook: {
+      type: String,
+    },
+    twitter: {
+      type: String,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    address: {
+      street: String,
+      streetNumber: String,
+      zip: String,
+      city: String,
+      state: String,
+      country: String,
+    },
+    description: {
+      type: String,
+      maxlength: 1500,
+    },
+    delivery: {
+      type: [String],
+      enum: ['collect', 'deliveryByOwner', 'deliveryByService'],
+    },
+    category: {
+      type: [String],
+      // enum: ['food', 'beverages', 'clothing', 'lifestyle', 'accessories', 'crafts', 'service', 'hairdresse', 'education'],
+      required: true,
+    },
+    paymentMethods: {
+      type: [String],
+      enum: ['paypal', 'cash', 'creditcard', 'invoice', 'sofort', 'amazon', 'ondelivery', 'sepa', 'other'],
+    },
+    media: {
+      logo: {
         type: Schema.Types.ObjectId,
         ref: 'Image',
       },
-      video: {
-        type: Schema.Types.ObjectId,
-        ref: 'Video',
+      cover: {
+        image: {
+          type: Schema.Types.ObjectId,
+          ref: 'Image',
+        },
+        video: {
+          type: Schema.Types.ObjectId,
+          ref: 'Video',
+        },
       },
-    },
-    profile: {
-      image: {
-        type: Schema.Types.ObjectId,
-        ref: 'Image',
+      profile: {
+        image: {
+          type: Schema.Types.ObjectId,
+          ref: 'Image',
+        },
+        video: {
+          type: Schema.Types.ObjectId,
+          ref: 'Video',
+        },
       },
-      video: {
-        type: Schema.Types.ObjectId,
-        ref: 'Video',
-      },
-    },
-    stories: {
-      images: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Image',
-      },
-      videos: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Video',
+      stories: {
+        images: {
+          type: [Schema.Types.ObjectId],
+          ref: 'Image',
+        },
+        videos: {
+          type: [Schema.Types.ObjectId],
+          ref: 'Video',
+        },
       },
     },
   },
-});
+  {
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
+  },
+);
 
 // Virtuals
-BusinessSchema.virtual('ownerFullName').get(function (this: IBusiness) {
-  return '';
+BusinessSchema.virtual('verified').get(function (this: IBusiness) {
+  return Object.keys(this.verification)
+    .filter((key) => key !== '$init')
+    .some((key) => this.verification[key]);
 });
 
 BusinessSchema.method('setDistance', function (this: IBusiness, distance: number) {
