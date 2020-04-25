@@ -4,14 +4,12 @@ import { IUserController } from './controller.types';
 import { userService as us } from '../service';
 
 export class UserController implements IUserController {
-  [key: string]: import('express').RequestHandler<import('express-serve-static-core').ParamsDictionary>;
-
   /**
    * Returns all user, optional filtered by query parameters
    *
    * Pagination applies
    */
-  static async allUsers(req: Request, res: Response): Promise<void> {
+  async allUsers(req: Request, res: Response): Promise<void> {
     if (!req.token) {
       res.status(401);
       return;
@@ -28,7 +26,7 @@ export class UserController implements IUserController {
   /**
    * Creates users, returns the created users
    */
-  static async createUsers(req: Request, res: Response): Promise<void> {
+  async createUsers(req: Request, res: Response): Promise<void> {
     if (!req.token) {
       res.status(401);
       return;
@@ -44,20 +42,18 @@ export class UserController implements IUserController {
   /**
    * Returns the user with passed id or nothing
    */
-  static async oneUser(req: Request, res: Response): Promise<void> {
-    if (req.token) {
-      res.status(401);
-      return;
-    }
+  async oneUser(req: Request, res: Response): Promise<void> {
+    if (!req.token) return res.status(401).end('User not authorized.');
     const userId = req.params.id;
+    if (req.token.id !== userId) return res.status(403).end('Not allowed.');
     const user = await us.getOneUserById(userId);
-    res.status(200).json(user);
+    res.status(200).json(user).end();
   }
 
   /**
    * Updates the user with passed id, returns nothing
    */
-  static async updateUser(req: Request, res: Response): Promise<void> {
+  async updateUser(req: Request, res: Response): Promise<void> {
     if (!req.token) {
       res.status(401);
       return;
@@ -84,7 +80,7 @@ export class UserController implements IUserController {
   /**
    * Deletes the user with passed id, returns nothing
    */
-  static async deleteUser(req: Request, res: Response): Promise<void> {
+  async deleteUser(req: Request, res: Response): Promise<void> {
     if (!req.token) {
       res.status(401);
       return;
@@ -102,3 +98,5 @@ export class UserController implements IUserController {
     }
   }
 }
+
+export const usersController = new UserController();

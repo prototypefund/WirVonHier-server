@@ -1,10 +1,7 @@
-import { AuthStrategy } from '..';
-import { IUser } from 'persistance/models';
-
-export function getEmailSubject(strategy: AuthStrategy, type: string, user: IUser): string {
-  return `${strategy} ${type} ${user}`;
+export function getEmailVerificationSubject(): string {
+  return `Bestätige deine E-Mail Adresse`;
 }
 
-export function getEmailBody(strategy: AuthStrategy, type: string, user: IUser): string {
-  return `${strategy} ${type} ${user}`;
+export function getEmailVerificationBody(link: string): string {
+  return `<p>Hallo</p>` + `Bitte bestätige deine E-Mail Adresse indem du auf diesen Link clickst: ${link}`;
 }

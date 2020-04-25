@@ -32,7 +32,7 @@ export class MailService {
       to,
       subject,
       html,
-      from: `${from}@wirvonhier.net`,
+      from: `WirVonHier <${from || 'hallo'}@wirvonhier.net>`,
     };
     return sendgrid.send(data);
     // TODO: Add Logging (also logged in sendgrid dashboard)

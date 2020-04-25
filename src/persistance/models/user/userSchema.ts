@@ -18,6 +18,17 @@ export const UserSchema = new Schema<IUser>({
       return new Date(Date.now()).toLocaleString();
     },
   },
+  refreshToken: {
+    type: String,
+  },
+  verificationToken: {
+    type: String,
+  },
+  verification: {
+    email: {
+      type: String,
+    },
+  },
   roles: {
     type: [String],
     default: ['businessowner'],
@@ -58,6 +69,9 @@ UserSchema.virtual('fullName').get(function (this: IUser) {
   const first = this.firstName;
   const last = this.lastName;
   return `${first} ${last}`;
+});
+UserSchema.virtual('verified').get(function (this: IUser) {
+  return Object.keys(this.verification).some((key) => this.verification[key]);
 });
 
 UserSchema.method('hasOneRole', function (this: IUser, roles: string[]) {

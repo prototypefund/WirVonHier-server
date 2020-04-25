@@ -1,5 +1,9 @@
 import { RequestHandler } from 'express';
 
 export interface IUserController {
-  [key: string]: RequestHandler;
+  allUsers: RequestHandler;
+  createUsers: RequestHandler;
+  oneUser: RequestHandler;
+  updateUser: RequestHandler;
+  deleteUser: RequestHandler;
 }

@@ -1,9 +1,9 @@
-# Build and Deploy into Test folder
-name: Continuous Deployment - Test
+# Build and Deploy into server folder
+name: Continuous Deployment - Server
 
 # Workflow triggers on pull requests targeting production branch
 on:
-  pull_request:
+  push:
     branches:
       - production
 
