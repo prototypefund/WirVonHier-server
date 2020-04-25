@@ -1,5 +1,4 @@
 # WirVonHier Server
-=========================
 
 ## Installation
 
