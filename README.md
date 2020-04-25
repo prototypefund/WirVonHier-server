@@ -22,6 +22,16 @@ Copy the default environment file to make certain configurations locally availab
 
 `cp .env.default .env`
 
+Install MongoDB [https://www.mongodb.com/](https://www.mongodb.com/) and create a new database (e.g. by opening a connection to mongo db via the terminal `mongo`):
+
+`use wirvonhier`
+
+Create a new user for the database:
+
+```
+db.createUser({ user: "wirvonhier", pwd: "wirvonhierpass", roles: [ { role: "readWrite", db: "wirvonhier" } ] } )
+```
+
 
 ## Start
 
