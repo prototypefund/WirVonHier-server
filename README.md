@@ -12,17 +12,22 @@ Clone the repository:
 
 `git clone https://github.com/wirvonhier/server`
 
+`cd server`
+
 Install all necessary node packages:
 
 `npm install`
 
 Copy the default environment file to make certain configurations locally available:
 
-`cd client`
-
 `cp .env.default .env`
 
 Install MongoDB [https://www.mongodb.com/](https://www.mongodb.com/) and create a new database (e.g. by opening a connection to mongo db via the terminal `mongo`):
+
+Open `docker-compose.yml` and remove the line `command: [--auth]`
+run `sudo docker-compose up -d`
+then `sudo docker exec -it wirvonhier-mongo bash`.
+Inside the container run `mongo`
 
 `use wirvonhier`
 
@@ -32,6 +37,7 @@ Create a new user for the database:
 db.createUser({ user: "wirvonhier", pwd: "wirvonhierpass", roles: [ { role: "readWrite", db: "wirvonhier" } ] } )
 ```
 
+Now that we have authentication we can add `command: [--auth]` back to the `docker-compose.yml` file.
 
 ## Start
 
@@ -40,7 +46,7 @@ To start the client run the following command:
 `npm run dev`
 
 This starts a node server which has hot reloading enabled. By default, the server can be found at [localhost:3000](localhost:3000).
-
+You should be able to see that the connection to the DB was successful by opening [0.0.0.0:8081](0.0.0.0:8081).
 ## Development
 
 We strongly encourage to use *Visual Studio Code* with a couple of plugins that will automatically run linting processes after code changes and keep the code style clean. In the base folder `wirvonhier` create a new file called `wirvonhier.code-workspace` and add the following code to it:
