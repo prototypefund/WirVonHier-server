@@ -64,7 +64,15 @@ We strongly encourage to use *Visual Studio Code* with a couple of plugins that 
 }
 ```
 
-Next open this file inside `Visual Studio Code` (or double click the workspace file) to open the whole workspace and load the linting settings.
+Next open this file inside *Visual Studio Code* (or double click the workspace file) to open the whole workspace and load the linting settings.
+
+Install the following extensions:
+
+- ESLint (version >= 2.1.5)
+- stylelint (version >= 0.84.0)
+- Vetur (version >= 0.24.0)
+
+Restart *Visual Studio Code* afterwards.
 
 ## Deployment
 
