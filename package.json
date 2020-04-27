@@ -5,7 +5,7 @@
   "private": true,
   "main": "dist/server.js",
   "scripts": {
-    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' -r tsconfig-paths/register src/index.ts",
+    "dev": "nodemon --watch 'src/**/*.ts' --ignore 'src/**/*.spec.ts' --exec 'ts-node' -r tsconfig-paths/register -r src/dev/index.ts src/index.ts",
     "build": "webpack -p --progress",
     "start": "node dist/server.js",
     "prod": "npm run build && npm run start",

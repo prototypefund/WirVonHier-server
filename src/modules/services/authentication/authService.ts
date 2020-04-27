@@ -9,6 +9,7 @@ import {
 } from 'modules/services';
 import { User, IUser } from 'persistance/models';
 
+declare const APP_BASE_URL: string;
 export type AuthStrategy = 'local';
 class AuthService {
   /**
