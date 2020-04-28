@@ -1,16 +1,23 @@
-version: '3'
+version: '3.7'
 
 services:
 
   mongo:
-    image: mongo
-    command: [--auth]
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: wirvonhier
+      MONGO_INITDB_ROOT_PASSWORD: wirvonhierpass
     container_name: 'wirvonhier-mongo'
     volumes:
       - ./mongo_volume:/data/db
     ports:
       - 27017-27019:27017-27019
 
+  # To seed the DB
+  mongo-seed:
+    build: ./mongo-seed
+    links:
+      - mongo
 
   mongo-express:
     image: mongo-express
