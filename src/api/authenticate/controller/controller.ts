@@ -21,6 +21,11 @@ class AuthenticationController implements IAuthenticationController {
     return res.status(200).json({ token: result.token }).end();
   };
 
+  logout: RequestHandler = async function logout(_req, res): Promise<void> {
+    res.clearCookie('refresh_token', { httpOnly: true });
+    return res.status(204).end();
+  }
+
   forgotPassword: RequestHandler = async function forgotPassword(req, res): Promise<void> {
     const { status, message } = await as.forgotPassword(req);
     res.status(status).json({ message });
