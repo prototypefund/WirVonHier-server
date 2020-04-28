@@ -22,22 +22,9 @@ Copy the default environment file to make certain configurations locally availab
 
 `cp .env.default .env`
 
-Install MongoDB [https://www.mongodb.com/](https://www.mongodb.com/) and create a new database (e.g. by opening a connection to mongo db via the terminal `mongo`):
+You need a DB dump to seed the db. These JSON files should be located in `server/mongo-seed`.
 
-Open `docker-compose.yml` and remove the line `command: [--auth]`
-run `sudo docker-compose up -d`
-then `sudo docker exec -it wirvonhier-mongo bash`.
-Inside the container run `mongo`
-
-`use wirvonhier`
-
-Create a new user for the database:
-
-```
-db.createUser({ user: "wirvonhier", pwd: "wirvonhierpass", roles: [ { role: "readWrite", db: "wirvonhier" } ] } )
-```
-
-Now that we have authentication we can add `command: [--auth]` back to the `docker-compose.yml` file.
+Finally, run `sudo docker-compose up`
 
 ## Start
 
@@ -46,7 +33,8 @@ To start the client run the following command:
 `npm run dev`
 
 This starts a node server which has hot reloading enabled. By default, the server can be found at [localhost:3000](localhost:3000).
-You should be able to see that the connection to the DB was successful by opening [0.0.0.0:8081](0.0.0.0:8081).
+
+You should be able to see that the connection to the DB was successful by opening Mongo Express at [0.0.0.0:8081](0.0.0.0:8081).
 ## Development
 
 We strongly encourage to use *Visual Studio Code* with a couple of plugins that will automatically run linting processes after code changes and keep the code style clean. In the base folder `wirvonhier` create a new file called `wirvonhier.code-workspace` and add the following code to it:
