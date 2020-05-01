@@ -19,9 +19,6 @@ export const UserSchema = new Schema<IUser>(
         return new Date(Date.now()).toLocaleString();
       },
     },
-    refreshToken: {
-      type: String,
-    },
     verificationToken: {
       type: String,
     },

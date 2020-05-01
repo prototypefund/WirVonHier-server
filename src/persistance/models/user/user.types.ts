@@ -6,7 +6,6 @@ import { IDataProtStatement } from '../dataProtStatement';
 interface IUserSchema extends Document {
   created: string;
   modified: string;
-  refreshToken?: string;
   verificationToken?: string;
   email: string;
   roles: Array<IRole['name']>;
