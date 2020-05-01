@@ -44,11 +44,12 @@ export class MailService {
       console.log('sending email to: ', business.email);
     }
   }
+
   sendForgotPasswordMail(user: IUser): void {
     const resetPasswordToken = tokenService.createResetPasswordToken(user);
     const data = {
       to: user.email,
-      from: `WirVonHier <service@wirvonheir.net>`,
+      from: `WirVonHier <service@wirvonhier.net>`,
       subject: 'Passwort zurücksetzen',
       html: `https://app.wirvonhier.net/change-password?token=${resetPasswordToken}`, // needs to contain JWT for authentication.
     };
@@ -60,7 +61,7 @@ export class MailService {
     if (!user) return;
     const data = {
       to: user.email,
-      from: `WirVonHier <service@wirvonheir.net>`,
+      from: `WirVonHier <service@wirvonhier.net>`,
       subject: 'Passwort erfolgreich geändert',
       html: `Your Password has been successfully changed.`,
     };
