@@ -76,6 +76,7 @@ class AuthService {
     if (!payload) return { error: { status: 406, message: 'Verification failed. Invalid token.' } };
     const user = await User.findById(payload.id);
     if (!user) return { error: { status: 404, message: 'Verification failed. User not found.' } };
+    if (user.verification.email) return { verified: user.verification.email };
     if (user.verificationToken !== verficationToken) return { error: { status: 500, message: "Tokens don't match." } };
     user.verification.email = new Date().toUTCString();
     user.verificationToken = undefined;
@@ -114,7 +115,7 @@ class AuthService {
     const token = ts.createVerificationToken(user);
     user.verificationToken = token;
     await user.save();
-    return `${APP_BASE_URL || 'http://localhost:8080'}/business/verify?token=${token}`;
+    return `${APP_BASE_URL || 'http://localhost:8080'}/business/verify-email?token=${token}`;
   }
 }
 

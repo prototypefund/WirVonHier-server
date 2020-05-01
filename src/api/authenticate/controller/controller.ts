@@ -54,7 +54,8 @@ class AuthenticationController implements IAuthenticationController {
   }
 
   resendEmailVerification: RequestHandler = async function resendEmailVerification(req, res): Promise<void> {
-    const user = await User.findOne({ email: req.body.email });
+    if (!req.token) return res.status(401).end();
+    const user = await User.findById(req.token.id);
     if (!user) return res.status(406).send(`Unable to send email to "${req.body.email}"`).end();
     const result = await as.sendVerificationEmail(user);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();

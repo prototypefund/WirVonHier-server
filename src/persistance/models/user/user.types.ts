@@ -20,7 +20,7 @@ interface IUserSchema extends Document {
     [key: string]: string | null;
     email: string | null;
   };
-  verified: boolean;
+  isVerified: boolean;
 }
 
 // DO NOT export

@@ -16,7 +16,7 @@ class UserService {
   }
 
   getOneUserById(id: string): Promise<IUser | null> {
-    return User.findById(id).select('businesses created email friends roles verified').exec();
+    return User.findById(id).select('businesses created email friends roles isVerified').exec();
   }
 
   // TODO Write getFilteredUsers()

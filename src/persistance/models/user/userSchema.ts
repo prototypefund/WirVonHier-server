@@ -73,11 +73,9 @@ export const UserSchema = new Schema<IUser>(
 
 // Virtuals
 UserSchema.virtual('fullName').get(function (this: IUser) {
-  const first = this.firstName;
-  const last = this.lastName;
-  return `${first} ${last}`;
+  return `${this.firstName || ''} ${this.lastName || ''}`.trim();
 });
-UserSchema.virtual('verified').get(function (this: IUser) {
+UserSchema.virtual('isVerified').get(function (this: IUser) {
   return Object.keys(this.verification)
     .filter((key) => key !== '$init')
     .some((key) => this.verification[key]);
