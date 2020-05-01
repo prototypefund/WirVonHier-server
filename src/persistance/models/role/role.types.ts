@@ -1,8 +1,8 @@
 import { Document, Model } from 'mongoose';
 
 export interface IRole extends Document {
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
   name: string;
 }
 

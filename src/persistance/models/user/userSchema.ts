@@ -5,14 +5,14 @@ import { hashingService as hs } from 'modules/services';
 
 export const UserSchema = new Schema<IUser>(
   {
-    created: {
+    createdAt: {
       type: String,
       required: true,
       default(): string {
         return new Date(Date.now()).toLocaleString();
       },
     },
-    modified: {
+    modifiedAt: {
       type: String,
       required: true,
       default(): string {
@@ -110,5 +110,5 @@ UserSchema.pre<IUser>('save', async function () {
 // TODO Write Query Middlewares
 // Query middlewares
 UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
-  doc.modified = Date.now().toLocaleString();
+  doc.modifiedAt = Date.now().toLocaleString();
 });

@@ -2,13 +2,13 @@ import { Schema } from 'mongoose';
 import { ILocation } from '.';
 
 export const LocationSchema = new Schema<ILocation>({
-  created: {
+  createdAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();
     },
   },
-  modified: {
+  modifiedAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();

@@ -4,8 +4,8 @@ import { IImage } from '../image';
 
 interface IBusinessSchema extends Document {
   id: string;
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
   verification: {
     [key: string]: string | null;
     email: string | null;

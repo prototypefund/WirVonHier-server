@@ -3,8 +3,8 @@ import { Document, Model } from 'mongoose';
 type VideoType = 'story' | 'profile' | 'banner' | 'mixed';
 
 export interface IVideo extends Document {
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
   name: string;
   description: string;
   path: string;

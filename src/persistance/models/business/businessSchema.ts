@@ -5,13 +5,13 @@ import { geoService } from 'modules';
 
 export const BusinessSchema = new Schema<IBusiness>(
   {
-    created: {
+    createdAt: {
       type: String,
       default(): string {
         return new Date(Date.now()).toUTCString();
       },
     },
-    modified: {
+    modifiedAt: {
       type: String,
       default(): string {
         return new Date(Date.now()).toUTCString();
@@ -176,5 +176,5 @@ BusinessSchema.pre<IBusiness>('save', function () {
 
 // Document post Hook
 BusinessSchema.post<IBusiness>('save', function (doc) {
-  doc.modified = new Date(Date.now()).toUTCString();
+  doc.modifiedAt = new Date(Date.now()).toUTCString();
 });

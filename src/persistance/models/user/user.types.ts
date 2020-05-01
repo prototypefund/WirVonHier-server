@@ -4,8 +4,8 @@ import { IRole } from '../role';
 import { IDataProtStatement } from '../dataProtStatement';
 
 interface IUserSchema extends Document {
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
   verificationToken?: string;
   email: string;
   roles: Array<IRole['name']>;

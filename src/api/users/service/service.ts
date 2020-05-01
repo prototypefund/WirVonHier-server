@@ -3,8 +3,8 @@ import { User, IUser } from 'persistance/models';
 import { mailService } from 'modules';
 
 class UserService {
-  createUsers(businesses: IUser[]): Promise<IUser[]> {
-    return User.create(businesses);
+  createUsers(users: IUser[]): Promise<IUser[]> {
+    return User.create(users);
   }
 
   async deleteOneUser(id: string): Promise<void> {
@@ -16,7 +16,7 @@ class UserService {
   }
 
   getOneUserById(id: string): Promise<IUser | null> {
-    return User.findById(id).select('businesses created email friends roles isVerified').exec();
+    return User.findById(id).select('businesses createdAt email friends roles isVerified').exec();
   }
 
   // TODO Write getFilteredUsers()
