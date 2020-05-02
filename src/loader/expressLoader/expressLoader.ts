@@ -29,6 +29,8 @@ export function expressLoader(app: Application): void {
   // parse cookie header and populare req.cookies
   app.use(cookieParser());
 
+  app.disable('etag');
+
   // configure cross origin resource sharing
   const corsWhitelist = config.hosts;
   app.use(
