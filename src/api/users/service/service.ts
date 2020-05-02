@@ -15,8 +15,8 @@ class UserService {
     return await User.findByIdAndUpdate(id, fieldsToUpdate);
   }
 
-  getOneUserById(id: string): Promise<IUser | null> {
-    return User.findById(id).select('businesses createdAt email friends roles isVerified').exec();
+  async getOneUserById(id: string): Promise<IUser | null> {
+    return await User.findById(id).select('-password');
   }
 
   // TODO Write getFilteredUsers()
