@@ -118,3 +118,7 @@ temp/
 **/.ssh/known_hosts
 
 # End of https://www.gitignore.io/api/ssh,node
+
+# mongo volume
+mongo_volume/
+mongo-seed/*.json

@@ -3,7 +3,7 @@ import { config } from 'config';
 
 export async function mongooseLoader(): Promise<typeof mongoose> {
   const { user, pass, path } = config.mongo;
-  const mongoURI = `mongodb://${user}:${pass}@${path}`;
+  const mongoURI = `mongodb://${user}:${pass}@${path}?authSource=admin`;
 
   const options = {
     useNewUrlParser: true,
