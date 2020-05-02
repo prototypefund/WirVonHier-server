@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import { config } from 'config';
 
 export async function mongooseLoader(): Promise<typeof mongoose> {
-  const { user, pass, path } = config.mongo;
-  const mongoURI = `mongodb://${user}:${pass}@${path}`;
+  const { user, pass, path, authSource } = config.mongo;
+  const mongoURI = `mongodb://${user}:${pass}@${path}?authSource=${authSource}`;
 
   const options = {
     useNewUrlParser: true,

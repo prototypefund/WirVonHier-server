@@ -115,7 +115,7 @@ class AuthService {
     const token = ts.createVerificationToken(user);
     user.verificationToken = token;
     await user.save();
-    return `${APP_BASE_URL || 'http://localhost:8080'}/business/verify-email?token=${token}`;
+    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/verify-email?token=${token}`;
   }
 }
 

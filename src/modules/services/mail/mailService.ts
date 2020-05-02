@@ -51,7 +51,7 @@ export class MailService {
       to: user.email,
       from: `WirVonHier <service@wirvonhier.net>`,
       subject: 'Passwort zurücksetzen',
-      html: `${APP_BASE_URL || 'http://localhost:8080'}/business/reset-password?token=${resetPasswordToken}`, // needs to contain JWT for authentication.
+      html: `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/reset-password?token=${resetPasswordToken}`, // needs to contain JWT for authentication.
     };
     sendgrid.send(data);
   }
