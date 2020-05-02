@@ -92,10 +92,15 @@ export class GeoService {
           }
         }
         const location = new Location({
-          type: 'Point',
-          coordinates: [parseFloat(loc.lon), parseFloat(loc.lat)],
+          geo: {
+            type: 'Point',
+            coordinates: [parseFloat(loc.lon), parseFloat(loc.lat)],
+          },
         });
-        business.location = location;
+        const newLoc = await location.save();
+        if (newLoc) {
+          business.location = location._id;
+        }
         business.save();
       });
     }

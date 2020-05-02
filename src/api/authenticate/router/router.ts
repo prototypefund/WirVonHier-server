@@ -9,3 +9,4 @@ authenticationRouter.post('/forgot-password', ac.forgotPassword.bind(ac));
 authenticationRouter.post('/refresh-token', ac.refreshToken.bind(ac));
 authenticationRouter.post('/verify', ac.verify.bind(ac));
 authenticationRouter.post('/resend-verification', ac.resendVerification.bind(ac));
+authenticationRouter.get('/me', ac.authenticateMe.bind(ac));

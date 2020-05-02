@@ -9,6 +9,7 @@ import {
 } from 'modules/services';
 import { User, IUser } from 'persistance/models';
 
+declare const APP_BASE_URL: string;
 export type AuthStrategy = 'local';
 class AuthService {
   /**
@@ -74,6 +75,7 @@ class AuthService {
     if (!user) return { error: { status: 404, message: 'Verification failed. User not found.' } };
     if (user.verificationToken !== verficationToken) return { error: { status: 500, message: "Tokens don't match." } };
     user.verification.email = new Date().toUTCString();
+    user.verificationToken = undefined;
     user.save();
     return { verified: user.verification.email };
   }
@@ -89,11 +91,21 @@ class AuthService {
     return { to: user.email };
   }
 
+  async authenticateMe(req: Request): Promise<string | void> {
+    const refreshToken = req.cookies.refresh_token;
+    if (!refreshToken) return;
+    const payload = ts.verify(refreshToken);
+    if (!payload) return;
+    const user = await User.findById(payload.id);
+    if (!user) return;
+    return user.id;
+  }
+
   private async getVerificationLink(user: IUser): Promise<string> {
     const token = ts.createVerificationToken(user);
     user.verificationToken = token;
     await user.save();
-    return `${APP_BASE_URL || 'http://localhost:8080'}/verify?token=${token}`;
+    return `${APP_BASE_URL || 'http://localhost:8080'}/business/verify?token=${token}`;
   }
 }
 

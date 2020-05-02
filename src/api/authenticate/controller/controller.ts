@@ -46,6 +46,12 @@ class AuthenticationController implements IAuthenticationController {
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
     return res.status(204).end();
   }
+
+  authenticateMe: RequestHandler = async function authenticateMe(req, res): Promise<void> {
+    const userId = await as.authenticateMe(req);
+    if (userId) return res.status(200).json({ id: userId }).end();
+    return res.status(401).end();
+  }
 }
 
 export const authenticationController = new AuthenticationController();

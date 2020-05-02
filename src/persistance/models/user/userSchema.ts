@@ -3,66 +3,76 @@ import { IUser } from '.';
 import { IUserPopulated, IUserModel } from './user.types';
 import { hashingService as hs } from 'modules/services';
 
-export const UserSchema = new Schema<IUser>({
-  created: {
-    type: String,
-    required: true,
-    default(): string {
-      return new Date(Date.now()).toLocaleString();
+export const UserSchema = new Schema<IUser>(
+  {
+    created: {
+      type: String,
+      required: true,
+      default(): string {
+        return new Date(Date.now()).toLocaleString();
+      },
     },
-  },
-  modified: {
-    type: String,
-    required: true,
-    default(): string {
-      return new Date(Date.now()).toLocaleString();
+    modified: {
+      type: String,
+      required: true,
+      default(): string {
+        return new Date(Date.now()).toLocaleString();
+      },
     },
-  },
-  refreshToken: {
-    type: String,
-  },
-  verificationToken: {
-    type: String,
-  },
-  verification: {
+    refreshToken: {
+      type: String,
+    },
+    verificationToken: {
+      type: String,
+    },
+    verification: {
+      email: {
+        type: String,
+      },
+    },
+    roles: {
+      type: [String],
+      default: ['businessowner'],
+    },
     email: {
       type: String,
+      required: true,
     },
-  },
-  roles: {
-    type: [String],
-    default: ['businessowner'],
-  },
-  email: {
-    type: String,
-    required: true,
-  },
-  firstName: {
-    type: String,
-  },
-  lastName: String,
-  username: {
-    type: String,
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-  businesses: {
-    type: [Schema.Types.ObjectId],
-    ref: 'Business',
-  },
-  acceptedDataProtStatements: {
-    type: [Schema.Types.ObjectId],
-    ref: 'DataProtStatement',
-    required: true,
-  },
-  friends: [
-    {
+    firstName: {
       type: String,
     },
-  ],
-});
+    lastName: String,
+    username: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    businesses: {
+      type: [Schema.Types.ObjectId],
+      ref: 'Business',
+    },
+    acceptedDataProtStatements: {
+      type: [Schema.Types.ObjectId],
+      ref: 'DataProtStatement',
+      required: true,
+    },
+    friends: [
+      {
+        type: String,
+      },
+    ],
+  },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+    toObject: {
+      virtuals: true,
+    },
+  },
+);
 
 // Virtuals
 UserSchema.virtual('fullName').get(function (this: IUser) {
@@ -71,7 +81,9 @@ UserSchema.virtual('fullName').get(function (this: IUser) {
   return `${first} ${last}`;
 });
 UserSchema.virtual('verified').get(function (this: IUser) {
-  return Object.keys(this.verification).some((key) => this.verification[key]);
+  return Object.keys(this.verification)
+    .filter((key) => key !== '$init')
+    .some((key) => this.verification[key]);
 });
 
 UserSchema.method('hasOneRole', function (this: IUser, roles: string[]) {

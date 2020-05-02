@@ -14,7 +14,11 @@ cloud.config({
 });
 
 function uploadImage(path: string): void {
-  cloud.uploader.upload(path, async (_error: any, result: { [key: string]: string }) => {
+  cloud.uploader.upload(path, async (error: any, result: { [key: string]: string }) => {
+    if (error) {
+      console.log(error);
+      return;
+    }
     // create Image db Entry;
     const fileName = path.split('.')[0].split('/').pop() as string;
     const businessId = fileName.split('_')[1];
@@ -36,9 +40,8 @@ function uploadImage(path: string): void {
       await business.save();
     }
     if (imageType.includes('Story')) {
-      const rank = parseInt(imageType.split('').slice(5).join(''), 10);
       await image.save();
-      business.media.stories.images[rank] = image._id;
+      business.media.stories.images.push(image._id);
       await business.save();
     }
   });

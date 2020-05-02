@@ -18,9 +18,7 @@ Install all necessary node packages:
 
 `npm install`
 
-Copy the default environment file to make certain configurations locally available:
-
-`cp .env.default .env`
+A `.env` file with several environment variables is required. Please inquire us directly for details.
 
 You need a DB dump to seed the db. These JSON files should be located in `server/mongo-seed`.
 

@@ -32,7 +32,7 @@ export async function register(this: typeof authService, req: Request): Promise<
   if (user) return { error: { status: 406, message: 'User already exists.' } };
   const newUser = await User.create({ email, password, acceptedDataProtStatements: [dataProtStatement._id] });
 
-  this.sendVerificationEmail(newUser);
+  await this.sendVerificationEmail(newUser);
 
   // Authentication Token
   const token = ts.generateToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });

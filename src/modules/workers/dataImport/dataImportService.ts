@@ -108,11 +108,11 @@ export class DataImportService {
     const ownerEmails = jsonBusinesses.map((business) => business.email) as string[];
     const ownerIds = await this.getOwnerIds(ownerEmails);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const coordinates = jsonBusinesses.map((business) => (business as any).coordinates);
-    const locations = await this.getLocations(coordinates);
+    // const coordinates = jsonBusinesses.map((business) => (business as any).coordinates);
+    // const locations = await this.getLocations(coordinates);
     const newBusinesses = jsonBusinesses.map((business, i) => {
       business.owner = ownerIds[i];
-      business.location = locations[i];
+      // business.location = locations[i];
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (business as any).coordinates;
       return business;
