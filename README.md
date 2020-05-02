@@ -12,22 +12,17 @@ Clone the repository:
 
 `git clone https://github.com/wirvonhier/server`
 
+`cd server`
+
 Install all necessary node packages:
 
 `npm install`
 
 A `.env` file with several environment variables is required. Please inquire us directly for details.
 
-Install MongoDB [https://www.mongodb.com/](https://www.mongodb.com/) and create a new database (e.g. by opening a connection to mongo db via the terminal `mongo`):
+You need a DB dump to seed the db. These JSON files should be located in `server/mongo-seed`.
 
-`use wirvonhier`
-
-Create a new user for the database:
-
-```
-db.createUser({ user: "wirvonhier", pwd: "wirvonhierpass", roles: [ { role: "readWrite", db: "wirvonhier" } ] } )
-```
-
+Finally, run `sudo docker-compose up`
 
 ## Start
 
@@ -37,6 +32,7 @@ To start the client run the following command:
 
 This starts a node server which has hot reloading enabled. By default, the server can be found at [localhost:3000](localhost:3000).
 
+You should be able to see that the connection to the DB was successful by opening Mongo Express at [0.0.0.0:8081](0.0.0.0:8081).
 ## Development
 
 We strongly encourage to use *Visual Studio Code* with a couple of plugins that will automatically run linting processes after code changes and keep the code style clean. In the base folder `wirvonhier` create a new file called `wirvonhier.code-workspace` and add the following code to it:
