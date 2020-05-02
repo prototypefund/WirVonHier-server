@@ -8,8 +8,8 @@ class AuthenticationController implements IAuthenticationController {
     const type = req.query.strategy || 'local';
     const result = await as.loginUser(type, req, res, next);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
-    res.cookie('public_refresh_token', result.publicRefreshToken);
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   };
 
@@ -18,14 +18,14 @@ class AuthenticationController implements IAuthenticationController {
     const type = req.query.strategy || 'local';
     const result = await as.registerUser(type, req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
-    res.cookie('public_refresh_token', result.publicRefreshToken);
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   };
 
   logout: RequestHandler = async function logout(_req, res): Promise<void> {
-    res.clearCookie('refresh_token', { httpOnly: true });
-    res.clearCookie('public_refresh_token');
+    res.clearCookie('refresh_token', { httpOnly: true, domain: APP_DOMAIN });
+    res.clearCookie('public_refresh_token', { domain: APP_DOMAIN });
     return res.status(204).end();
   }
 
@@ -42,8 +42,8 @@ class AuthenticationController implements IAuthenticationController {
   refreshToken: RequestHandler = async function refreshToken(req, res): Promise<void> {
     const result = await as.refreshToken(req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
-    res.cookie('public_refresh_token', result.publicRefreshToken);
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   }
 

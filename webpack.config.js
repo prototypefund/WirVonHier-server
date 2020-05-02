@@ -105,6 +105,7 @@ module.exports = async function (env, argv) {
         VERSION: JSON.stringify(VERSION),
         NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         APP_BASE_URL: JSON.stringify(process.env.APP_BASE_URL),
+        APP_DOMAIN: JSON.stringify(process.env.APP_DOMAIN),
       }),
     ].filter(Boolean),
     optimization: {
