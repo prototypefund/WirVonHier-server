@@ -14,6 +14,7 @@ export class BusinessFilter extends Filter<IBusiness> {
     }
     const count = await model.countDocuments((query as unknown) as MongooseFilterQuery<IBusiness>).exec();
     const list = await query
+      .where({ active: true })
       .sort(this.query.sorting)
       .skip(this.query.page * this.query.limit)
       .limit(this.query.limit);
