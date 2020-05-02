@@ -6,7 +6,7 @@ import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 class BusinessesService {
   async createBusinesses(
     userId: string,
-    businesses: IBusiness[],
+    businesses: IBusiness[] = [],
   ): Promise<{ status: number; message: string; createdBusinesses?: IBusiness[] }> {
     const user = await User.findById(userId);
     if (!user) return { status: 401, message: 'User not found.' };
@@ -14,17 +14,32 @@ class BusinessesService {
     if (user.hasOneRole(['businessowner']) && user.businesses.length >= 5)
       return { status: 403, message: 'Max allowed businesses per user reached (5).' };
 
+    const newBusinesses = [];
     try {
       for (const business of businesses) {
-        business.owner = user._id;
+        const validatedBusiness = new Business({
+          ...(business && typeof business === 'object' ? business : {}),
+          owner: user._id,
+          email: user.email,
+          name: `${user.email} - ${Date.now()}`,
+          active: false,
+        });
+
+        const newBusiness = await Business.create(validatedBusiness);
+        newBusinesses.push(newBusiness);
       }
-      const newBusinesses = await Business.create(businesses);
+
+      const businessIds = newBusinesses.map((business) => business._id);
+      user.businesses.push(...businessIds);
+      await user.save();
+
       mailService.send({
         from: 'info',
         to: user.email,
         subject: this.getEmailSubject('businessesCreated', newBusinesses),
         html: this.getEmailBody('businessesCreated', newBusinesses, user),
       });
+
       return { status: 200, createdBusinesses: newBusinesses, message: 'All businesses created.' };
     } catch (e) {
       return { status: 500, message: e.message, createdBusinesses: [] };
@@ -65,7 +80,7 @@ class BusinessesService {
   }
 
   async getOneBusinessById(id: string): Promise<{ status: number; business?: IBusiness }> {
-    const business = await Business.findOne({ id }).exec();
+    const business = await Business.findById(id);
     if (!business) return { status: 400 };
     // TODO: expect coordinates from client - add distance to response
     await Business.populate(business, [

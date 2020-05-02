@@ -23,7 +23,6 @@ class BusinessesController implements IBusinessesController {
    */
   public async createBusinesses(req: Request, res: Response): Promise<void> {
     if (!req.token) return res.status(401).end();
-    if (req.token.type && req.token.type === 'changeEmail') return res.status(403).end();
     const businesses = req.body.businesses;
     const { status, message, createdBusinesses } = await bs.createBusinesses(req.token.id, businesses);
     return res.status(status).json({ message, createdBusinesses }).end();

@@ -17,6 +17,10 @@ export const BusinessSchema = new Schema<IBusiness>(
         return new Date(Date.now()).toUTCString();
       },
     },
+    active: {
+      type: Boolean,
+      default: false,
+    },
     verification: {
       email: {
         type: String,
@@ -91,7 +95,7 @@ export const BusinessSchema = new Schema<IBusiness>(
     },
     delivery: {
       type: [String],
-      enum: ['collect', 'deliveryByOwner', 'deliveryByService'],
+      enum: ['collect', 'delivery'],
     },
     category: {
       type: [String],

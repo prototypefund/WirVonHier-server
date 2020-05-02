@@ -10,6 +10,7 @@ interface IBusinessSchema extends Document {
     [key: string]: string | null;
     email: string | null;
   };
+  active: boolean;
   verified: boolean;
   name: string;
   distance?: number;
