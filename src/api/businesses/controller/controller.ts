@@ -43,7 +43,6 @@ class BusinessesController implements IBusinessesController {
    */
   public async updateBusiness(req: Request, res: Response): Promise<void> {
     if (!req.token) return res.status(401).end();
-    if (req.token.type && req.token.type === 'changeEmail') return res.status(403).end();
     const businessId = req.params.id;
     const userId = req.token.id;
     const updates = req.body.business; // TODO: Validate input

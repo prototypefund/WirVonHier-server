@@ -64,15 +64,17 @@ class BusinessesService {
   async updateOneBusiness(
     businessId: string,
     userId: string,
-    fieldsToUpdate: Partial<IBusiness>,
+    fieldsToUpdate: Partial<IBusiness> = {},
   ): Promise<{ status: number; message: string; updatedBusiness?: IBusiness }> {
     const user = await User.findById(userId);
     if (!user) return { status: 401, message: 'User not found.' };
     if (!user.hasOneRole(['admin', 'businessowner'])) return { status: 403, message: 'User not authorized' };
     try {
-      const business = await Business.findOne({ id: businessId });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { _id, ...businessData } = fieldsToUpdate;
+      const business = await Business.findById(businessId);
       if (!business) return { status: 401, message: `Business with id "${businessId}" does not exist.` };
-      const updatedBusiness = await business.update(fieldsToUpdate);
+      const updatedBusiness = await business.updateOne(businessData);
       return { status: 200, updatedBusiness, message: 'Business updated.' };
     } catch (e) {
       return { status: 500, message: e.message };
