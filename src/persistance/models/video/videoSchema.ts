@@ -2,13 +2,13 @@ import { Schema } from 'mongoose';
 import { IVideo } from '.';
 
 export const VideoSchema = new Schema<IVideo>({
-  created: {
+  createdAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();
     },
   },
-  modified: {
+  modifiedAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();

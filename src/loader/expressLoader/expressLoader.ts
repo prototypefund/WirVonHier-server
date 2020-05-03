@@ -29,13 +29,13 @@ export function expressLoader(app: Application): void {
   // parse cookie header and populare req.cookies
   app.use(cookieParser());
 
+  app.disable('etag');
+
   // configure cross origin resource sharing
   const corsWhitelist = config.hosts;
   app.use(
     cors({
-      //origin: 'http://0.0.0.0:8080',
       origin: (requestOrigin, callback) => {
-        // TODO: remove undefined (= called in the browser directly)
         if (requestOrigin === undefined) {
           callback(null, true);
         } else if (corsWhitelist.includes(requestOrigin)) {

@@ -2,13 +2,13 @@ import { Schema } from 'mongoose';
 import { IImage } from '.';
 
 export const ImageSchema = new Schema<IImage>({
-  created: {
+  createdAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();
     },
   },
-  modified: {
+  modifiedAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();

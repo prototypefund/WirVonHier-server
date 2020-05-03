@@ -40,12 +40,12 @@ class TokenService {
     const token = JWT.sign(
       {
         id: user._id,
-        type: 'changePassword',
+        type: 'reset-password',
       },
       this.secretKey,
       {
         algorithm: 'HS256',
-        expiresIn: 60 * 30,
+        expiresIn: 60 * 30, // 30 min
       },
     );
 

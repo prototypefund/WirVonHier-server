@@ -9,7 +9,6 @@ import {
 } from 'modules/services';
 import { User, IUser } from 'persistance/models';
 
-declare const APP_BASE_URL: string;
 export type AuthStrategy = 'local';
 class AuthService {
   /**
@@ -48,23 +47,27 @@ class AuthService {
     next();
   }
 
-  async forgotPassword(req: Request): Promise<{ status: number; message?: string }> {
-    return providers.local.forgotPassword(req);
+  async requestNewPassword(req: Request): Promise<{ status: number; message?: string }> {
+    return providers.local.requestNewPassword(req);
+  }
+  async resetPassword(req: Request): Promise<{ status: number; message?: string }> {
+    return providers.local.resetPassword(req);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
   async refreshToken(req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
     const refreshToken = req.cookies.refresh_token;
-    const payload = ts.verify(refreshToken);
-    if (!payload) return { error: { status: 401, message: 'User not authenticated.' } };
-    const user = await User.findById(payload.id);
+    const publicRefreshToken = req.cookies.public_refresh_token;
+    const payloadPriv = ts.verify(refreshToken);
+    const payloadPub = ts.verify(publicRefreshToken);
+    if (!payloadPriv || !payloadPub || payloadPub.id !== payloadPriv.id)
+      return { error: { status: 401, message: 'User not authenticated.' } };
+    const user = await User.findById(payloadPub.id);
     if (!user) return { error: { status: 401, message: 'User not authenticated' } };
-    if (user.refreshToken !== refreshToken) return { error: { status: 401, message: 'User not authenticated.' } };
-    const newRefreshToken = ts.generateRefreshToken({ id: user._id, email: user.email, roles: user.roles });
+    const newRefreshToken = ts.generateRefreshToken({ id: user._id, email: user.email });
+    const newPublicRefreshToken = ts.generateRefreshToken({ id: user._id });
     const newToken = ts.generateToken({ id: user._id, email: user.email, roles: user.roles });
-    user.refreshToken = newRefreshToken;
-    user.save();
-    return { token: newToken, refreshToken: newRefreshToken };
+    return { token: newToken, refreshToken: newRefreshToken, publicRefreshToken: newPublicRefreshToken };
   }
 
   async verifyUserEmail(req: Request): Promise<{ verified: string } | IAuthErrorResponse> {
@@ -73,6 +76,7 @@ class AuthService {
     if (!payload) return { error: { status: 406, message: 'Verification failed. Invalid token.' } };
     const user = await User.findById(payload.id);
     if (!user) return { error: { status: 404, message: 'Verification failed. User not found.' } };
+    if (user.verification.email) return { verified: user.verification.email };
     if (user.verificationToken !== verficationToken) return { error: { status: 500, message: "Tokens don't match." } };
     user.verification.email = new Date().toUTCString();
     user.verificationToken = undefined;
@@ -81,31 +85,37 @@ class AuthService {
   }
 
   async sendVerificationEmail(user: IUser): Promise<{ to: string } | IAuthErrorResponse> {
-    const verificationLink = await this.getVerificationLink(user);
-    mailService.send({
-      to: user.email,
-      from: 'info',
-      subject: getEmailVerificationSubject(),
-      html: getEmailVerificationBody(verificationLink),
-    });
-    return { to: user.email };
+    try {
+      const verificationLink = await this.createVerificationLink(user);
+      await mailService.send({
+        to: user.email,
+        from: 'info',
+        subject: getEmailVerificationSubject(),
+        html: getEmailVerificationBody(verificationLink),
+      });
+      return { to: user.email };
+    } catch (e) {
+      return { error: { status: 400, message: e.message } };
+    }
   }
 
   async authenticateMe(req: Request): Promise<string | void> {
     const refreshToken = req.cookies.refresh_token;
-    if (!refreshToken) return;
-    const payload = ts.verify(refreshToken);
-    if (!payload) return;
-    const user = await User.findById(payload.id);
+    const publicRefreshToken = req.cookies.public_refresh_token;
+    if (!refreshToken || !publicRefreshToken) return;
+    const payloadPriv = ts.verify(refreshToken);
+    const payloadPub = ts.verify(publicRefreshToken);
+    if (!payloadPriv || !payloadPub || payloadPub.id !== payloadPriv.id) return;
+    const user = await User.findById(payloadPub.id);
     if (!user) return;
     return user.id;
   }
 
-  private async getVerificationLink(user: IUser): Promise<string> {
+  private async createVerificationLink(user: IUser): Promise<string> {
     const token = ts.createVerificationToken(user);
     user.verificationToken = token;
     await user.save();
-    return `${APP_BASE_URL || 'http://localhost:8080'}/business/verify?token=${token}`;
+    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/verify-email?token=${token}`;
   }
 }
 

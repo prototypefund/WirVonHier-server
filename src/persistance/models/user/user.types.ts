@@ -4,9 +4,8 @@ import { IRole } from '../role';
 import { IDataProtStatement } from '../dataProtStatement';
 
 interface IUserSchema extends Document {
-  created: string;
-  modified: string;
-  refreshToken?: string;
+  createdAt: string;
+  modifiedAt: string;
   verificationToken?: string;
   email: string;
   roles: Array<IRole['name']>;
@@ -21,7 +20,7 @@ interface IUserSchema extends Document {
     [key: string]: string | null;
     email: string | null;
   };
-  verified: boolean;
+  isVerified: boolean;
 }
 
 // DO NOT export

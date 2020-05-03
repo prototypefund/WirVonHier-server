@@ -5,22 +5,19 @@ import { hashingService as hs } from 'modules/services';
 
 export const UserSchema = new Schema<IUser>(
   {
-    created: {
+    createdAt: {
       type: String,
       required: true,
       default(): string {
         return new Date(Date.now()).toLocaleString();
       },
     },
-    modified: {
+    modifiedAt: {
       type: String,
       required: true,
       default(): string {
         return new Date(Date.now()).toLocaleString();
       },
-    },
-    refreshToken: {
-      type: String,
     },
     verificationToken: {
       type: String,
@@ -76,11 +73,9 @@ export const UserSchema = new Schema<IUser>(
 
 // Virtuals
 UserSchema.virtual('fullName').get(function (this: IUser) {
-  const first = this.firstName;
-  const last = this.lastName;
-  return `${first} ${last}`;
+  return `${this.firstName || ''} ${this.lastName || ''}`.trim();
 });
-UserSchema.virtual('verified').get(function (this: IUser) {
+UserSchema.virtual('isVerified').get(function (this: IUser) {
   return Object.keys(this.verification)
     .filter((key) => key !== '$init')
     .some((key) => this.verification[key]);
@@ -115,5 +110,5 @@ UserSchema.pre<IUser>('save', async function () {
 // TODO Write Query Middlewares
 // Query middlewares
 UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
-  doc.modified = Date.now().toLocaleString();
+  doc.modifiedAt = Date.now().toLocaleString();
 });

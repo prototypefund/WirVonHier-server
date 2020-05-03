@@ -8,7 +8,8 @@ class AuthenticationController implements IAuthenticationController {
     const type = req.query.strategy || 'local';
     const result = await as.loginUser(type, req, res, next);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   };
 
@@ -17,34 +18,48 @@ class AuthenticationController implements IAuthenticationController {
     const type = req.query.strategy || 'local';
     const result = await as.registerUser(type, req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   };
 
-  forgotPassword: RequestHandler = async function forgotPassword(req, res): Promise<void> {
-    const { status, message } = await as.forgotPassword(req);
+  logout: RequestHandler = async function logout(_req, res): Promise<void> {
+    res.clearCookie('refresh_token', { httpOnly: true, domain: APP_DOMAIN });
+    res.clearCookie('public_refresh_token', { domain: APP_DOMAIN });
+    return res.status(204).end();
+  }
+
+  requestNewPassword: RequestHandler = async function requestNewPassword(req, res): Promise<void> {
+    const { status, message } = await as.requestNewPassword(req);
+    res.status(status).json({ message });
+  };
+
+  resetPassword: RequestHandler = async function resetPassword(req, res): Promise<void> {
+    const { status, message } = await as.resetPassword(req);
     res.status(status).json({ message });
   };
 
   refreshToken: RequestHandler = async function refreshToken(req, res): Promise<void> {
     const result = await as.refreshToken(req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
   }
 
-  verify: RequestHandler = async function verify(req, res): Promise<void> {
+  verifyEmail: RequestHandler = async function verifyEmail(req, res): Promise<void> {
     const result = await as.verifyUserEmail(req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    return res.status(204).end();
+    return res.status(204).json({ verified: result.verified }).end();
   }
 
-  resendVerification: RequestHandler = async function resendVerification(req, res): Promise<void> {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) return res.status(406).send(`No User found for email "${req.body.email}`).end();
+  resendEmailVerification: RequestHandler = async function resendEmailVerification(req, res): Promise<void> {
+    if (!req.token) return res.status(401).end();
+    const user = await User.findById(req.token.id);
+    if (!user) return res.status(406).send(`Unable to send email to "${req.body.email}"`).end();
     const result = await as.sendVerificationEmail(user);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    return res.status(204).end();
+    return res.status(204).json({ email: result.to }).end();
   }
 
   authenticateMe: RequestHandler = async function authenticateMe(req, res): Promise<void> {

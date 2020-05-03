@@ -2,13 +2,13 @@ import { Schema } from 'mongoose';
 import { IDataProtStatement } from '.';
 
 export const DataProtectionStatementSchema = new Schema<IDataProtStatement>({
-  created: {
+  createdAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();
     },
   },
-  modified: {
+  modifiedAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();

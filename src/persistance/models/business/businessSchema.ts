@@ -5,17 +5,21 @@ import { geoService } from 'modules';
 
 export const BusinessSchema = new Schema<IBusiness>(
   {
-    created: {
+    createdAt: {
       type: String,
       default(): string {
         return new Date(Date.now()).toUTCString();
       },
     },
-    modified: {
+    modifiedAt: {
       type: String,
       default(): string {
         return new Date(Date.now()).toUTCString();
       },
+    },
+    active: {
+      type: Boolean,
+      default: false,
     },
     verification: {
       email: {
@@ -91,7 +95,7 @@ export const BusinessSchema = new Schema<IBusiness>(
     },
     delivery: {
       type: [String],
-      enum: ['collect', 'deliveryByOwner', 'deliveryByService'],
+      enum: ['collect', 'delivery'],
     },
     category: {
       type: [String],
@@ -176,5 +180,5 @@ BusinessSchema.pre<IBusiness>('save', function () {
 
 // Document post Hook
 BusinessSchema.post<IBusiness>('save', function (doc) {
-  doc.modified = new Date(Date.now()).toUTCString();
+  doc.modifiedAt = new Date(Date.now()).toUTCString();
 });

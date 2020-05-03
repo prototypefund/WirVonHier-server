@@ -2,13 +2,13 @@ import { Schema } from 'mongoose';
 import { IRole } from '.';
 
 export const RoleSchema = new Schema<IRole>({
-  created: {
+  createdAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();
     },
   },
-  modified: {
+  modifiedAt: {
     type: String,
     default(): string {
       return new Date(Date.now()).toUTCString();

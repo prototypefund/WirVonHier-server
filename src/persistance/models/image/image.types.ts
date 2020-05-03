@@ -3,8 +3,8 @@ import { Document, Model } from 'mongoose';
 type ImageType = 'story' | 'profile' | 'banner' | 'mixed';
 
 export interface IImage extends Document {
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
   title: string;
   description: string;
   caption: string;

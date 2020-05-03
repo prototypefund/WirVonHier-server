@@ -3,6 +3,7 @@ import { DataProtLanguageId } from 'persistance/models';
 export interface IAuthResponse {
   token: string;
   refreshToken: string;
+  publicRefreshToken: string;
 }
 
 export interface IAuthErrorResponse {

@@ -37,9 +37,9 @@ export async function register(this: typeof authService, req: Request): Promise<
   // Authentication Token
   const token = ts.generateToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
   const refreshToken = ts.generateRefreshToken({ id: newUser.id, email: newUser.email, roles: newUser.roles });
-  newUser.refreshToken = refreshToken;
+  const publicRefreshToken = ts.generateRefreshToken({ id: newUser.id });
   await newUser.save();
-  return { token, refreshToken };
+  return { token, refreshToken, publicRefreshToken };
 }
 
 export const login: RequestHandler = async function login(req): Promise<IAuthResponse | IAuthErrorResponse> {
@@ -60,18 +60,12 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
     return { error: { status: 406, message: 'Email or password incorrect.' } };
 
   const token = ts.generateToken({ id: user.id, email: user.email, roles: user.roles });
-  const refreshToken =
-    user.refreshToken || ts.generateRefreshToken({ id: user.id, email: user.email, roles: user.roles });
-
-  if (!user.refreshToken) {
-    user.refreshToken = refreshToken;
-    user.save();
-  }
-
-  return { token, refreshToken };
+  const refreshToken = ts.generateRefreshToken({ id: user.id, email: user.email, roles: user.roles });
+  const publicRefreshToken = ts.generateRefreshToken({ id: user.id });
+  return { token, refreshToken, publicRefreshToken };
 };
 
-export async function forgotPassword(req: Request): Promise<{ status: number; message?: string }> {
+export async function requestNewPassword(req: Request): Promise<{ status: number; message?: string }> {
   const schema = Joi.object().keys({
     email: Joi.string().required(),
   });
@@ -84,11 +78,45 @@ export async function forgotPassword(req: Request): Promise<{ status: number; me
   if (!user) {
     return {
       status: 400,
-      message: `No user found with e-mail address: ${email}.`,
+      message: `Failed to reset password for: ${email}.`,
     };
   }
   mailService.sendForgotPasswordMail(user);
   return {
     status: 204,
   };
+}
+
+export async function resetPassword(req: Request): Promise<{ status: number; message?: string }> {
+  const schema = Joi.object().keys({
+    password: Joi.string().required(),
+    token: Joi.string().required(),
+  });
+  const { error, value } = Joi.validate<{ password: string; token: string }>(req.body, schema);
+  if (error) {
+    return { status: 406, message: error.details[0].message };
+  }
+  const { password, token } = value;
+  const payload = ts.verify(token);
+  if (!payload) {
+    return { status: 403, message: 'Not authorized. Invalid Token.' };
+  }
+  const { id, type } = payload;
+  if (type !== 'reset-password') {
+    return { status: 403, message: 'Not authorized. Invalid Token.' };
+  }
+  const user = await User.findById(id);
+  if (!user) {
+    return {
+      status: 400,
+      message: 'Could not find user. May have been since token has been issued.',
+    };
+  }
+  user.password = password;
+  try {
+    await user.save();
+    return { status: 204 };
+  } catch (error) {
+    return { status: 500 };
+  }
 }
