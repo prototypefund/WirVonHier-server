@@ -22,7 +22,6 @@ export const ImageSchema = new Schema<IImage>({
   caption: String,
   src: {
     type: String,
-    required: true,
   },
   publicId: String,
   rank: Number,
@@ -30,3 +29,5 @@ export const ImageSchema = new Schema<IImage>({
     type: String,
   },
 });
+
+// before delete hook: Delete image in cloudinary per publicId!
