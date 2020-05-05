@@ -46,6 +46,6 @@ export interface ILocationWithDistance {
   distance: number;
   _id: string;
   geo: { type: 'Point'; coordinates: number[] };
-  created: string;
-  modified: string;
+  createdAt: string;
+  modifiedAt: string;
 }
