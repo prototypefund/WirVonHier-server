@@ -92,7 +92,7 @@ class BusinessesService {
       const updatedBusiness = await business.updateOne(processedBusinessData);
       return { status: 200, updatedBusiness, message: 'Business updated.' };
     } catch (e) {
-      return { status: 500, message: e.message };
+      return { status: 500, message: e.stack };
     }
   }
 
@@ -236,9 +236,10 @@ class BusinessesService {
         if (profile.image === null) {
           processedMedia.profile.image = undefined;
           this.deleteImage(oldMedia.profile.image);
+        } else {
+          const newImage = await this.createImage(profile.image, business._id, 'profile');
+          processedMedia.profile.image = newImage._id;
         }
-        const newImage = await this.createImage(profile.image, business._id, 'profile');
-        processedMedia.profile.image = newImage._id;
       } else {
         processedMedia.profile.image = oldMedia.profile && oldMedia.profile.image;
       }

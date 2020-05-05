@@ -16,7 +16,7 @@ export class ImagesController {
     };
     const { error, value } = Joi.validate<{ publicIds: string[] }>(req.body, schema);
     if (error) {
-      res.status(406).end(error.details[0].message);
+      return res.status(406).end(error.details[0].message);
     }
     const failed = [];
     for (const publicId of value.publicIds) {
