@@ -2,6 +2,38 @@ import { Document, Model } from 'mongoose';
 import { ILocation, IVideo, IUser } from '..';
 import { IImage } from '../image';
 
+export interface IBusinessMedia {
+  logo: IImage['_id'];
+  cover: {
+    image: IImage['_id'];
+    video: IVideo['_id'];
+  };
+  profile: {
+    image: IImage['_id'];
+    video: IVideo['_id'];
+  };
+  stories: {
+    images: IImage['_id'][];
+    videos: IVideo['_id'][];
+  };
+}
+
+export interface IBusinessMediaPopulated {
+  logo: IImage;
+  cover: {
+    image: IImage;
+    video: IVideo;
+  };
+  profile: {
+    image: IImage;
+    video: IVideo;
+  };
+  stories: {
+    images: IImage[];
+    videos: IVideo[];
+  };
+}
+
 interface IBusinessSchema extends Document {
   id: string;
   createdAt: string;
@@ -50,42 +82,16 @@ export interface IBusinessBase extends IBusinessSchema {
 
 export interface IBusiness extends IBusinessBase {
   owner: IUser['_id'];
+  members: Array<IUser['_id']>;
   location: ILocation['_id'];
-  media: {
-    logo: IImage['_id'];
-    cover: {
-      image: IImage['_id'];
-      video: IVideo['_id'];
-    };
-    profile: {
-      image: IImage['_id'];
-      video: IVideo['_id'];
-    };
-    stories: {
-      images: IImage['_id'][];
-      videos: IVideo['_id'][];
-    };
-  };
+  media: IBusinessMedia;
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
   owner: IUser;
+  members: IUser[];
   location: ILocation;
-  media: {
-    logo: IImage;
-    cover: {
-      image: IImage;
-      video: IVideo;
-    };
-    profile: {
-      image: IImage;
-      video: IVideo;
-    };
-    stories: {
-      images: IImage[];
-      videos: IVideo[];
-    };
-  };
+  media: IBusinessMediaPopulated;
 }
 
 export interface IBusinessModel extends Model<IBusiness> {
