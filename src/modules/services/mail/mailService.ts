@@ -13,7 +13,8 @@ const dummyMailer = {
     return `Email sent to ${data.to}`;
   },
 };
-const sendgrid = process.env.NODE_ENV === 'production' ? sgMail : dummyMailer;
+const isProd = process.env.NODE_ENV === 'production';
+const sendgrid = isProd ? sgMail : dummyMailer;
 export interface IMailOptions {
   from: string;
   to: string;
@@ -29,7 +30,7 @@ export class MailService {
   send(options: IMailOptions): Promise<[ClientResponse, {}]> {
     const { to, from, subject, html } = options;
     const data = {
-      to,
+      to: isProd ? to : '',
       subject,
       html,
       from: `WirVonHier <${from || 'hallo'}@wirvonhier.net>`,
@@ -48,7 +49,7 @@ export class MailService {
   sendForgotPasswordMail(user: IUser): void {
     const resetPasswordToken = tokenService.createResetPasswordToken(user);
     const data = {
-      to: user.email,
+      to: isProd ? user.email : '',
       from: `WirVonHier <service@wirvonhier.net>`,
       subject: 'Passwort zurücksetzen',
       html: `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/reset-password?token=${resetPasswordToken}`, // needs to contain JWT for authentication.
@@ -60,7 +61,7 @@ export class MailService {
     const user = await User.findById(userId);
     if (!user) return;
     const data = {
-      to: user.email,
+      to: isProd ? user.email : '',
       from: `WirVonHier <service@wirvonhier.net>`,
       subject: 'Passwort erfolgreich geändert',
       html: `Your Password has been successfully changed.`,

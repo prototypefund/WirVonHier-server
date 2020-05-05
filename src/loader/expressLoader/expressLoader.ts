@@ -10,6 +10,7 @@ import {
   registerUserModule,
   registerBusinessesModule,
   registerDataProtStatementModule,
+  registerImagesModule,
 } from '../../api';
 import { config } from 'config';
 
@@ -53,5 +54,6 @@ export function expressLoader(app: Application): void {
   registerHealthModule(app);
   registerUserModule(app);
   registerBusinessesModule(app);
+  registerImagesModule(app);
   registerDataProtStatementModule(app);
 }
