@@ -6,3 +6,4 @@ export * from './health';
 export * from './geolocation';
 export * from './mail';
 export * from './dataImport';
+export * from './image';
