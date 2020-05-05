@@ -19,7 +19,7 @@ export const UserSchema = new Schema<IUser>(
         return new Date(Date.now()).toLocaleString();
       },
     },
-    verificationToken: {
+    resetPasswordToken: {
       type: String,
     },
     verification: {

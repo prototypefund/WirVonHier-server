@@ -5,7 +5,6 @@ import { tokenService as ts } from 'modules/services';
 import { hashingService as hs } from 'modules/services';
 import { IAuthResponse, ILocalRegisterBody, IAuthErrorResponse } from '../../authService.types';
 import { DataProtStatement } from 'persistance/models';
-import { mailService } from 'modules/services';
 import { authService } from 'modules/services/authentication';
 
 export async function register(this: typeof authService, req: Request): Promise<IAuthResponse | IAuthErrorResponse> {
@@ -65,7 +64,10 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
   return { token, refreshToken, publicRefreshToken };
 };
 
-export async function requestNewPassword(req: Request): Promise<{ status: number; message?: string }> {
+export async function requestNewPassword(
+  this: typeof authService,
+  req: Request,
+): Promise<{ status: number; message?: string }> {
   const schema = Joi.object().keys({
     email: Joi.string().required(),
   });
@@ -81,7 +83,7 @@ export async function requestNewPassword(req: Request): Promise<{ status: number
       message: `Failed to reset password for: ${email}.`,
     };
   }
-  mailService.sendForgotPasswordMail(user);
+  this.sendResetPasswordMail(user);
   return {
     status: 204,
   };
@@ -112,6 +114,8 @@ export async function resetPassword(req: Request): Promise<{ status: number; mes
       message: 'Could not find user. May have been since token has been issued.',
     };
   }
+  if (user.resetPasswordToken !== token) return { status: 403, message: "Tokens don't match." };
+  user.resetPasswordToken = undefined;
   user.password = password;
   try {
     await user.save();

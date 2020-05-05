@@ -1,7 +1,6 @@
 import { IBusiness, User, Business } from 'persistance/models';
 import cryptoRandomString from 'crypto-random-string';
 import Joi from 'joi';
-import { mailService } from '../mail';
 import { transformDataService } from '../transformData';
 import { IDataImportBody, IDataImportResponse } from './dataImportService.types';
 
@@ -110,7 +109,6 @@ export class DataImportService {
     }) as IBusiness[];
     try {
       const createdBusinesses = await Business.create(newBusinesses);
-      mailService.sendInvitationEmail(createdBusinesses);
       const failed = newBusinesses.filter(
         (business) => !createdBusinesses.some((item) => item.email === business.email),
       );

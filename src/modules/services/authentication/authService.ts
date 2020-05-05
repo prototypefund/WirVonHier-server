@@ -1,12 +1,9 @@
 import { NextFunction, Request, Response } from 'express-serve-static-core';
 import { IAuthResponse, IAuthErrorResponse } from './authService.types';
 import * as providers from './providers';
-import {
-  tokenService as ts,
-  mailService,
-  getEmailVerificationSubject,
-  getEmailVerificationBody,
-} from 'modules/services';
+import { tokenService as ts, mailService } from 'modules/services';
+import { getEmailVerificationBody } from './emailTemplates/emailVerification';
+import { getResetPasswordBody } from './emailTemplates/resetPassword';
 import { User, IUser } from 'persistance/models';
 
 export type AuthStrategy = 'local';
@@ -48,10 +45,10 @@ class AuthService {
   }
 
   async requestNewPassword(req: Request): Promise<{ status: number; message?: string }> {
-    return providers.local.requestNewPassword(req);
+    return providers.local.requestNewPassword.call(this, req);
   }
   async resetPassword(req: Request): Promise<{ status: number; message?: string }> {
-    return providers.local.resetPassword(req);
+    return providers.local.resetPassword.call(this, req);
   }
 
   // eslint-disable-next-line @typescript-eslint/require-await
@@ -77,26 +74,58 @@ class AuthService {
     const user = await User.findById(payload.id);
     if (!user) return { error: { status: 404, message: 'Verification failed. User not found.' } };
     if (user.verification.email) return { verified: user.verification.email };
-    if (user.verificationToken !== verficationToken) return { error: { status: 500, message: "Tokens don't match." } };
     user.verification.email = new Date().toUTCString();
-    user.verificationToken = undefined;
     user.save();
     return { verified: user.verification.email };
   }
 
   async sendVerificationEmail(user: IUser): Promise<{ to: string } | IAuthErrorResponse> {
     try {
-      const verificationLink = await this.createVerificationLink(user);
+      const verificationLink = this.createVerificationLink(user);
+      const bodyOptions = {
+        link: verificationLink,
+      };
       await mailService.send({
         to: user.email,
         from: 'info',
-        subject: getEmailVerificationSubject(),
-        html: getEmailVerificationBody(verificationLink),
+        subject: 'HändlerRegistrierung WirVonHier.net',
+        html: getEmailVerificationBody(bodyOptions),
       });
       return { to: user.email };
     } catch (e) {
       return { error: { status: 400, message: e.message } };
     }
+  }
+
+  async sendResetPasswordMail(user: IUser): Promise<{ to: string } | IAuthErrorResponse> {
+    try {
+      const resetPasswordLink = await this.createForgotPasswordLink(user);
+
+      const bodyOptions = {
+        link: resetPasswordLink,
+      };
+      await mailService.send({
+        to: user.email,
+        from: `WirVonHier <service@wirvonhier.net>`,
+        subject: 'Passwort vergessen',
+        html: getResetPasswordBody(bodyOptions),
+      });
+      return { to: user.email };
+    } catch (e) {
+      return { error: { status: 400, message: e.message } };
+    }
+  }
+
+  async sendPasswordChangedEmail(userId: string): Promise<void> {
+    const user = await User.findById(userId);
+    if (!user) return;
+    const data = {
+      to: user.email,
+      from: `WirVonHier <service@wirvonhier.net>`,
+      subject: 'Passwort erfolgreich geändert',
+      html: `Your Password has been successfully changed.`,
+    };
+    await mailService.send(data);
   }
 
   async authenticateMe(req: Request): Promise<string | void> {
@@ -111,11 +140,15 @@ class AuthService {
     return user.id;
   }
 
-  private async createVerificationLink(user: IUser): Promise<string> {
+  private createVerificationLink(user: IUser): string {
     const token = ts.createVerificationToken(user);
-    user.verificationToken = token;
-    await user.save();
     return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/verify-email?token=${token}`;
+  }
+  private async createForgotPasswordLink(user: IUser): Promise<string> {
+    const token = ts.createResetPasswordToken(user);
+    user.resetPasswordToken = token;
+    await user.save();
+    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/reset-password?token=${token}`;
   }
 }
 

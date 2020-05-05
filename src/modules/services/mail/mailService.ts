@@ -1,8 +1,6 @@
 import sgMail from '@sendgrid/mail';
 import { ClientResponse } from '@sendgrid/client/src/response';
 import { config } from 'config';
-import { IBusiness, IUser, User } from 'persistance/models';
-import { tokenService } from '..';
 
 const dummyMailer = {
   setApiKey(key: string): string {
@@ -37,36 +35,6 @@ export class MailService {
     };
     return sendgrid.send(data);
     // TODO: Add Logging (also logged in sendgrid dashboard)
-  }
-
-  sendInvitationEmail(businesses: IBusiness[]): void {
-    for (const business of businesses) {
-      // eslint-disable-next-line no-console
-      console.log('sending email to: ', business.email);
-    }
-  }
-
-  sendForgotPasswordMail(user: IUser): void {
-    const resetPasswordToken = tokenService.createResetPasswordToken(user);
-    const data = {
-      to: isProd ? user.email : '',
-      from: `WirVonHier <service@wirvonhier.net>`,
-      subject: 'Passwort zurücksetzen',
-      html: `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/reset-password?token=${resetPasswordToken}`, // needs to contain JWT for authentication.
-    };
-    sendgrid.send(data);
-  }
-
-  async sendPasswordChangedEmail(userId: string): Promise<void> {
-    const user = await User.findById(userId);
-    if (!user) return;
-    const data = {
-      to: isProd ? user.email : '',
-      from: `WirVonHier <service@wirvonhier.net>`,
-      subject: 'Passwort erfolgreich geändert',
-      html: `Your Password has been successfully changed.`,
-    };
-    sendgrid.send(data);
   }
 }
 
