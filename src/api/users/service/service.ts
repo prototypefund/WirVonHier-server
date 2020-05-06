@@ -1,6 +1,6 @@
 import { IUserFilter } from './service.types';
 import { User, IUser } from 'persistance/models';
-import { mailService } from 'modules';
+import { authService } from 'modules';
 
 class UserService {
   createUsers(users: IUser[]): Promise<IUser[]> {
@@ -34,7 +34,7 @@ class UserService {
     };
     try {
       await this.updateOneUser(userId, updates);
-      mailService.sendPasswordChangedEmail(userId);
+      authService.sendPasswordChangedEmail(userId);
       return { status: 204 };
     } catch (e) {
       return { status: 400, message: e.message };
