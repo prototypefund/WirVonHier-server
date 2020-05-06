@@ -11,7 +11,7 @@ import {
   IBusinessMediaPopulated,
 } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
-import { mailService, imageService } from 'modules/services';
+import { /*mailService,*/ imageService } from 'modules/services';
 import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 import mongoose from 'mongoose';
 import { ImageType } from 'modules/services/image/imageService.types';
@@ -44,12 +44,12 @@ class BusinessesService {
       user.businesses.push(...businessIds);
       await user.save();
 
-      mailService.send({
-        from: 'info',
-        to: user.email,
-        subject: this.getEmailSubject('businessesCreated', newBusinesses),
-        html: this.getEmailBody('businessesCreated', newBusinesses, user),
-      });
+      // mailService.send({
+      //   from: 'info',
+      //   to: user.email,
+      //   subject: this.getEmailSubject('businessesCreated', newBusinesses),
+      //   html: this.getEmailBody('businessesCreated', newBusinesses, user),
+      // });
 
       return { status: 200, createdBusinesses: newBusinesses, message: 'All businesses created.' };
     } catch (e) {
@@ -128,14 +128,14 @@ class BusinessesService {
   }
 
   // TODO: create correct email
-  private getEmailSubject(type: string, businesses: IBusiness[]): string {
-    return `${type} ${businesses}`;
-  }
+  // private getEmailSubject(type: string, businesses: IBusiness[]): string {
+  //   return `${type} ${businesses}`;
+  // }
 
-  // TODO: create correct email
-  private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
-    return `${businesses} ${type} ${user}`;
-  }
+  // // TODO: create correct email
+  // private getEmailBody(type: string, businesses: IBusiness[], user: IUser): string {
+  //   return `${businesses} ${type} ${user}`;
+  // }
 
   private async processUpdateData(updateData: unknown, business: IBusiness): Promise<Partial<IBusiness>> {
     if (typeof updateData !== 'object' || !updateData) return {};
