@@ -7,6 +7,8 @@ import {
   IBusinessMedia,
   Image,
   IImage,
+  IVideo,
+  IBusinessMediaPopulated,
 } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
 import { mailService, imageService } from 'modules/services';
@@ -31,8 +33,6 @@ class BusinessesService {
         const validatedBusiness = new Business({
           ...(business && typeof business === 'object' ? business : {}),
           owner: user._id,
-          email: user.email,
-          name: `${user.email} - ${Date.now()}`,
           active: false,
         });
 
@@ -173,129 +173,212 @@ class BusinessesService {
     return null;
   }
 
+  /*
+   * Adds AND Deletes documents / fields
+   * All keys that contain values in the client-side document are created IF they DON'T exist in the DB
+   * All keys that are empty | null in the client-side document are deleted IF they DO exist in the DB
+   * All keys that are EQUAL in the client-side document and DB are ignored
+   *
+   * TODO: Update Image Upload logic to work directly with Image Collection
+   */
   private async processMedia(newMedia: unknown, business: IBusiness): Promise<IBusinessMedia> {
-    const oldMedia = business.media;
-    const { logo, cover, profile, stories } = newMedia as IBusinessMedia;
-    const processedMedia = {} as IBusinessMedia;
-    if (logo !== undefined) {
-      if (logo === null) {
-        processedMedia.logo = undefined;
-        this.deleteImage(oldMedia.logo);
-      } else if (mongoose.Types.ObjectId.isValid(logo)) {
-        // we dont allow changing objectIDs yet. New Logo has to be a newly uploaded logo.
-        processedMedia.logo = oldMedia.logo;
-      } else if (typeof logo === 'object') {
-        const newImage = await this.createImage(logo, business._id, 'logo');
-        processedMedia.logo = newImage._id;
-      }
-    } else {
-      processedMedia.logo = oldMedia.logo;
-    }
+    const { logo: oldLogo, cover: oldCover, profile: oldProfile, stories: oldStories } = business.media;
+    const {
+      logo: newLogo,
+      cover: newCover,
+      profile: newProfile,
+      stories: newStories,
+    } = newMedia as IBusinessMediaPopulated;
+    const resultMedia = {} as IBusinessMedia;
 
-    if (cover) {
-      processedMedia.cover = {
-        image: undefined,
-        video: undefined,
-      };
-      if (typeof cover !== 'object') {
-        processedMedia.cover = oldMedia.cover;
-      }
-      if (!('video' in cover)) {
-        // Video not handled yet
-        processedMedia.cover.video = oldMedia.cover && oldMedia.cover.video;
-      }
-      if ('image' in cover) {
-        if (cover.image === null) {
-          processedMedia.cover.image = undefined;
-          this.deleteImage(oldMedia.cover.image);
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { _id, ...imgData } = cover.image;
-        const newImage = await this.createImage(imgData, business._id, 'cover');
-        processedMedia.cover.image = newImage._id;
-      } else {
-        processedMedia.cover.image = oldMedia.cover && oldMedia.cover.image;
-      }
-    } else {
-      processedMedia.cover = oldMedia.cover;
-    }
-
-    if (profile) {
-      processedMedia.profile = {
-        image: undefined,
-        video: undefined,
-      };
-      if (typeof profile !== 'object') {
-        processedMedia.profile = oldMedia.profile;
-      }
-      if (!('video' in profile)) {
-        // Video not handled yet
-        processedMedia.profile.video = oldMedia.profile && oldMedia.profile.video;
-      }
-      if ('image' in profile) {
-        if (profile.image === null) {
-          processedMedia.profile.image = undefined;
-          this.deleteImage(oldMedia.profile.image);
-        } else {
-          const newImage = await this.createImage(profile.image, business._id, 'profile');
-          processedMedia.profile.image = newImage._id;
-        }
-      } else {
-        processedMedia.profile.image = oldMedia.profile && oldMedia.profile.image;
-      }
-    } else {
-      processedMedia.profile = oldMedia.profile;
-    }
-
-    if (stories) {
-      processedMedia.stories = {
-        images: [],
-        videos: [],
-      };
-      if (typeof stories !== 'object') {
-        processedMedia.stories = oldMedia.stories;
-      }
-      if (!('videos' in stories)) {
-        // Video not handled yet
-        processedMedia.stories.videos = oldMedia.stories && oldMedia.stories.videos;
-      }
-      if ('images' in stories && stories.images instanceof Array) {
-        const newIds: (string | mongoose.Types.ObjectId)[] = [];
-        const newImages = stories.images.filter((image) => {
-          if (!image) return false;
-          const isExistingObjectId =
-            typeof image === 'string' && oldMedia.stories.images.some((oldImage) => oldImage._id.equals(image));
-          if (isExistingObjectId) return true;
-          if (typeof image === 'object') return true;
-          return false;
-        });
-
-        for (const image of newImages) {
-          if (typeof image === 'string') newIds.push(image);
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { _id, ...imgData } = image;
-          const newImage = await this.createImage(imgData, business._id, 'story');
-          newIds.push(newImage._id);
-        }
-        processedMedia.stories.images = newIds;
-      } else {
-        processedMedia.stories.images = oldMedia.stories && oldMedia.stories.images;
-      }
-    } else {
-      processedMedia.stories = oldMedia.stories;
-    }
-    return processedMedia;
+    resultMedia.logo = await this.updateLogo(oldLogo, newLogo, business._id);
+    resultMedia.cover = await this.updateCover(oldCover, newCover, business._id);
+    resultMedia.profile = await this.updateProfile(oldProfile, newProfile, business._id);
+    resultMedia.stories = await this.updateStories(oldStories, newStories, business._id);
+    return resultMedia;
   }
 
-  private async createImage(image: unknown, businessId: mongoose.Types.ObjectId, type: ImageType): Promise<IImage> {
-    const newImage = await Image.create(image);
-    imageService.cleanupImage(newImage.id, businessId, type);
-    return newImage;
+  private async updateLogo(
+    oldLogo: mongoose.Types.ObjectId | undefined,
+    newLogo: IImage | null | undefined,
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<mongoose.Types.ObjectId | null> {
+    if (newLogo === null || typeof newLogo === undefined) {
+      if (oldLogo) this.deleteImage(oldLogo);
+      return null;
+    }
+    if (typeof newLogo !== 'object') {
+      // Invalid input; keep old logo
+      return oldLogo || null;
+    }
+    const newImage = await this.putImage(newLogo, businessId, 'logo');
+    if (newImage) return newImage._id;
+    return oldLogo || null;
   }
 
-  private async deleteImage(imageId: string): Promise<IImage | null> {
-    if (!imageId || !mongoose.Types.ObjectId.isValid(imageId)) return null;
-    return Image.findByIdAndDelete(imageId).exec();
+  private async updateCover(
+    oldCover: {
+      image?: mongoose.Types.ObjectId | null | undefined;
+      video?: mongoose.Types.ObjectId | null | undefined;
+    } = {},
+    newCover: { image?: IImage | undefined; video?: IVideo | undefined } = {},
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<{ image: mongoose.Types.ObjectId | null; video: mongoose.Types.ObjectId | null }> {
+    return {
+      image: await this.updateCoverImage(oldCover.image, newCover.image, businessId),
+      video: await this.updateCoverVideo(oldCover.video, newCover.video, businessId),
+    };
+  }
+  private async updateCoverImage(
+    oldCoverImage: mongoose.Types.ObjectId | null | undefined,
+    newCoverImage: IImage | null | undefined,
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<mongoose.Types.ObjectId | null> {
+    if (newCoverImage === null || typeof newCoverImage === undefined) {
+      if (oldCoverImage) this.deleteImage(oldCoverImage);
+      return null;
+    }
+    if (typeof newCoverImage !== 'object') {
+      // Invalid input; keep old logo
+      return oldCoverImage || null;
+    }
+    const newImage = await this.putImage(newCoverImage, businessId, 'cover');
+    if (newImage) return newImage._id;
+    return oldCoverImage || null;
+  }
+  private async updateCoverVideo(
+    _oldCoverImage: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
+    _newCoverImage: IVideo | null | undefined, // eslint-disable-line
+    _businessId: mongoose.Types.ObjectId, // eslint-disable-line
+  ): Promise<mongoose.Types.ObjectId | null> {
+    return new Promise((resolve) => resolve(null));
+  }
+
+  private async updateProfile(
+    oldProfile: {
+      image?: mongoose.Types.ObjectId | null | undefined;
+      video?: mongoose.Types.ObjectId | null | undefined;
+    } = {},
+    newProfile: { image?: IImage | undefined; video?: IVideo | undefined } = {},
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<{ image: mongoose.Types.ObjectId | null; video: mongoose.Types.ObjectId | null }> {
+    return {
+      image: await this.updateProfileImage(oldProfile.image, newProfile.image, businessId),
+      video: await this.updateProfileVideo(oldProfile.video, newProfile.video, businessId),
+    };
+  }
+  private async updateProfileImage(
+    oldProfileImage: mongoose.Types.ObjectId | null | undefined,
+    newProfileImage: IImage | null | undefined,
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<mongoose.Types.ObjectId | null> {
+    if (newProfileImage === null || typeof newProfileImage === undefined) {
+      if (oldProfileImage) this.deleteImage(oldProfileImage);
+      return null;
+    }
+    if (typeof newProfileImage !== 'object') {
+      // Invalid input; keep old logo
+      return oldProfileImage || null;
+    }
+    const newImage = await this.putImage(newProfileImage, businessId, 'cover');
+    if (newImage) return newImage._id;
+    return oldProfileImage || null;
+  }
+  private async updateProfileVideo(
+    _oldProfileVideo: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
+    _newProfileVideo: IVideo | null | undefined, // eslint-disable-line
+    _businessId: mongoose.Types.ObjectId, // eslint-disable-line
+  ): Promise<mongoose.Types.ObjectId | null> {
+    return new Promise((resolve) => resolve(null));
+  }
+
+  private async updateStories(
+    oldStories: { images: mongoose.Types.ObjectId[]; videos: mongoose.Types.ObjectId[] },
+    newStories: {
+      images?: IImage[] | null;
+      videos?: IVideo[] | mongoose.Types.ObjectId[] | string[];
+    } = {},
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<{ images: mongoose.Types.ObjectId[]; videos: mongoose.Types.ObjectId[] }> {
+    return {
+      images: await this.updateStoryImages(oldStories.images, newStories.images, businessId),
+      videos: await this.updateStoryVideos(oldStories.videos, newStories.videos, businessId),
+    };
+  }
+  private async updateStoryImages(
+    oldStoryImages: mongoose.Types.ObjectId[],
+    newStoryImages: IImage[] | null | undefined,
+    businessId: mongoose.Types.ObjectId,
+  ): Promise<mongoose.Types.ObjectId[]> {
+    if (!newStoryImages || !(newStoryImages instanceof Array)) return oldStoryImages;
+
+    const newImages = [];
+    for (const oldImage of oldStoryImages) {
+      const exists = newStoryImages.some((image: unknown) => {
+        if (!image || typeof image !== 'object') return false;
+        if (typeof (image as IImage)._id !== 'string') return false;
+        if ((image as IImage)._id == oldImage) return true;
+        if (oldImage.equals((image as IImage)._id)) return true;
+      });
+      if (exists) {
+        newImages.push(oldImage);
+      } else {
+        await this.deleteImage(oldImage);
+      }
+    }
+
+    for (const newImage of newStoryImages) {
+      if (!newImage) continue;
+      if (typeof newImage !== 'object') continue;
+      const img = await this.putImage(newImage, businessId, 'story');
+      if (img) newImages.push(img._id);
+    }
+    return newImages;
+  }
+  private async updateStoryVideos(
+    _oldStoryVideos: mongoose.Types.ObjectId[], // eslint-disable-line
+    _newStoryVideos: IVideo[] | mongoose.Types.ObjectId[] | string[] | undefined, // eslint-disable-line
+    _businessId: mongoose.Types.ObjectId, // eslint-disable-line
+  ): Promise<mongoose.Types.ObjectId[]> {
+    return new Promise((resolve) => resolve([]));
+  }
+
+  private async putImage(image: unknown, businessId: mongoose.Types.ObjectId, type: ImageType): Promise<IImage | null> {
+    if (!image) return null;
+    if (typeof image !== 'object') return null;
+    if ((image as IImage)._id && typeof (image as IImage)._id === 'string') {
+      const { _id, ...data } = image as IImage;
+      try {
+        await Image.findByIdAndUpdate(_id, data);
+        return null;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to update Image: ${image}. Error: `, e);
+      }
+    } else if (!(image as IImage)._id) {
+      if (!(image as IImage).title) return null;
+      delete (image as IImage)._id;
+      try {
+        const newImage = await Image.create(image);
+        imageService.cleanupImage(newImage.id, businessId, type);
+        return newImage;
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to create Image: ${image}. Error: `, e);
+      }
+    }
+    return null;
+  }
+
+  private async deleteImage(imageId: mongoose.Types.ObjectId): Promise<void> {
+    try {
+      if (!imageId || typeof imageId !== 'object') return;
+      const img = await Image.findById(imageId);
+      if (img) await img.remove();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to delete Image: ${imageId}. Error: `, e);
+    }
   }
 }
 
