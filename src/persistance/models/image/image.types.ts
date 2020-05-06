@@ -12,6 +12,7 @@ export interface IImage extends Document {
   type: ImageType;
   rank: number;
   ratio: number[];
+  publicId: string;
 }
 
 export type IImageModel = Model<IImage>;

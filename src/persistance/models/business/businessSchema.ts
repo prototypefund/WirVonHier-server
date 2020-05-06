@@ -35,8 +35,6 @@ export const BusinessSchema = new Schema<IBusiness>(
     name: {
       type: String,
       unique: true,
-      required: true,
-      lowercase: true,
       trim: true,
     },
     owner: {
@@ -79,7 +77,6 @@ export const BusinessSchema = new Schema<IBusiness>(
     },
     email: {
       type: String,
-      required: true,
     },
     address: {
       street: String,
@@ -110,25 +107,30 @@ export const BusinessSchema = new Schema<IBusiness>(
       logo: {
         type: Schema.Types.ObjectId,
         ref: 'Image',
+        default: null,
       },
       cover: {
         image: {
           type: Schema.Types.ObjectId,
           ref: 'Image',
+          default: null,
         },
         video: {
           type: Schema.Types.ObjectId,
           ref: 'Video',
+          default: null,
         },
       },
       profile: {
         image: {
           type: Schema.Types.ObjectId,
           ref: 'Image',
+          default: null,
         },
         video: {
           type: Schema.Types.ObjectId,
           ref: 'Video',
+          default: null,
         },
       },
       stories: {
@@ -172,6 +174,9 @@ BusinessSchema.method('setDistance', function (this: IBusiness, distance: number
 BusinessSchema.pre<IBusiness>('save', function () {
   if (this.isModified('name')) {
     this.id = normalizeName(this.name);
+  }
+  if (!this.id) {
+    this.id = this._id;
   }
   if (this.isModified('address')) {
     geoService.queueForGeolocation([this]);

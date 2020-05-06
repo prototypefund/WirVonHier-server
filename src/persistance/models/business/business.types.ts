@@ -5,12 +5,12 @@ import { IImage } from '../image';
 export interface IBusinessMedia {
   logo: IImage['_id'];
   cover: {
-    image: IImage['_id'];
-    video: IVideo['_id'];
+    image: IImage['_id'] | undefined;
+    video: IVideo['_id'] | undefined;
   };
   profile: {
-    image: IImage['_id'];
-    video: IVideo['_id'];
+    image: IImage['_id'] | undefined;
+    video: IVideo['_id'] | undefined;
   };
   stories: {
     images: IImage['_id'][];
@@ -21,12 +21,12 @@ export interface IBusinessMedia {
 export interface IBusinessMediaPopulated {
   logo: IImage;
   cover: {
-    image: IImage;
-    video: IVideo;
+    image: IImage | undefined;
+    video: IVideo | undefined;
   };
   profile: {
-    image: IImage;
-    video: IVideo;
+    image: IImage | undefined;
+    video: IVideo | undefined;
   };
   stories: {
     images: IImage[];
