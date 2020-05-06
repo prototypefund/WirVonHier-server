@@ -1,5 +1,6 @@
 import { Schema } from 'mongoose';
 import { IImage } from '.';
+import { imageService } from 'modules/services';
 
 export const ImageSchema = new Schema<IImage>({
   createdAt: {
@@ -23,11 +24,21 @@ export const ImageSchema = new Schema<IImage>({
   src: {
     type: String,
   },
-  publicId: String,
+  publicId: {
+    type: String,
+    required: true,
+    unique: true,
+  },
   rank: Number,
   ratio: {
     type: String,
   },
 });
 
-// before delete hook: Delete image in cloudinary per publicId!
+ImageSchema.pre<IImage>('remove', function (next) {
+  imageService.deleteImage(this.publicId).then(
+    () => next(),
+    // eslint-disable-next-line
+    (error?: any) => console.error('Error on deleteImage: ', error),
+  );
+});

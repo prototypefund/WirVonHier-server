@@ -9,6 +9,7 @@ export async function mongooseLoader(): Promise<typeof mongoose> {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
+    useFindAndModify: false,
   };
   try {
     const db = await mongoose.connect(mongoURI, options);
