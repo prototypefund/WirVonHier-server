@@ -106,6 +106,7 @@ class BusinessesService {
       { path: 'media.logo', model: 'Image' },
       { path: 'media.cover.image', model: 'Image' },
       { path: 'media.stories.images', model: 'Image' },
+      { path: 'media.stories.videos', model: 'Video' },
     ]);
     return { status: 200, business };
   }
@@ -120,6 +121,7 @@ class BusinessesService {
         { path: 'media.logo', model: 'Image' },
         { path: 'media.cover.image', model: 'Image' },
         { path: 'media.stories.images', model: 'Image' },
+        { path: 'media.stories.videos', model: 'Video' },
       ]);
       return result;
     } catch (e) {

@@ -1,6 +1,6 @@
+/* eslint-disable no-console */
 import Agenda from 'agenda';
-import { Business, IVideo } from 'persistance/models';
-//import { ImageType } from 'modules/services/image/imageService.types';
+import { Business, IVideo, Video } from 'persistance/models';
 import mongoose from 'mongoose';
 import { config } from 'config';
 import axios from 'axios';
@@ -12,26 +12,30 @@ interface IVideoTranscodingOptions {
 
 const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<void> => {
   const { businessId, videoId } = job.attrs.data;
+
   const business = await Business.findById(businessId);
   if (!business) {
-    return;
-  }
-  const index = business.media.stories.videos.findIndex((video: IVideo) => {
-    return video.src === videoId;
-  });
-  if (index === -1) {
-    return;
+    return job.remove();
   }
 
-  const video = business.media.stories.videos[index];
+  const videos = await Video.find({ _id: { $in: business.media.stories.videos } });
+  const index = videos.findIndex((video: IVideo) => {
+    return video.videoId === videoId;
+  });
+  if (index === -1) {
+    return job.remove();
+  }
+  const video = videos[index];
+
   if (video.status === 'complete') {
-    return;
+    return job.remove();
   }
 
   try {
+    const url = `https://api.vimeo.com${videoId}?fields=files,uri,width,height,status,transcode.status,upload.status`;
     const response = await axios({
       method: 'GET',
-      url: `https://api.vimeo.com${videoId}?fields=files,uri,width,height,status,transcode.status,upload.status`,
+      url: url,
       headers: {
         Authorization: `Bearer ${config.vimeo.accessToken}`,
         'Content-Type': 'application/json',
@@ -40,10 +44,12 @@ const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<vo
     });
     if (response.data.transcode.status === 'complete' && response.data.status === 'available') {
       video.status = 'complete';
-      await business.save();
+      await video.save();
+      job.remove();
     }
     // eslint-disable-next-line no-empty
-  } finally {
+  } catch (error) {
+    console.log('Encountered errror during job', error);
   }
 };
 
