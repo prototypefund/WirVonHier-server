@@ -25,7 +25,7 @@ export class VideosController {
       // TODO: check if the user can write to this particular business. Is there a token set?
 
       if (videoSize <= 0) {
-        return res.status(400).end();
+        throw 'Invalid file size';
       }
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const announceResponse: any = await axios({
@@ -72,6 +72,8 @@ export class VideosController {
       };
       return res.status(200).json(answer).end();
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
       return res.status(400).end();
     }
   }
