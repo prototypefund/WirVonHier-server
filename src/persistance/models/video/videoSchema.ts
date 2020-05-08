@@ -20,10 +20,9 @@ export const VideoSchema = new Schema<IVideo>({
   },
   description: String,
   caption: String,
-  src: {
-    type: String,
-    required: true,
-  },
+  src: String,
+  videoId: String,
+  status: String,
   rank: Number,
   ratio: {
     type: String,

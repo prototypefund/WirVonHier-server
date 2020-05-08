@@ -2,6 +2,7 @@ import Agenda from 'agenda';
 import mongoose from 'mongoose';
 import { geolocateBusinesses } from './geoserviceAgenda';
 import { imageCleanupJob } from './imageCleanup';
+import { videoTranscodingCheckJob } from './videoTranscodingCheck';
 
 export const jobs: { agenda: Agenda } = { agenda: (null as unknown) as Agenda };
 
@@ -23,5 +24,6 @@ export class Jobs {
     await this.agenda.start();
     geolocateBusinesses(this.agenda);
     imageCleanupJob(this.agenda);
+    videoTranscodingCheckJob(this.agenda);
   }
 }

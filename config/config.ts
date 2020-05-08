@@ -16,6 +16,7 @@ const envVarsSchema = joi
     CLOUDINARY_CLOUD_NAME: joi.string().required(),
     CLOUDINARY_API_SECRET: joi.string().required(),
     CLOUDINARY_API_KEY: joi.string().required(),
+    VIMEO_ACCESS_TOKEN: joi.string().required(),
   })
   .unknown()
   .required();
@@ -47,5 +48,8 @@ export const config = {
     cloudName: envVars.CLOUDINARY_CLOUD_NAME,
     apiKey: envVars.CLOUDINARY_API_KEY,
     apiSecret: envVars.CLOUDINARY_API_SECRET,
+  },
+  vimeo: {
+    accessToken: envVars.VIMEO_ACCESS_TOKEN,
   },
 };
