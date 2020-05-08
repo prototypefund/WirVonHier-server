@@ -49,7 +49,7 @@ export class VideosController {
         },
       });
       const videoId = announceResponse.data.uri;
-      const updateLink = announceResponse.data.upload.upload_link;
+      const uploadLink = announceResponse.data.upload.upload_link;
 
       const newVideo = await Video.create({
         videoId: videoId,
@@ -68,7 +68,7 @@ export class VideosController {
       const answer = {
         _id: newVideo._id,
         videoId: videoId,
-        updateLink: updateLink,
+        uploadLink: uploadLink,
       };
       return res.status(200).json(answer).end();
     } catch (error) {
