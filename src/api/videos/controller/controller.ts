@@ -89,6 +89,7 @@ export class VideosController {
 
       // TODO: check if the user can write to this particular business. Is there a token set?
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const videoIndex = business.media.stories.videos.findIndex((video: any) => {
         return video._id == videoId;
       });
