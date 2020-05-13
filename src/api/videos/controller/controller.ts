@@ -105,7 +105,7 @@ export class VideosController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const deleteResponse: any = await axios({
         method: 'DELETE',
-        url: `https://api.vimeo.com/me/videos/${vimeoVideoId}`,
+        url: `https://api.vimeo.com${vimeoVideoId}`,
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,
           'Content-Type': 'application/json',
