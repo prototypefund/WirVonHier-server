@@ -1,12 +1,11 @@
 import { Request, Response } from 'express-serve-static-core';
-import { videoService as vs } from 'modules/services';
 import { Business, Video } from 'persistance/models';
+import { videoService as vs } from 'modules/services';
 import axios from 'axios';
 import { config } from 'config';
 
 export class VideosController {
-  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  async uploadVideo(req: Request, res: Response) {
+  async uploadVideo(req: Request, res: Response): Promise<void> {
     try {
       if (!req.body.size) {
         throw 'Invalid parameters';
@@ -16,7 +15,7 @@ export class VideosController {
       const videoDescription = req.body.description as string;
       const videoSize = req.body.size as number;
 
-      const businessId = req.params.id;
+      const businessId = req.params.businessId;
       const business = await Business.findById(businessId);
       if (business === null) {
         throw 'Invalid business';
@@ -30,7 +29,7 @@ export class VideosController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const announceResponse: any = await axios({
         method: 'POST',
-        url: 'https://api.vimeo.com/me/videos',
+        url: 'https://api.vimeo.com/me/videos/',
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,
           'Content-Type': 'application/json',
@@ -71,6 +70,58 @@ export class VideosController {
         uploadLink: uploadLink,
       };
       return res.status(200).json(answer).end();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log(error);
+      return res.status(400).end();
+    }
+  }
+
+  async deleteVideo(req: Request, res: Response): Promise<void> {
+    try {
+      const businessId = req.params.businessId;
+      const videoId = req.params.videoId;
+
+      const business = await Business.findById(businessId);
+      if (business === null) {
+        throw 'Invalid business';
+      }
+
+      // TODO: check if the user can write to this particular business. Is there a token set?
+
+      const videoIndex = business.media.stories.videos.findIndex((video: any) => {
+        return video._id == videoId;
+      });
+      if (videoIndex === -1) {
+        return res.status(404).end();
+      }
+      const video = await Video.findById(videoId);
+      if (video === null) {
+        return res.status(404).end();
+      }
+
+      const vimeoVideoId = video.videoId;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const deleteResponse: any = await axios({
+        method: 'DELETE',
+        url: `https://api.vimeo.com/me/videos/${vimeoVideoId}`,
+        headers: {
+          Authorization: `Bearer ${config.vimeo.accessToken}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.vimeo.*+json;version=3.4',
+        },
+      });
+      // eslint-disable-next-line no-console
+      console.log(deleteResponse);
+
+      business.media.stories.videos.splice(videoIndex, 1);
+      business.save();
+
+      const success = await Video.findByIdAndDelete(videoId);
+      if (success === null) {
+        return res.status(404).end();
+      }
+      return res.status(200).end();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);
