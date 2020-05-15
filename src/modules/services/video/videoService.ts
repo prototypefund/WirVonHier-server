@@ -18,54 +18,62 @@ class VideoService {
     if (!user) {
       return { status: 403, error: { code: 'A0', message: 'Not authenticated.' } };
     }
-    if (!user.hasOneRole(['businessOwner', 'admin'])) {
+    if (!user.hasOneRole(['businessowner', 'admin'])) {
       return { status: 403, error: { code: 'A1', message: 'Not authorized.' } };
     }
     const business = await Business.findById(businessId);
     if (business === null) {
       return { status: 404, error: { code: 'A1', message: 'Business not found.' } };
     }
-    if (user.hasOneRole(['businessOwner']) && !business.owner.equals(user._id)) {
+    if (user.hasOneRole(['businessowner']) && !business.owner.equals(user._id)) {
       return { status: 404, error: { code: 'A1', message: 'Not authorized.' } };
     }
 
-    // TODO: Outgoing API-Interface should be separate Service
-    const announceResponse = await axios.post<IVimeoCreateVideoResponse>('https://api.vimeo.com/me/videos/', {
-      headers: {
-        Authorization: `Bearer ${config.vimeo.accessToken}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.vimeo.*+json;version=3.4',
-      },
-      data: {
-        upload: {
-          approach: 'tus',
-          size,
+    try {
+      // TODO: Outgoing API-Interface should be separate Service
+      const announceResponse = await axios.post<IVimeoCreateVideoResponse>(
+        'https://api.vimeo.com/me/videos/',
+        {
+          upload: {
+            approach: 'tus',
+            size,
+          },
+          name: title,
+          description: description,
         },
-        name: title,
+        {
+          headers: {
+            Authorization: `Bearer ${config.vimeo.accessToken}`,
+            'Content-Type': 'application/json',
+            Accept: 'application/vnd.vimeo.*+json;version=3.4',
+          },
+        },
+      );
+
+      const vimeoId = announceResponse.data.uri;
+      const uploadLink = announceResponse.data.upload.upload_link;
+
+      const newVideo = await Video.create({
+        vimeoId,
+        title: title,
         description: description,
-        privacy: {
-          view: 'unlisted',
-        },
-      },
-    });
-    const vimeoId = announceResponse.data.uri;
-    const uploadLink = announceResponse.data.upload.upload_link;
+        status: 'transcoding',
+        type: 'story',
+        owner: business._id,
+      });
+      business.media.stories.videos.push(newVideo._id);
+      await business.save();
 
-    const newVideo = await Video.create({
-      vimeoId,
-      title: title,
-      description: description,
-      status: 'transcoding',
-      type: 'story',
-      owner: business._id,
-    });
-    business.media.stories.videos.push(newVideo._id);
-    await business.save();
-
-    // Start video service to check for video transcoding status.
-    // The video will be ready when vimeo reports it as being transcoded
-    this.checkVideoTranscodingStatus(vimeoId, businessId);
-    return { status: 200, data: uploadLink };
+      // Start video service to check for video transcoding status.
+      // The video will be ready when vimeo reports it as being transcoded
+      this.checkVideoTranscodingStatus(vimeoId, businessId);
+      return { status: 200, data: uploadLink };
+    } catch (e) {
+      if (e.response) {
+        return { status: 500, error: { ...e.response.data, code: 'A5' } };
+      }
+      return { status: 500, error: { ...e, code: 'A5' } };
+    }
   }
 
   public async deleteVideo(options: IDeleteVideoOptions): Promise<IServiceResponse<void>> {
@@ -74,14 +82,14 @@ class VideoService {
     if (!user) {
       return { status: 403, error: { code: 'A0', message: 'Not authenticated.' } };
     }
-    if (!user.hasOneRole(['businessOwner', 'admin'])) {
+    if (!user.hasOneRole(['businessowner', 'admin'])) {
       return { status: 403, error: { code: 'A1', message: 'Not authorized.' } };
     }
     const business = await Business.findById(businessId);
     if (business === null) {
       return { status: 404, error: { code: 'A1', message: 'Business not found.' } };
     }
-    if (user.hasOneRole(['businessOwner']) && !business.owner.equals(user._id)) {
+    if (user.hasOneRole(['businessowner']) && !business.owner.equals(user._id)) {
       return { status: 404, error: { code: 'A1', message: 'Not authorized.' } };
     }
 
