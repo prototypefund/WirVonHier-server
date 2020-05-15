@@ -12,13 +12,13 @@ export class VideosController {
     const schema = Joi.object({
       size: Joi.number().greater(0).required(),
       title: Joi.string().required(),
-      descriptiion: Joi.string(),
+      description: Joi.string().allow(''),
     });
     const { error, value } = schema.validate<ICreateVideoBody>(req.body);
     if (error) {
       return res.status(406).end(error.message);
     }
-    const businessId = req.params;
+    const { businessId } = req.params;
     if (!businessId || typeof businessId !== 'string') {
       return res.status(406).end('No valid business-id specified.');
     }

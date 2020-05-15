@@ -2,6 +2,7 @@ import { Document, Types, Model } from 'mongoose';
 import { IBusiness } from '../business';
 import { IRole } from '../role';
 import { IDataProtStatement } from '../dataProtStatement';
+import { RoleName } from '../role/role.types';
 
 interface IUserSchema extends Document {
   _id: Types.ObjectId;
@@ -27,8 +28,8 @@ interface IUserSchema extends Document {
 // DO NOT export
 interface IUserBase extends IUserSchema {
   fullName: string;
-  hasAllRoles(roles: string[]): boolean;
-  hasOneRole(roles: string[]): boolean;
+  hasAllRoles(roles: RoleName[]): boolean;
+  hasOneRole(roles: RoleName[]): boolean;
 }
 
 // Export this for strong typing

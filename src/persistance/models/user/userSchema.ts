@@ -2,6 +2,7 @@ import { Schema } from 'mongoose';
 import { IUser } from '.';
 import { IUserPopulated, IUserModel } from './user.types';
 import { hashingService as hs } from 'modules/services';
+import { RoleName } from '../role/role.types';
 
 export const UserSchema = new Schema<IUser>(
   {
@@ -81,13 +82,13 @@ UserSchema.virtual('isVerified').get(function (this: IUser) {
     .some((key) => this.verification[key]);
 });
 
-UserSchema.method('hasOneRole', function (this: IUser, roles: string[]) {
+UserSchema.method('hasOneRole', function (this: IUser, roles: RoleName[]) {
   for (const role of roles) {
     if (this.roles.includes(role)) return true;
   }
   return false;
 });
-UserSchema.method('hasAllRoles', function (this: IUser, roles: string[]) {
+UserSchema.method('hasAllRoles', function (this: IUser, roles: RoleName[]) {
   for (const role of roles) {
     if (!this.roles.includes(role)) return false;
   }
