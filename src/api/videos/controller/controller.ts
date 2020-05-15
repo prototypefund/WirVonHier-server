@@ -5,7 +5,7 @@ import { ICreateVideoBody, IDeleteVideoParams } from './controller.types';
 
 export class VideosController {
   async uploadVideo(req: Request, res: Response): Promise<void> {
-    const userId = req.token?.id;
+    const userId = req.token && req.token.id;
     if (!userId) {
       return res.status(401).end('Not authenticated.');
     }
@@ -30,7 +30,7 @@ export class VideosController {
   }
 
   async deleteVideo(req: Request, res: Response): Promise<void> {
-    const userId = req.token?.id;
+    const userId = req.token && req.token.id;
     if (!userId) {
       return res.status(401).end('Not authenticated.');
     }

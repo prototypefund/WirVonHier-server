@@ -48,11 +48,11 @@ class VideoService {
         },
       },
     });
-    const videoId = announceResponse.data.uri;
+    const vimeoId = announceResponse.data.uri;
     const uploadLink = announceResponse.data.upload.upload_link;
 
     const newVideo = await Video.create({
-      vimeoId: videoId,
+      vimeoId,
       title: title,
       description: description,
       status: 'transcoding',
@@ -64,7 +64,7 @@ class VideoService {
 
     // Start video service to check for video transcoding status.
     // The video will be ready when vimeo reports it as being transcoded
-    this.checkVideoTranscodingStatus(videoId, businessId);
+    this.checkVideoTranscodingStatus(vimeoId, businessId);
     return { status: 200, data: uploadLink };
   }
 
@@ -117,12 +117,12 @@ class VideoService {
     return { status: 204, data: undefined };
   }
 
-  public checkVideoTranscodingStatus(videoId: string, businessId: string): void {
+  public checkVideoTranscodingStatus(vimeoId: string, businessId: string): void {
     if (!jobs) return;
     // TODO: maybe in 15 minutes, every 5 minutes? 15 minutes is about the time vimeo needs
-    jobs.agenda.every('5 minutes', 'video-transcoding-check', { videoId, businessId });
+    jobs.agenda.every('5 minutes', 'video-transcoding-check', { vimeoId, businessId });
     // eslint-disable-next-line no-console
-    console.log(`video-transcoding-check: Start job for businessId=${businessId} videoId=${videoId}`);
+    console.log(`video-transcoding-check: Start job for businessId=${businessId} vimeoId=${vimeoId}`);
   }
 }
 
