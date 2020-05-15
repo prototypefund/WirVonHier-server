@@ -24,7 +24,7 @@ class BusinessesController implements IBusinessesController {
   public async createBusinesses(req: Request, res: Response): Promise<void> {
     if (!req.token) return res.status(401).end();
     const businesses = req.body.businesses;
-    const { status, message, createdBusinesses } = await bs.createBusinesses(req.token.id, businesses);
+    const { status, message, createdBusinesses } = await bs.createBusinesses(req.token.id as string, businesses);
     return res.status(status).json({ message, createdBusinesses }).end();
   }
 
@@ -46,7 +46,7 @@ class BusinessesController implements IBusinessesController {
     const businessId = req.params.id;
     const userId = req.token.id;
     const updates = req.body.business; // TODO: Validate input
-    const { status, message, updatedBusiness } = await bs.updateOneBusiness(businessId, userId, updates);
+    const { status, message, updatedBusiness } = await bs.updateOneBusiness(businessId, userId as string, updates);
     return res.status(status).json({ message, updatedBusiness }).end();
   }
 

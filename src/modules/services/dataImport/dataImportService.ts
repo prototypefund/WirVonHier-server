@@ -3,6 +3,7 @@ import cryptoRandomString from 'crypto-random-string';
 import Joi from 'joi';
 import { transformDataService } from '../transformData';
 import { IDataImportBody, IDataImportResponse } from './dataImportService.types';
+import { Types } from 'mongoose';
 
 export class DataImportService {
   async businessImport(body: IDataImportBody): Promise<IDataImportResponse> {
@@ -118,14 +119,14 @@ export class DataImportService {
     }
   }
 
-  async getOwnerIds(emails: string[]): Promise<string[]> {
+  async getOwnerIds(emails: string[]): Promise<Types.ObjectId[]> {
     const ownerIds = [];
     for (const email of emails) {
       let user = await User.findOne({ email });
       if (!user) {
         user = await User.create({ email, password: cryptoRandomString({ length: 16 }) });
       }
-      ownerIds.push(user.email);
+      ownerIds.push(user._id);
     }
     return ownerIds;
   }

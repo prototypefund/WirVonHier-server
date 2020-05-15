@@ -95,8 +95,8 @@ UserSchema.method('hasAllRoles', function (this: IUser, roles: string[]) {
 });
 
 // Static methods
-UserSchema.statics.findMyBusinesses = async function (this: IUserModel, id: string): Promise<IUserPopulated | null> {
-  return this.findById(id).populate('businesses').exec();
+UserSchema.statics.findMyBusinesses = function (this: IUserModel, id: string): IUserPopulated | null {
+  return (this.findById(id).populate('businesses').exec() as unknown) as IUserPopulated;
 };
 
 // TODO Write Document Middlewares

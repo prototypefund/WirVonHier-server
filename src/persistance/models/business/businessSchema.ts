@@ -176,7 +176,7 @@ BusinessSchema.pre<IBusiness>('save', function () {
     this.id = normalizeName(this.name);
   }
   if (!this.id) {
-    this.id = this._id;
+    this.id = this._id.toHexString();
   }
   if (this.isModified('address')) {
     geoService.queueForGeolocation([this]);

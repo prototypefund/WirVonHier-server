@@ -18,10 +18,11 @@ const jobHandler = async (job: Agenda.Job<IImageCleanupOptions>): Promise<void> 
         imageId.equals(imageId),
       );
       business.media.stories.images.splice(index, 1);
-    } else if (imageType === 'logo' && business.media.logo.equals(imageId)) {
-      business.media.logo = undefined;
-    } else if (business.media[imageType].image.equals(imageId)) {
-      business.media[imageType].image = undefined;
+    } else if (imageType === 'logo') {
+      if (business.media.logo && business.media.logo.equals(imageId)) business.media.logo = null;
+    } else {
+      const image = business.media[imageType].image;
+      if (image && image.equals(imageId)) business.media[imageType].image = undefined;
     }
     await business.save();
   }

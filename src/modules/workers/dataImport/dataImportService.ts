@@ -5,6 +5,7 @@ import Joi from 'joi';
 // import { mailService } from '../../services/mail';
 import { transformDataService } from '../../services/transformData';
 import { IDataImportBody, IDataImportResponse } from './dataImportService.types';
+import { Types } from 'mongoose';
 
 export class DataImportService {
   public async businessImport(body: IDataImportBody): Promise<IDataImportResponse> {
@@ -138,7 +139,7 @@ export class DataImportService {
     }
   }
 
-  async getOwnerIds(emails: string[]): Promise<string[]> {
+  async getOwnerIds(emails: string[]): Promise<Types.ObjectId[]> {
     const ownerIds = [];
     for (const email of emails) {
       let user = await User.findOne({ email });
@@ -153,7 +154,7 @@ export class DataImportService {
     }
     return ownerIds;
   }
-  async getLocations(coordinates: number[][]): Promise<string[]> {
+  async getLocations(coordinates: number[][]): Promise<Types.ObjectId[]> {
     const locations = [];
     for (const pair of coordinates) {
       let location = await Location.findOne({ geo: { type: 'Point', coordinates: [pair[1], pair[0]] } });

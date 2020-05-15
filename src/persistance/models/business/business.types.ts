@@ -3,14 +3,14 @@ import { ILocation, IVideo, IUser } from '..';
 import { IImage } from '../image';
 
 export interface IBusinessMedia {
-  logo: IImage['_id'];
+  logo: IImage['_id'] | null;
   cover: {
-    image: IImage['_id'] | undefined;
-    video: IVideo['_id'] | undefined;
+    image: IImage['_id'] | null | undefined;
+    video: IVideo['_id'] | null | undefined;
   };
   profile: {
-    image: IImage['_id'] | undefined;
-    video: IVideo['_id'] | undefined;
+    video: IVideo['_id'] | null | undefined;
+    image: IImage['_id'] | null | undefined;
   };
   stories: {
     images: IImage['_id'][];

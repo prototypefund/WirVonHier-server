@@ -42,7 +42,7 @@ const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<vo
       },
     });
     await video.remove();
-    return;
+    return job.remove();
   }
 
   try {

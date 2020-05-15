@@ -2,6 +2,7 @@ import https from 'https';
 import { IBusiness, Business, Location, User } from 'persistance/models';
 import { IGeoResponseSearch } from './geolocation.types';
 import cryptoRandomString from 'crypto-random-string';
+import { Types } from 'mongoose';
 
 //GET https://nominatim.openstreetmap.org/search?format=json&email=e.rom@gmx.net&addressdetails=1&q=55+gostenhofer+hauptstrasse+nuernberg
 
@@ -79,7 +80,7 @@ export class GeoService {
   }
 
   // ! ===============================================
-  updateData(response: IGeoResponseSearch[], businessId: string): void {
+  updateData(response: IGeoResponseSearch[], businessId: Types.ObjectId): void {
     const loc = response[0];
     if (loc) {
       Business.findOne({ _id: businessId }).then(async (business) => {
@@ -87,7 +88,7 @@ export class GeoService {
         if (!business.owner) {
           const owner = await User.create({ email: business.email, password: cryptoRandomString({ length: 16 }) });
           if (owner) {
-            business.owner = owner;
+            business.owner = owner._id;
             await business.save();
           }
         }

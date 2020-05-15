@@ -201,7 +201,7 @@ class BusinessesService {
   }
 
   private async updateLogo(
-    oldLogo: mongoose.Types.ObjectId | undefined,
+    oldLogo: mongoose.Types.ObjectId | null | undefined,
     newLogo: IImage | null | undefined,
     businessId: mongoose.Types.ObjectId,
   ): Promise<mongoose.Types.ObjectId | null> {
