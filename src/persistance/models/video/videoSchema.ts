@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import { Schema, Types } from 'mongoose';
 import { IVideo } from '.';
 
 export const VideoSchema = new Schema<IVideo>({
@@ -18,10 +18,16 @@ export const VideoSchema = new Schema<IVideo>({
     type: String,
     required: true,
   },
+
+  // TODO: Should we save the owner here?
+  owner: {
+    type: Types.ObjectId,
+    required: true,
+  },
   description: String,
   caption: String,
   src: String,
-  videoId: String,
+  vimeoId: String,
   status: String,
   rank: Number,
   ratio: {
