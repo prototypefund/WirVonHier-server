@@ -1,4 +1,4 @@
-import { Document, Model } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 import { ILocation, IVideo, IUser } from '..';
 import { IImage } from '../image';
 
@@ -35,6 +35,7 @@ export interface IBusinessMediaPopulated {
 }
 
 interface IBusinessSchema extends Document {
+  _id: Types.ObjectId;
   id: string;
   createdAt: string;
   modifiedAt: string;

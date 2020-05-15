@@ -4,6 +4,7 @@ import { IRole } from '../role';
 import { IDataProtStatement } from '../dataProtStatement';
 
 interface IUserSchema extends Document {
+  _id: Types.ObjectId;
   createdAt: string;
   modifiedAt: string;
   resetPasswordToken?: string;

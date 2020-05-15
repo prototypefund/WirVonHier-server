@@ -1,4 +1,4 @@
-import { Document, Model } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 
 export enum DataProtLanguageId {
   Deutsch = 'de',
@@ -6,6 +6,7 @@ export enum DataProtLanguageId {
 }
 
 export interface IDataProtStatement extends Document {
+  _id: Types.ObjectId;
   createdAt: string;
   modifiedAt: string;
   version: string;

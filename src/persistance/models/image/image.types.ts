@@ -1,8 +1,9 @@
-import { Document, Model } from 'mongoose';
+import { Document, Model, Types } from 'mongoose';
 
 type ImageType = 'story' | 'profile' | 'banner' | 'mixed';
 
 export interface IImage extends Document {
+  _id: Types.ObjectId;
   createdAt: string;
   modifiedAt: string;
   title: string;
