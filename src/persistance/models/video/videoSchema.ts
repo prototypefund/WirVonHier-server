@@ -27,7 +27,7 @@ export const VideoSchema = new Schema<IVideo>({
   description: String,
   caption: String,
   src: String,
-  vimeoId: String,
+  videoId: String,
   status: String,
   rank: Number,
   ratio: {

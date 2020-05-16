@@ -52,11 +52,11 @@ class VideoService {
         },
       );
 
-      const vimeoId = announceResponse.data.uri;
+      const videoId = announceResponse.data.uri;
       const uploadLink = announceResponse.data.upload.upload_link;
 
       const newVideo = await Video.create({
-        vimeoId,
+        videoId,
         title: title,
         description: description,
         status: 'transcoding',
@@ -68,7 +68,7 @@ class VideoService {
 
       // Start video service to check for video transcoding status.
       // The video will be ready when vimeo reports it as being transcoded
-      this.checkVideoTranscodingStatus(vimeoId, businessId);
+      this.checkVideoTranscodingStatus(videoId, businessId);
       return { status: 200, data: uploadLink };
     } catch (e) {
       if (e.response) {
@@ -105,17 +105,22 @@ class VideoService {
       return { status: 500, error: { code: 'E1', message: 'Database miss-match.' } };
     }
 
-    const vimeoVideoId = video.vimeoId;
-    const deleteResponse = await axios.delete<IVimeoDeleteVideoResponse>(`https://api.vimeo.com${vimeoVideoId}`, {
-      headers: {
-        Authorization: `Bearer ${config.vimeo.accessToken}`,
-        'Content-Type': 'application/json',
-        Accept: 'application/vnd.vimeo.*+json;version=3.4',
-      },
-    });
+    const vimeoVideoId = video.videoId;
+    try {
+      const deleteResponse = await axios.delete<IVimeoDeleteVideoResponse>(`https://api.vimeo.com${vimeoVideoId}`, {
+        headers: {
+          Authorization: `Bearer ${config.vimeo.accessToken}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.vimeo.*+json;version=3.4',
+        },
+      });
 
-    // eslint-disable-next-line no-console
-    console.log('DELETE RESPONSE: ', deleteResponse);
+      // eslint-disable-next-line no-console
+      console.log('Delete Vimeo Response: ', deleteResponse);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.log('Delete Vimeo video failed but we dont care for now');
+    }
 
     business.media.stories.videos.splice(videoIndex, 1);
     const promise1 = business.save();
@@ -147,12 +152,12 @@ class VideoService {
     }
   }
 
-  public checkVideoTranscodingStatus(vimeoId: string, businessId: string): void {
+  public checkVideoTranscodingStatus(videoId: string, businessId: string): void {
     if (!jobs) return;
     // TODO: maybe in 15 minutes, every 5 minutes? 15 minutes is about the time vimeo needs
-    jobs.agenda.every('5 minutes', 'video-transcoding-check', { vimeoId, businessId });
+    jobs.agenda.every('5 minutes', 'video-transcoding-check', { videoId, businessId });
     // eslint-disable-next-line no-console
-    console.log(`video-transcoding-check: Start job for businessId=${businessId} vimeoId=${vimeoId}`);
+    console.log(`video-transcoding-check: Start job for businessId=${businessId} videoId=${videoId}`);
   }
 }
 
