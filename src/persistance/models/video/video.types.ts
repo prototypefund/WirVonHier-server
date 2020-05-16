@@ -12,7 +12,7 @@ export interface IVideo extends Document {
   description: string;
   path: string;
   src: string;
-  vimeoId: string;
+  videoId: string;
   status: VideoStatusType;
   host: string;
   type: VideoType;

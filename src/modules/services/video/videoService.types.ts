@@ -24,3 +24,30 @@ export interface IVimeoDeleteVideoResponse {
     upload_link: string;
   };
 }
+
+export interface IVimeoGetVideoResponse {
+  uri: string;
+  width: number;
+  height: number;
+  files: {
+    quality: string;
+    type: string;
+    width: number;
+    height: number;
+    link: string;
+    created_time: string;
+    fps: string;
+    size: string;
+    md5: string;
+  }[];
+  status: string;
+  upload: {
+    status: string;
+  };
+  transcode: {
+    status: string;
+  };
+}
+export interface IGetVideoUrlResponse {
+  url: string;
+}
