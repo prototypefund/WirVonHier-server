@@ -1,7 +1,7 @@
 import { Request, Response } from 'express-serve-static-core';
 import { videoService } from 'modules/services';
 import Joi from 'joi';
-import { ICreateVideoBody, IDeleteVideoParams } from './controller.types';
+import { ICreateVideoBody, IDeleteVideoParams, IGetVideoUrl } from './controller.types';
 
 export class VideosController {
   async uploadVideo(req: Request, res: Response): Promise<void> {
@@ -43,6 +43,25 @@ export class VideosController {
       return res.status(406).end(error.message);
     }
     const result = await videoService.deleteVideo({ ...value, userId });
+    if ('error' in result) {
+      return res.status(result.status).json(result.error).end();
+    }
+    res.status(result.status).json(result.data);
+  }
+
+  async getVideoUrl(req: Request, res: Response): Promise<void> {
+    // eslint-disable-next-line no-console
+    if (!req.query.videoId) {
+      return res.status(406).end('No valid videoId specified');
+    }
+    const schema = Joi.object({
+      videoId: Joi.string().required(),
+    });
+    const { error, value } = schema.validate<IGetVideoUrl>((req.query as unknown) as IDeleteVideoParams);
+    if (error) {
+      return res.status(406).end(error.message);
+    }
+    const result = await videoService.getVideoUrl(value.videoId);
     if ('error' in result) {
       return res.status(result.status).json(result.error).end();
     }

@@ -8,3 +8,7 @@ export interface IDeleteVideoParams {
   businessId: string;
   videoId: string;
 }
+
+export interface IGetVideoUrl {
+  videoId: string;
+}

@@ -4,6 +4,8 @@ import {
   IVimeoCreateVideoResponse,
   IDeleteVideoOptions,
   IVimeoDeleteVideoResponse,
+  IGetVideoUrlResponse,
+  IVimeoGetVideoResponse,
 } from './videoService.types';
 import { Business, Video, User } from 'persistance/models';
 import { config } from 'config';
@@ -123,6 +125,26 @@ class VideoService {
       return { status: 500, error: { code: 'D0', message: 'Undefined Database error.' } };
     }
     return { status: 204, data: undefined };
+  }
+
+  public async getVideoUrl(videoId: string): Promise<IServiceResponse<IGetVideoUrlResponse>> {
+    try {
+      const getVideoResponse = await axios.get<IVimeoGetVideoResponse>(`https://api.vimeo.com${videoId}`, {
+        headers: {
+          Authorization: `Bearer ${config.vimeo.accessToken}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/vnd.vimeo.*+json;version=3.4',
+        },
+      });
+
+      // TODO: how to decide on which file to use?
+      return { status: 200, data: { url: getVideoResponse.data.files[0].link } };
+    } catch (e) {
+      if (e.response) {
+        return { status: 500, error: { ...e.response.data, code: 'A5' } };
+      }
+      return { status: 500, error: { ...e, code: 'A5' } };
+    }
   }
 
   public checkVideoTranscodingStatus(vimeoId: string, businessId: string): void {
