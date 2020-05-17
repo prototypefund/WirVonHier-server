@@ -41,7 +41,11 @@ class AuthenticationController implements IAuthenticationController {
 
   refreshToken: RequestHandler = async function refreshToken(req, res): Promise<void> {
     const result = await as.refreshToken(req);
-    if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
+    if ('error' in result) {
+      res.clearCookie('refresh_token', { httpOnly: true, domain: APP_DOMAIN });
+      res.clearCookie('public_refresh_token', { domain: APP_DOMAIN });
+      return res.status(result.error.status).send(result.error.message).end();
+    }
     res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
     res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
     return res.status(200).json({ token: result.token }).end();
