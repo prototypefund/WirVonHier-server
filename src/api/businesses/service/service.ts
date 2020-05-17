@@ -36,7 +36,7 @@ class BusinessesService {
           active: false,
         });
 
-        const newBusiness = await Business.create(validatedBusiness);
+        const newBusiness = await validatedBusiness.save();
         newBusinesses.push(newBusiness);
       }
 
