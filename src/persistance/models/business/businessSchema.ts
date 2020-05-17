@@ -29,11 +29,9 @@ export const BusinessSchema = new Schema<IBusiness>(
       type: String,
       required: true,
       unique: true,
-      index: true,
     },
     name: {
       type: String,
-      unique: true,
       trim: true,
     },
     owner: {
@@ -180,8 +178,6 @@ BusinessSchema.pre<IBusiness>('save', function () {
   if (this.isModified('address')) {
     geoService.queueForGeolocation([this]);
   }
-  // eslint-disable-next-line no-console
-  console.log('id: ', this.id);
 });
 
 // Document post Hook
