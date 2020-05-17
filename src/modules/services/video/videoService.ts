@@ -107,7 +107,7 @@ class VideoService {
 
     const vimeoVideoId = video.videoId;
     try {
-      const deleteResponse = await axios.delete<IVimeoDeleteVideoResponse>(`https://api.vimeo.com${vimeoVideoId}`, {
+      const deleteResponse = await axios.delete<IVimeoDeleteVideoResponse>(`https://api.vimeo.com/${vimeoVideoId}`, {
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,
           'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ class VideoService {
 
   public async getVideoUrl(videoId: string): Promise<IServiceResponse<IGetVideoUrlResponse>> {
     try {
-      const getVideoResponse = await axios.get<IVimeoGetVideoResponse>(`https://api.vimeo.com${videoId}`, {
+      const getVideoResponse = await axios.get<IVimeoGetVideoResponse>(`https://api.vimeo.com/${videoId}`, {
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,
           'Content-Type': 'application/json',

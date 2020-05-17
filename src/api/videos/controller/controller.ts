@@ -50,7 +50,6 @@ export class VideosController {
   }
 
   async getVideoUrl(req: Request, res: Response): Promise<void> {
-    // eslint-disable-next-line no-console
     if (!req.query.videoId) {
       return res.status(406).end('No valid videoId specified');
     }
