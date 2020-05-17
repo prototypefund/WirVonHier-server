@@ -11,13 +11,11 @@ export function getEmailVerificationBody(options: IVerificationEmailOptions): st
       <style>
         .cr_site {background-color:#fff;}
         .cr_header {background-color:#5f6db0;color:#fff;}
-        .cr_body {background-color:#dadded;color:#000;font-size:12px;}
+        .cr_body {background-color:#fff;color:#000;font-size:12px;padding: 24px;}
         .cr_page {border-color:#000;border-style:solid;border-width:0;width:640px;}
-        .cr_hr {background-color:#ccc;}
         .cr_site a {color:#0084ff;}
-        .cr_site { background:#FFF; text-align:left;}
-        .cr_header { background-color:#ccc; }
-        .cr_body {background-color:#efefef;}
+        .cr_site { background:#FFF;}
+        .cr_header { background-color:#e8e8e8; padding: 24px; border-radius: 15px;}
         .cr_page {border-color:#000;border-style:solid;border-width:1px; width:640px;}
         .cr_page {border-color:#000;border-style:solid;border-width:1px;}
         .cr_font {font: normal 12px Arial, Helvetica, sans-serif;}
@@ -33,7 +31,7 @@ export function getEmailVerificationBody(options: IVerificationEmailOptions): st
         
         .imprint {font-size:0.8em;}
         .cr_captcha {padding-left: 130px;}
-        .cr_ipe_item .itemname{display:block;float:left;margin:5px 0 0;text-align:left;width:120px;}
+        .cr_ipe_item .itemname{display:block;float:left;margin:5px 0 0; width:120px;}
         .cr_ipe_item input[type="text"]{width:300px;}
         .cr_ipe_item textarea{width:300px;}
         .cr_ipe_item select{width:300px;}
@@ -49,11 +47,10 @@ export function getEmailVerificationBody(options: IVerificationEmailOptions): st
         .clever_form_note {background-color:#f2ecb5; color:#000;display:inline; font-size:12px !important; font-weight:bold;margin:26px 0 0 3px; padding: 2px 4px;position:absolute;  }
         
         .cr_site {background-color:#fff;}
-        .cr_header {background-color:#8c8c8c;color:#000;}
-        .cr_body {background-color:#f0f0f0;color:#000;font-size:12px;}
+        .cr_header {color:#000;}
         .cr_page {border-color:#000;border-style:solid;border-width:0;}
-        .cr_hr {background-color:#ccc;}
         .cr_site a {color:#0084ff;}
+        p { text-align: left; line-height: 1.6; }
       </style>
     </head>
     <body>
@@ -64,13 +61,13 @@ export function getEmailVerificationBody(options: IVerificationEmailOptions): st
               <tr>
                 <td align="center" class="cr_header cr_font">
                   <div class="logo" style="overflow:hidden;width:100%;max-width: 240px;">
-                    <img src="https://s3-eu-west-1.amazonaws.com/files.crsend.com/251000/251888/images/Layout_Files/Herz_Logo_negativ-04_200px.png" align="center" border="0" alt="" hspace="15" vspace="15">
+                    <img style="margin: 0;" width="240px" src="https://test.wirvonhier.net/assets/imgs/logo/logo-schrift_512x203.png" align="center" border="0" alt="" hspace="15" vspace="15">
                   </div>
                 </td>
               </tr>
               <tr>
                 <td class="cr_body cr_font formbox" align="center">
-                  <div id="editable_content" class="cr_font" style="text-align:left;">
+                  <div id="editable_content" class="cr_font" >
                     <div id="3308416" rel="mce_text" class="cr_ipe_item ui-sortable">
                       <div class="mce_text">
                         <p>Lieber Händler,</p>
@@ -80,9 +77,29 @@ export function getEmailVerificationBody(options: IVerificationEmailOptions): st
                       </div>
                       <br style="clear:left;" />
                     </div>
-                    <div id="3308459" rel="button" class="cr_ipe_item ui-sortable submit_container" style=" margin-bottom:15px;text-align:center;">
-                      <a href="${options.link}" class="cr_button">Hier klicken</a>
-                    </div>
+                    <table style="margin-bottom: 16px;">
+                      <tbody>
+                        <tr>
+                        <td>&nbsp;</td>
+                        <td style="display: block; margin: 0 auto;">
+                          <div style="margin: 0 auto;">
+                            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td>
+                                  <table border="0" cellspacing="0" cellpadding="0">
+                                    <tr>
+                                      <td align="center" style="margin: 0 auto !important; max-width: 200px; border-radius: 10px; color: #fff;" bgcolor="#5f6daf"><a href="${options.link}" target="_blank" style="font-size: 16px; font-family: Helvetica, Arial, sans-serif; color: #ffffff; text-decoration: none; text-decoration: none;border-radius: 10px; padding: 12px 18px; display: inline-block;">Hier klicken</a></td>
+                                    </tr>
+                                  </table>
+                                </td>
+                              </tr>
+                            </table>
+                          </div>
+                        </td>
+                        <td>&nbsp;</td>
+                        </tr>
+                      </tbody>
+                    </table>
                     <div id="3308416" rel="mce_text" class="cr_ipe_item ui-sortable">
                       <div class="mce_text">
                         <p>Im Anschluss daran können Sie Ihr Profil vervollständigen und ein erstes Video hochladen, um direkt mit bestehenden und neuen Kunden in Kontakt zu treten.</p>
