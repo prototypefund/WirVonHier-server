@@ -42,6 +42,9 @@ class VideoService {
           },
           name: title,
           description: description,
+          privacy: {
+            view: 'unlisted',
+          },
         },
         {
           headers: {
