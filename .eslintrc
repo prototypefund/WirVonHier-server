@@ -26,7 +26,7 @@
 
 	"rules": {
 		"prettier/prettier": "error",
-		"no-console": "error",
+		//"no-console": "error",
 		"@typescript-eslint/interface-name-prefix": ["error", { "prefixWithI": "always" }]
 	}
 }
