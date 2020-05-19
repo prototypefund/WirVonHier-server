@@ -18,7 +18,7 @@ export class Filter<T extends Document> {
   public query: IFilterQueryDefinition = {
     location: { coords: [], maxDistance: 5000 },
     filters: [],
-    limit: 25,
+    limit: 50,
     page: 0,
     sorting: {},
   };
