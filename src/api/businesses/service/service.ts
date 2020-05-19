@@ -249,11 +249,11 @@ class BusinessesService {
     return oldCoverImage || null;
   }
   private async updateCoverVideo(
-    _oldCoverImage: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
-    _newCoverImage: IVideo | null | undefined, // eslint-disable-line
+    oldCoverVideo: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
+    _newCoverVideo: IVideo | null | undefined, // eslint-disable-line
     _businessId: mongoose.Types.ObjectId, // eslint-disable-line
   ): Promise<mongoose.Types.ObjectId | null> {
-    return new Promise((resolve) => resolve(null));
+    return new Promise((resolve) => resolve(oldCoverVideo));
   }
 
   private async updateProfile(
@@ -287,11 +287,11 @@ class BusinessesService {
     return oldProfileImage || null;
   }
   private async updateProfileVideo(
-    _oldProfileVideo: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
+    oldProfileVideo: mongoose.Types.ObjectId | null | undefined, // eslint-disable-line
     _newProfileVideo: IVideo | null | undefined, // eslint-disable-line
     _businessId: mongoose.Types.ObjectId, // eslint-disable-line
   ): Promise<mongoose.Types.ObjectId | null> {
-    return new Promise((resolve) => resolve(null));
+    return new Promise((resolve) => resolve(oldProfileVideo));
   }
 
   private async updateStories(
@@ -338,11 +338,11 @@ class BusinessesService {
     return newImages;
   }
   private async updateStoryVideos(
-    _oldStoryVideos: mongoose.Types.ObjectId[], // eslint-disable-line
+    oldStoryVideos: mongoose.Types.ObjectId[], // eslint-disable-line
     _newStoryVideos: IVideo[] | mongoose.Types.ObjectId[] | string[] | undefined, // eslint-disable-line
     _businessId: mongoose.Types.ObjectId, // eslint-disable-line
   ): Promise<mongoose.Types.ObjectId[]> {
-    return new Promise((resolve) => resolve([]));
+    return new Promise((resolve) => resolve(oldStoryVideos));
   }
 
   private async putImage(image: unknown, businessId: mongoose.Types.ObjectId, type: ImageType): Promise<IImage | null> {
