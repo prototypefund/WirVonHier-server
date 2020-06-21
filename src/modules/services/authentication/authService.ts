@@ -106,7 +106,7 @@ class AuthService {
       };
       await mailService.send({
         to: user.email,
-        from: `WirVonHier <service@wirvonhier.net>`,
+        from: `service`,
         subject: 'Passwort vergessen',
         html: getResetPasswordBody(bodyOptions),
       });
@@ -121,7 +121,7 @@ class AuthService {
     if (!user) return;
     const data = {
       to: user.email,
-      from: `WirVonHier <service@wirvonhier.net>`,
+      from: `service`,
       subject: 'Passwort erfolgreich geändert',
       html: `Your Password has been successfully changed.`,
     };
