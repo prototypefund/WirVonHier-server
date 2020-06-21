@@ -84,14 +84,14 @@ export interface IBusinessBase extends IBusinessSchema {
 export interface IBusiness extends IBusinessBase {
   owner: IUser['_id'];
   members: Array<IUser['_id']>;
-  location: ILocation['_id'];
+  location: ILocation['_id'] | null;
   media: IBusinessMedia;
 }
 
 export interface IBusinessPopulated extends IBusinessBase {
   owner: IUser;
   members: IUser[];
-  location: ILocation;
+  location: ILocation | null;
   media: IBusinessMediaPopulated;
 }
 

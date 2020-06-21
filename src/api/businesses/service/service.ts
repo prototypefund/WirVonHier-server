@@ -9,6 +9,7 @@ import {
   IImage,
   IVideo,
   IBusinessMediaPopulated,
+  Location,
 } from 'persistance/models';
 import { BusinessFilter } from 'modules/services/filter';
 import { /*mailService,*/ imageService } from 'modules/services';
@@ -153,14 +154,24 @@ class BusinessesService {
     if ('members' in data) {
       processedData.members = [];
     }
-    if ('address' in data) {
-      // update location;
+    if ('location' in data) {
+      processedData.location = await this.processLocation((data.location as unknown) as [number, number]);
     }
     Object.keys(updateData).forEach((key) => {
       if (['media', 'owner', 'members', 'location'].includes(key)) return;
-      processedData[key as Extract<keyof IBusiness, string>] = data[key as Extract<keyof IBusiness, string>];
+      processedData[key as keyof IBusiness] = data[key as keyof IBusiness];
     });
     return processedData;
+  }
+
+  private async processLocation(lngLat: [number, number]): Promise<mongoose.Types.ObjectId | null> {
+    const loc = await Location.create({
+      geo: {
+        type: 'Point',
+        coordinates: lngLat,
+      },
+    });
+    return loc._id;
   }
 
   private async processOwner(owner: unknown): Promise<mongoose.Types.ObjectId | null> {
