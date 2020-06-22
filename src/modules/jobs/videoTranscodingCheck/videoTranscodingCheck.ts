@@ -61,7 +61,6 @@ const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<vo
       await video.save();
       job.remove();
     }
-    // eslint-disable-next-line no-empty
   } catch (error) {
     console.log('Encountered errror during job', error);
   }
