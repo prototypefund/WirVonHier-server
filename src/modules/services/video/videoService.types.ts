@@ -29,6 +29,7 @@ export interface IVimeoGetVideoResponse {
   uri: string;
   width: number;
   height: number;
+  maxContentLength: number;
   files: {
     quality: string;
     type: string;

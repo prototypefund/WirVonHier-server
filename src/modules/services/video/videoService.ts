@@ -137,7 +137,7 @@ class VideoService {
 
   public async getVideoUrl(videoId: string): Promise<IServiceResponse<IGetVideoUrlResponse>> {
     try {
-      const getVideoResponse = await axios.get<IVimeoGetVideoResponse>(`https://api.vimeo.com/${videoId}`, {
+      const { data } = await axios.get<IVimeoGetVideoResponse>(`https://api.vimeo.com/${videoId}`, {
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,
           'Content-Type': 'application/json',
@@ -145,8 +145,12 @@ class VideoService {
         },
       });
 
+      if (data.maxContentLength === -1) {
+        return { status: 404, error: { code: 'E2', message: 'Video does not exist.' } };
+      }
+
       // TODO: how to decide on which file to use?
-      return { status: 200, data: { url: getVideoResponse.data.files[0].link } };
+      return { status: 200, data: { url: data.files[0].link } };
     } catch (e) {
       if (e.response) {
         return { status: 500, error: { ...e.response.data, code: 'A5' } };
