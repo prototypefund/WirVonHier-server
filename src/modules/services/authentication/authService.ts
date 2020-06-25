@@ -142,13 +142,13 @@ class AuthService {
 
   private createVerificationLink(user: IUser): string {
     const token = ts.createVerificationToken(user);
-    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/verify-email?token=${token}`;
+    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/verify-email?token=${token}`;
   }
   private async createForgotPasswordLink(user: IUser): Promise<string> {
     const token = ts.createResetPasswordToken(user);
     user.resetPasswordToken = token;
     await user.save();
-    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/business/reset-password?token=${token}`;
+    return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/reset-password?token=${token}`;
   }
 }
 
