@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { IImage } from '.';
-import { imageService } from 'modules/services';
 
 export const ImageSchema = new Schema<IImage>({
   createdAt: {
@@ -20,25 +19,28 @@ export const ImageSchema = new Schema<IImage>({
     required: true,
   },
   description: String,
-  caption: String,
-  src: {
+  businessId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Business',
+    required: true,
+  },
+  imageType: {
     type: String,
+    required: true,
+    enum: ['logo', 'profile', 'story'],
   },
   publicId: {
     type: String,
     required: true,
     unique: true,
   },
-  rank: Number,
-  ratio: {
-    type: String,
+  uploadVerified: {
+    type: Boolean,
+    default: false,
   },
 });
 
-ImageSchema.pre<IImage>('remove', function (next) {
-  imageService.deleteImage(this.publicId).then(
-    () => next(),
-    // eslint-disable-next-line
-    (error?: any) => console.error('Error on deleteImage: ', error),
-  );
+// Document post Hook
+ImageSchema.post<IImage>('save', function (doc) {
+  doc.modifiedAt = new Date(Date.now()).toUTCString();
 });

@@ -61,9 +61,9 @@ class AuthService {
       return { error: { status: 401, message: 'User not authenticated.' } };
     const user = await User.findById(payloadPub.id);
     if (!user) return { error: { status: 401, message: 'User not authenticated' } };
-    const newRefreshToken = ts.generateRefreshToken({ id: user._id, email: user.email });
-    const newPublicRefreshToken = ts.generateRefreshToken({ id: user._id });
-    const newToken = ts.generateToken({ id: user._id, email: user.email, roles: user.roles });
+    const newRefreshToken = ts.generateRefreshToken({ id: user._id.toHexString(), email: user.email });
+    const newPublicRefreshToken = ts.generateRefreshToken({ id: user._id.toHexString() });
+    const newToken = ts.generateToken({ id: user._id.toHexString(), email: user.email, roles: user.roles });
     return { token: newToken, refreshToken: newRefreshToken, publicRefreshToken: newPublicRefreshToken };
   }
 

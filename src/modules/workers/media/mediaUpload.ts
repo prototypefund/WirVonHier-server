@@ -36,7 +36,7 @@ function uploadImage(path: string): void {
       console.log('saved as Logo');
     }
     if (imageType.includes('Hauptbild')) {
-      business.media.cover.image = image._id;
+      business.media.profile = image._id;
       await business.save();
     }
     if (imageType.includes('Story')) {

@@ -1,6 +1,5 @@
 import { Schema } from 'mongoose';
 import { IBusiness } from '.';
-import { geoService } from 'modules';
 
 export const BusinessSchema = new Schema<IBusiness>(
   {
@@ -106,29 +105,10 @@ export const BusinessSchema = new Schema<IBusiness>(
         ref: 'Image',
         default: null,
       },
-      cover: {
-        image: {
-          type: Schema.Types.ObjectId,
-          ref: 'Image',
-          default: null,
-        },
-        video: {
-          type: Schema.Types.ObjectId,
-          ref: 'Video',
-          default: null,
-        },
-      },
       profile: {
-        image: {
-          type: Schema.Types.ObjectId,
-          ref: 'Image',
-          default: null,
-        },
-        video: {
-          type: Schema.Types.ObjectId,
-          ref: 'Video',
-          default: null,
-        },
+        type: Schema.Types.ObjectId,
+        ref: 'Image',
+        default: null,
       },
       stories: {
         images: {
@@ -175,9 +155,7 @@ BusinessSchema.pre('validate', function () {
 
 // Document pre Hook
 BusinessSchema.pre<IBusiness>('save', function () {
-  if (this.isModified('address')) {
-    geoService.queueForGeolocation([this]);
-  }
+  // placeholder
 });
 
 // Document post Hook

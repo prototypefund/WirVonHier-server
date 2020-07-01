@@ -1,6 +1,6 @@
 import { Document, Model, Types } from 'mongoose';
 
-type VideoType = 'story' | 'profile' | 'banner' | 'mixed';
+type VideoType = 'story';
 type VideoStatusType = 'complete' | 'transcoding' | 'uploading' | 'init';
 
 export interface IVideo extends Document {

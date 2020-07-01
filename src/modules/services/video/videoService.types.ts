@@ -1,4 +1,4 @@
-export type VideoType = 'cover' | 'profile' | 'story' | 'logo';
+export type VideoType = 'story';
 export interface ICreateVideoOptions {
   title: string;
   description: string;

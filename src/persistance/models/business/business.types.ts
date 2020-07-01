@@ -4,14 +4,7 @@ import { IImage } from '../image';
 
 export interface IBusinessMedia {
   logo: IImage['_id'] | null;
-  cover: {
-    image: IImage['_id'] | null | undefined;
-    video: IVideo['_id'] | null | undefined;
-  };
-  profile: {
-    video: IVideo['_id'] | null | undefined;
-    image: IImage['_id'] | null | undefined;
-  };
+  profile: IImage['_id'] | null;
   stories: {
     images: IImage['_id'][];
     videos: IVideo['_id'][];
@@ -20,14 +13,7 @@ export interface IBusinessMedia {
 
 export interface IBusinessMediaPopulated {
   logo: IImage;
-  cover: {
-    image: IImage | undefined;
-    video: IVideo | undefined;
-  };
-  profile: {
-    image: IImage | undefined;
-    video: IVideo | undefined;
-  };
+  profile: IImage | undefined;
   stories: {
     images: IImage[];
     videos: IVideo[];
