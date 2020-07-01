@@ -1,35 +1,47 @@
-import { Request, Response } from 'express-serve-static-core';
 import Joi from 'joi';
-import { imageService as is } from 'modules/services';
-import { Image } from 'persistance/models';
+import { imageService as is, ICreateImagePayload, UpdateImagePayload } from 'modules/services';
+import { RequestHandler } from 'express';
 
 export class ImagesController {
-  /**
-   * Returns all user, optional filtered by query parameters
-   *
-   * Pagination applies
-   */
-  async confirmImageUpload(req: Request, res: Response): Promise<void> {
-    if (!req.token) return res.status(401).end();
+  public createImages: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token || !req.token.roles || !req.token.roles.includes('admin')) return res.status(401).end();
+    const userId = req.token.id;
+    const schema = Joi.array().items({
+      publicId: Joi.string().required(),
+      title: Joi.string().required(),
+      businessId: Joi.string().required(),
+      description: Joi.string(),
+      imageType: Joi.valid('logo', 'profile', 'story'),
+    });
+    const { error, value } = Joi.validate<ICreateImagePayload[]>(req.body, schema);
+    if (error) return res.status(406).end(error.details[0].message);
+    const { status, message, images } = await is.createImages(userId, value);
+    return res.status(status).json({ message, images }).end();
+  };
+
+  public updateImage: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token || !req.token.roles || !req.token.roles.includes('admin')) return res.status(401).end();
+    const imageId = req.params.id;
     const schema = {
-      publicIds: Joi.array().items(Joi.string().required()),
+      _id: Joi.string(),
+      title: Joi.string(),
+      businessId: Joi.string(),
+      description: Joi.string(),
+      imageType: Joi.valid('logo', 'profile', 'story'),
+      uploadVerified: Joi.bool(),
     };
-    const { error, value } = Joi.validate<{ publicIds: string[] }>(req.body, schema);
-    if (error) {
-      return res.status(406).end(error.details[0].message);
-    }
-    const failed = [];
-    for (const publicId of value.publicIds) {
-      const image = await Image.findOne({ publicId });
-      if (!image) {
-        failed.push(publicId);
-        continue;
-      }
-      is.cancelCleanupImage(image.id);
-    }
-    const status = failed.length === 0 ? 200 : 400;
-    res.status(status).json({ failed });
-  }
+    const { error, value } = Joi.validate<UpdateImagePayload>(req.body, schema);
+    if (error) return res.status(406).end(error.details[0].message);
+    const { status, message } = await is.updateImage(imageId, value);
+    return res.status(status).json({ message }).end();
+  };
+
+  public deleteImage: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token || !req.token.roles || !req.token.roles.includes('admin')) return res.status(401).end();
+    const imageId = req.params.id;
+    const { status, message } = await is.deleteImage(imageId);
+    return res.status(status).json({ message }).end();
+  };
 }
 
 export const imagesController = new ImagesController();
