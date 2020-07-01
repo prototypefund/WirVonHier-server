@@ -207,7 +207,7 @@ class BusinessesService {
           break;
         }
         case 'location': {
-          data.location = await this.processLocation((data.location as unknown) as [number, number]);
+          data.location = await this.processLocation((updates.location as unknown) as [number, number]);
           break;
         }
         default:
