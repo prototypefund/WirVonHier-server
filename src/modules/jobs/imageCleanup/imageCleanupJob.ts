@@ -1,7 +1,6 @@
 import Agenda from 'agenda';
 import { Business, Image } from 'persistance/models';
-import { ImageType } from 'modules/services/image/imageService.types';
-import mongoose from 'mongoose';
+import { ImageType } from 'modules/services/image';
 
 interface IImageCleanupOptions {
   businessId: string;
@@ -10,22 +9,30 @@ interface IImageCleanupOptions {
 }
 
 const jobHandler = async (job: Agenda.Job<IImageCleanupOptions>): Promise<void> => {
-  const { businessId, imageId, imageType } = job.attrs.data;
+  const { imageId } = job.attrs.data;
+  const image = await Image.findById(imageId);
+  if (!image) return;
+  if (image.uploadVerified) return;
+  const { businessId, imageType } = image;
   const business = await Business.findById(businessId);
-  if (business) {
-    if (imageType === 'story') {
-      const index = business.media.stories.images.findIndex((imageId: mongoose.Types.ObjectId) =>
-        imageId.equals(imageId),
-      );
-      business.media.stories.images.splice(index, 1);
-    } else if (imageType === 'logo') {
-      if (business.media.logo && business.media.logo.equals(imageId)) business.media.logo = null;
-    } else {
-      const image = business.media[imageType].image;
-      if (image && image.equals(imageId)) business.media[imageType].image = undefined;
-    }
-    await business.save();
+  if (!business) {
+    await Image.findByIdAndDelete(imageId);
+    return;
   }
+  switch (imageType) {
+    case 'logo': {
+      if (business.media.logo && business.media.logo.equals(imageId)) business.media.logo = null;
+      break;
+    }
+    case 'profile': {
+      if (business.media.profile && business.media.profile.equals(imageId)) business.media.logo = null;
+      break;
+    }
+    case 'story': {
+      business.media.stories.images = business.media.stories.images.filter((imgId) => !imgId.equals(imageId));
+    }
+  }
+  await business.save();
   await Image.findByIdAndDelete(imageId);
 };
 
