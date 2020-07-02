@@ -12,6 +12,8 @@ export interface IDataProtStatement extends Document {
   version: string;
   type: string;
   text: string;
+  html: string;
+  markdown: string;
   language: DataProtLanguageId;
 }
 

@@ -30,6 +30,14 @@ export const DataProtectionStatementSchema = new Schema<IDataProtStatement>({
     type: String,
     required: true,
   },
+  html: {
+    type: String,
+    required: true,
+  },
+  markdown: {
+    type: String,
+    required: true,
+  },
   language: {
     type: String,
     required: true,
