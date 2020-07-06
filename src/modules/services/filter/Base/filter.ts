@@ -160,7 +160,7 @@ export class Filter<T extends Document> {
   }
 
   private parseLocation(string: string): { coords: number[]; maxDistance: number } {
-    if (!string) throw new Error(`Invalid value passed to location filter. Value passed "${location}".`);
+    if (!string) throw new Error(`Invalid value passed to location filter. Value passed "${string}".`);
     let lng;
     let lat;
     let maxDistance = 2000;
@@ -172,13 +172,13 @@ export class Filter<T extends Document> {
     }
     if (args.length === 2) {
       const coords = this.zipCodes.get(args[0]);
-      if (!coords) throw new Error(`Coud not find ZIP-Code passed to location filter. Value passed "${location}".`);
+      if (!coords) throw new Error(`Coud not find ZIP-Code passed to location filter. Value passed "${string}".`);
       lng = coords[0];
       lat = coords[1];
       maxDistance = parseInt(args[1], 10);
     }
     if (!lng || !lat || isNaN(lng) || isNaN(lat) || isNaN(maxDistance))
-      throw new Error(`Invalid value passed to location filter. Value passed "${location}".`);
+      throw new Error(`Invalid value passed to location filter. Value passed "${string}".`);
     return { coords: [lng, lat], maxDistance };
   }
 
