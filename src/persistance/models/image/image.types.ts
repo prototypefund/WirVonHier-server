@@ -9,7 +9,7 @@ export interface IImage extends Document {
   publicId: string;
   title: string;
   description: string;
-  businessId: string;
+  businessId: Types.ObjectId;
   imageType: ImageType;
 
   // This property indicates whether the ImageFile was successfully uploaded to Cloudinary

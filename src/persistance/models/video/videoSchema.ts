@@ -1,5 +1,6 @@
 import { Schema, Types } from 'mongoose';
 import { IVideo } from '.';
+import { videoService } from 'modules';
 
 export const VideoSchema = new Schema<IVideo>({
   createdAt: {
@@ -20,17 +21,31 @@ export const VideoSchema = new Schema<IVideo>({
   },
 
   // TODO: Should we save the owner here?
-  owner: {
+  businessId: {
     type: Types.ObjectId,
+    ref: 'Business',
     required: true,
   },
   description: String,
-  caption: String,
-  src: String,
-  videoId: String,
-  status: String,
-  rank: Number,
-  ratio: {
+  vimeoURI: String,
+  status: {
     type: String,
+    enum: ['complete', 'uploaded', 'transcoding', 'error'],
   },
+  url: {
+    type: String,
+    default: '',
+  },
+});
+
+// Document post Hook
+VideoSchema.post<IVideo>('save', function (doc) {
+  doc.modifiedAt = new Date(Date.now()).toUTCString();
+
+  if (doc.status === 'uploaded') {
+    videoService.startTranscodingCheck(doc._id);
+  }
+  if (doc.status === 'complete' && !doc.url) {
+    videoService.setDownloadURL(doc);
+  }
 });

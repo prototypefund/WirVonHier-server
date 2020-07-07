@@ -100,7 +100,6 @@ UserSchema.statics.findMyBusinesses = function (this: IUserModel, id: string): I
   return (this.findById(id).populate('businesses').exec() as unknown) as IUserPopulated;
 };
 
-// TODO Write Document Middlewares
 // Document middlewares
 UserSchema.pre<IUser>('save', async function () {
   if (this.isModified('password')) {
@@ -108,8 +107,7 @@ UserSchema.pre<IUser>('save', async function () {
   }
 });
 
-// TODO Write Query Middlewares
 // Query middlewares
-UserSchema.post<IUser>('findOneAndUpdate', function (doc) {
+UserSchema.post<IUser>('save', function (doc) {
   doc.modifiedAt = Date.now().toLocaleString();
 });

@@ -1,23 +1,16 @@
 import { Document, Model, Types } from 'mongoose';
 
-type VideoType = 'story';
-type VideoStatusType = 'complete' | 'transcoding' | 'uploading' | 'init';
+type VideoStatusType = 'complete' | 'uploaded' | 'transcoding' | 'error';
 
 export interface IVideo extends Document {
   _id: Types.ObjectId;
   createdAt: string;
   modifiedAt: string;
-  owner: Types.ObjectId;
-  name: string;
+  businessId: Types.ObjectId;
   description: string;
-  path: string;
-  src: string;
-  videoId: string;
+  vimeoURI: string;
   status: VideoStatusType;
-  host: string;
-  type: VideoType;
-  rank: number;
-  ratio: number[];
+  url: string;
 }
 
 export type IVideoModel = Model<IVideo>;

@@ -1,28 +1,48 @@
+import { IVideo } from 'persistance/models';
+
 export type VideoType = 'story';
 export interface ICreateVideoOptions {
   title: string;
   description: string;
-  size: number;
+  uri: string;
   businessId: string;
-  userId: string;
 }
+
+export type ICreateVideoResponse = ICreateVideoError | ICreateVideoSuccess;
+interface ICreateVideoSuccess {
+  status: 200;
+  video: IVideo;
+}
+interface ICreateVideoError {
+  status: 400 | 401 | 403 | 404 | 406 | 500;
+  error: {
+    message: string;
+    code: string;
+  };
+}
+
+export type IUpdateVideoResponse = IUpdateVideoSuccess | IUpdateVideoError;
+interface IUpdateVideoSuccess {
+  status: 200;
+}
+interface IUpdateVideoError {
+  status: 404;
+  error: { code: string; message: string };
+}
+
 export interface IDeleteVideoOptions {
   businessId: string;
   videoId: string;
   userId: string;
 }
 
-export interface IVimeoCreateVideoResponse {
-  uri: string;
-  upload: {
-    upload_link: string;
-  };
+export type IDeleteVideoResponse = IDeleteVideoSuccess | IDeleteVideoError;
+interface IDeleteVideoSuccess {
+  status: 204;
 }
-export interface IVimeoDeleteVideoResponse {
-  uri: string;
-  upload: {
-    upload_link: string;
-  };
+interface IDeleteVideoError {
+  status: 404 | 500;
+  error: { code: string; message: string };
 }
 
 export interface IVimeoGetVideoResponse {
@@ -49,6 +69,20 @@ export interface IVimeoGetVideoResponse {
     status: string;
   };
 }
-export interface IGetVideoUrlResponse {
+export interface IVimeoRequestDownloadURLResponse {
   url: string;
+  maxContentLength: number;
+  files: any[];
+}
+
+export interface IVimeoRequestUploadURLResponse {
+  uri: string;
+  upload: {
+    upload_link: string;
+  };
+}
+export interface IRequestUploadURLOptions {
+  size: number;
+  title: string;
+  description: string;
 }

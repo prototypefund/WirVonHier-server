@@ -3,7 +3,12 @@ import Joi from 'joi';
 import { IBusinessesController } from './controller.types';
 import { businessesService as bs } from '../service';
 import { User, Business } from 'persistance/models';
-import { ICreateBusinessImagePayload, IUpdateBusinessImagePayload } from '../service/service.types';
+import {
+  ICreateBusinessImagePayload,
+  IUpdateBusinessImagePayload,
+  ICreateBusinessVideoBody,
+  IUpdateBusinessVideoBody,
+} from '../service/service.types';
 
 class BusinessesController implements IBusinessesController {
   [key: string]: import('express').RequestHandler<import('express-serve-static-core').ParamsDictionary>;
@@ -78,6 +83,9 @@ class BusinessesController implements IBusinessesController {
     }
   };
 
+  /**
+   * IMAGES
+   */
   public createBusinessImage: RequestHandler = async (req, res): Promise<void> => {
     if (!req.token) return res.status(401).end();
     const { businessId } = req.params;
@@ -116,6 +124,58 @@ class BusinessesController implements IBusinessesController {
     const { businessId, imageId } = req.params;
     const { status, message } = await bs.deleteBusinessImage(businessId, userId, imageId);
     return res.status(status).json({ message }).end();
+  };
+
+  /**
+   * VIDEOS
+   */
+  public createBusinessVideo: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token) return res.status(401).end();
+    const { businessId } = req.params;
+    const userId = req.token.id;
+    const schema = Joi.object({
+      size: Joi.number().greater(0).required(),
+      title: Joi.string().required(),
+      description: Joi.string().allow(''),
+    });
+    const { error, value } = schema.validate<ICreateBusinessVideoBody>(req.body);
+    if (error) {
+      return res.status(406).end(error.details[0].message);
+    }
+    const result = await bs.createBusinessVideo({ ...value, businessId, userId });
+    if ('error' in result) {
+      return res.status(result.status).json(result.error).end();
+    }
+    res.status(result.status).json(result.data).end();
+  };
+
+  public updateBusinessVideo: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token) return res.status(401).end();
+    const userId = req.token.id;
+    const { businessId, videoId } = req.params;
+    const schema = {
+      title: Joi.string(),
+      description: Joi.string(),
+      status: Joi.valid('uploaded'),
+    };
+    const { error, value } = Joi.validate<IUpdateBusinessVideoBody>(req.body, schema);
+    if (error) return res.status(406).end(error.details[0].message);
+    const result = await bs.updateBusinessVideo({ businessId, userId, videoId, ...value });
+    if ('error' in result) {
+      return res.status(result.status).json(result.error).end();
+    }
+    res.status(result.status).end();
+  };
+
+  public deleteBusinessVideo: RequestHandler = async (req, res): Promise<void> => {
+    if (!req.token) return res.status(401).end();
+    const userId = req.token.id;
+    const { businessId, videoId } = req.params;
+    const result = await bs.deleteBusinessVideo(businessId, userId, videoId);
+    if ('error' in result) {
+      return res.status(result.status).json(result.error).end();
+    }
+    res.status(result.status).end();
   };
 }
 

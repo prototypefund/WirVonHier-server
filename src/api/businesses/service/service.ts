@@ -2,8 +2,16 @@ import { Business, IBusiness, IUser, User, IBusinessPopulated, Location, IImage 
 import { BusinessFilter } from 'modules/services/filter';
 import { IFilterResult } from 'modules/services/filter/Base/filter.types';
 import mongoose from 'mongoose';
-import { imageService } from 'modules/services';
-import { ICreateBusinessImagePayload, IUpdateBusinessImagePayload } from './service.types';
+import { imageService, videoService } from 'modules/services';
+import {
+  ICreateBusinessImagePayload,
+  IUpdateBusinessImagePayload,
+  ICreateBusinessVideoOptions,
+  ICreateBusinessVideoResult,
+  IUpdateBusinessVideoResult,
+  IUpdateBusinessVideoOptions,
+  IDeleteBusinessVideoResult,
+} from './service.types';
 
 class BusinessesService {
   async getOneBusinessById(id: string): Promise<{ status: number; business?: IBusiness }> {
@@ -108,10 +116,10 @@ class BusinessesService {
       await Business.populate(result.list, [
         { path: 'owner', model: 'User' },
         { path: 'location', model: 'Location' },
-        { path: 'media.logo', model: 'Image' },
-        { path: 'media.profile', model: 'Image' },
-        { path: 'media.stories.images', model: 'Image' },
-        { path: 'media.stories.videos', model: 'Video' },
+        { path: 'media.logo', match: { uploadVerified: true }, model: 'Image' },
+        { path: 'media.profile', match: { uploadVerified: true }, model: 'Image' },
+        { path: 'media.stories.images', match: { uploadVerified: true }, model: 'Image' },
+        { path: 'media.stories.videos', match: { url: /^(?!\s*$).+/ }, model: 'Video' }, // regex matches non-empty string
       ]);
       return result;
     } catch (e) {
@@ -120,6 +128,9 @@ class BusinessesService {
     }
   }
 
+  /**
+   * IMAGES
+   */
   public async createBusinessImage(
     businessId: string,
     userId: string,
@@ -162,6 +173,69 @@ class BusinessesService {
     if (!business) return { status: 404, message: 'Business not found.' };
     if (!business.owner.equals(userId)) return { status: 403, message: 'User not authorized.' };
     return imageService.updateImage(imageId, value);
+  }
+
+  /**
+   * VIDEOS
+   */
+  public async createBusinessVideo(options: ICreateBusinessVideoOptions): Promise<ICreateBusinessVideoResult> {
+    const { businessId, title, description = '', size, userId } = options;
+
+    console.log('options in businessService: ', options);
+    const user = await User.findById(userId);
+    if (!user) {
+      return { status: 403, error: { code: 'A0', message: 'Not authenticated.' } };
+    }
+    if (!user.hasOneRole(['businessowner', 'admin'])) {
+      return { status: 403, error: { code: 'A1', message: 'Not authorized.' } };
+    }
+    const business = await Business.findById(businessId);
+    if (business === null) {
+      return { status: 404, error: { code: 'A2', message: 'Business not found.' } };
+    }
+    if (user.hasOneRole(['businessowner']) && !business.owner.equals(user._id)) {
+      return { status: 404, error: { code: 'A1', message: 'Not authorized.' } };
+    }
+    const { uri, upload } = await videoService.requestUploadURL({ size, title, description });
+    const result = await videoService.createVideo({ title, description, businessId, uri });
+    if (result.status !== 200) {
+      return { status: 500, error: result.error };
+    }
+
+    business.media.stories.videos.push(result.video._id);
+    await business.save();
+    return { status: 200, data: { uploadLink: upload.upload_link, video: result.video } };
+  }
+
+  public async updateBusinessVideo(options: IUpdateBusinessVideoOptions): Promise<IUpdateBusinessVideoResult> {
+    const { businessId, videoId, title, description, status, userId } = options;
+    const business = await Business.findById(businessId);
+    if (!business) return { status: 404, error: { code: 'A2', message: 'Business not found.' } };
+    if (!business.owner.equals(userId)) return { status: 403, error: { code: 'A1', message: 'Not authorized.' } };
+    const updates = { title, description, status };
+    return videoService.updateVideo(videoId, updates);
+  }
+
+  public async deleteBusinessVideo(
+    businessId: string,
+    userId: string,
+    videoId: string,
+  ): Promise<IDeleteBusinessVideoResult> {
+    const business = await Business.findById(businessId);
+    if (!business) return { status: 404, error: { code: 'A2', message: 'Business not found.' } };
+    if (!business.owner.equals(userId)) {
+      return { status: 403, error: { code: 'A1', message: 'User not authorized.' } };
+    }
+    const res = await Promise.all([this.removeVideoFromBusiness(business, videoId), videoService.deleteVideo(videoId)]);
+    return res[1];
+  }
+
+  private async removeVideoFromBusiness(business: IBusiness, videoId: string): Promise<void> {
+    const storyIndex = business.media.stories.videos.findIndex((id) => id.equals(videoId));
+    if (storyIndex !== -1) {
+      business.media.stories.videos.splice(storyIndex, 1);
+    }
+    await business.save();
   }
 
   private async removeImageFromBusiness(business: IBusiness, imageId: string): Promise<void> {
