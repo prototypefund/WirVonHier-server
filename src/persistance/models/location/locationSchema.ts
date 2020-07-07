@@ -27,3 +27,8 @@ export const LocationSchema = new Schema<ILocation>({
 });
 
 LocationSchema.index({ geo: '2dsphere' });
+
+// Document middlewares
+LocationSchema.pre<ILocation>('save', function () {
+  this.modifiedAt = Date.now().toLocaleString();
+});

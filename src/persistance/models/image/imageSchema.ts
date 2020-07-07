@@ -40,7 +40,7 @@ export const ImageSchema = new Schema<IImage>({
   },
 });
 
-// Document post Hook
-ImageSchema.post<IImage>('save', function (doc) {
-  doc.modifiedAt = new Date(Date.now()).toUTCString();
+// Document middlewares
+ImageSchema.pre<IImage>('save', function () {
+  this.modifiedAt = Date.now().toLocaleString();
 });

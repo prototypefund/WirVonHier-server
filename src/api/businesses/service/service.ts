@@ -101,7 +101,7 @@ class BusinessesService {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { _id, ...adjustedUpdates } = updates;
       const updatedBusinessData = await this.updateBusinessData(adjustedUpdates);
-      const updatedBusiness = await business.updateOne(updatedBusinessData);
+      const updatedBusiness = await business.updateOne(updatedBusinessData).exec();
       return { status: 200, updatedBusiness, message: 'Business updated.' };
     } catch (e) {
       console.log(e);
@@ -180,8 +180,6 @@ class BusinessesService {
    */
   public async createBusinessVideo(options: ICreateBusinessVideoOptions): Promise<ICreateBusinessVideoResult> {
     const { businessId, title, description = '', size, userId } = options;
-
-    console.log('options in businessService: ', options);
     const user = await User.findById(userId);
     if (!user) {
       return { status: 403, error: { code: 'A0', message: 'Not authenticated.' } };

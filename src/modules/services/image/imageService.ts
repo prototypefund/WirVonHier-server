@@ -1,5 +1,5 @@
 import { ICreateImagePayload, UpdateImagePayload } from './imageService.types';
-import { jobs } from 'modules';
+import { jobs } from 'modules/jobs';
 import { config } from 'config';
 import mongoose from 'mongoose';
 import cloudinary from 'cloudinary';
@@ -37,7 +37,7 @@ class ImageService {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { _id, ...adjustedUpdates } = updates;
-    await image.update(adjustedUpdates);
+    await image.updateOne(adjustedUpdates).exec();
     return { status: 200 };
   }
 

@@ -21,6 +21,10 @@ interface ICreateVideoError {
   };
 }
 
+export type IVideoUpdates = {
+  [Key in keyof IVideo]?: IVideo[Key];
+};
+
 export type IUpdateVideoResponse = IUpdateVideoSuccess | IUpdateVideoError;
 interface IUpdateVideoSuccess {
   status: 200;

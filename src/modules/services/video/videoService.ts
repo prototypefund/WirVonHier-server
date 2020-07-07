@@ -1,4 +1,4 @@
-import { jobs } from 'modules';
+import { jobs } from 'modules/jobs';
 import {
   ICreateVideoOptions,
   ICreateVideoResponse,
@@ -16,13 +16,12 @@ import axios from 'axios';
 class VideoService {
   public async createVideo(options: ICreateVideoOptions): Promise<ICreateVideoResponse> {
     const { uri, title, description, businessId } = options;
-    console.log('options in createVideo: ', options);
     try {
       const video = await Video.create({
         vimeoURI: uri,
         title,
         description,
-        status: 'transcoding',
+        status: 'init',
         type: 'story',
         businessId,
       });
@@ -70,7 +69,7 @@ class VideoService {
       if (typeof updates[key] === 'undefined' || updates[key] === null) return res;
       return { ...res, [key]: updates[key] };
     }, {} as Partial<IVideo>);
-    await video.update(adjustedUpdates);
+    await video.updateOne(adjustedUpdates).exec();
     return { status: 200 };
   }
 
@@ -101,6 +100,7 @@ class VideoService {
 
   public async setDownloadURL(video: IVideo): Promise<void> {
     try {
+      if (!video || video.url) return;
       const { data } = await axios.get<IVimeoRequestDownloadURLResponse>(`https://api.vimeo.com${video.vimeoURI}`, {
         headers: {
           Authorization: `Bearer ${config.vimeo.accessToken}`,

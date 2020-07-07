@@ -1,6 +1,6 @@
-import { Schema, Types } from 'mongoose';
+import { Schema, Types, Query } from 'mongoose';
 import { IVideo } from '.';
-import { videoService } from 'modules';
+import { videoService } from 'modules/services';
 
 export const VideoSchema = new Schema<IVideo>({
   createdAt: {
@@ -19,8 +19,6 @@ export const VideoSchema = new Schema<IVideo>({
     type: String,
     required: true,
   },
-
-  // TODO: Should we save the owner here?
   businessId: {
     type: Types.ObjectId,
     ref: 'Business',
@@ -30,7 +28,7 @@ export const VideoSchema = new Schema<IVideo>({
   vimeoURI: String,
   status: {
     type: String,
-    enum: ['complete', 'uploaded', 'transcoding', 'error'],
+    enum: ['complete', 'uploaded', 'transcoding', 'error', 'init'],
   },
   url: {
     type: String,
@@ -38,14 +36,20 @@ export const VideoSchema = new Schema<IVideo>({
   },
 });
 
-// Document post Hook
-VideoSchema.post<IVideo>('save', function (doc) {
-  doc.modifiedAt = new Date(Date.now()).toUTCString();
-
-  if (doc.status === 'uploaded') {
-    videoService.startTranscodingCheck(doc._id);
+VideoSchema.pre<IVideo>(/save/, function () {
+  this.modifiedAt = new Date(Date.now()).toUTCString();
+});
+// We are casting this to any since the Typings are not complete!
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+VideoSchema.post<IVideo>(/updateOne|findOneAndUpdate/, function (this: Query<unknown> & any) {
+  const newStatus = this.get('status');
+  if (newStatus === 'uploaded') {
+    const videoId = this.getFilter()._id;
+    videoService.startTranscodingCheck(videoId);
   }
-  if (doc.status === 'complete' && !doc.url) {
-    videoService.setDownloadURL(doc);
+});
+VideoSchema.post<IVideo>(/save/, function (this: IVideo) {
+  if (this.status === 'complete') {
+    videoService.setDownloadURL(this);
   }
 });

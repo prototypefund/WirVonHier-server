@@ -4,7 +4,7 @@ import { Video } from 'persistance/models';
 import mongoose from 'mongoose';
 import { config } from 'config';
 import axios from 'axios';
-import { videoService } from 'modules';
+import { videoService } from 'modules/services';
 
 interface IVideoTranscodingOptions {
   videoId: string | mongoose.Types.ObjectId;
@@ -12,7 +12,6 @@ interface IVideoTranscodingOptions {
 
 const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<void> => {
   const { videoId } = job.attrs.data;
-
   const video = await Video.findById(videoId);
   if (!video || video.status === 'complete') return job.remove();
 
@@ -33,6 +32,10 @@ const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<vo
         Accept: 'application/vnd.vimeo.*+json;version=3.4',
       },
     });
+    if (response.data.transcode.status === 'in_progress') {
+      video.status = 'transcoding';
+      await video.save();
+    }
     if (response.data.transcode.status === 'complete' && response.data.status === 'available') {
       video.status = 'complete';
       await video.save();

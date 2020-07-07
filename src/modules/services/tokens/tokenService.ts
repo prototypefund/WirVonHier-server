@@ -36,7 +36,7 @@ class TokenService {
     });
   }
 
-  createResetPasswordToken(user: IUser): string {
+  async createResetPasswordToken(user: IUser): Promise<string> {
     const token = JWT.sign(
       {
         id: user._id,
@@ -49,7 +49,7 @@ class TokenService {
       },
     );
 
-    user.update({ changeEmailToken: token });
+    await user.updateOne({ changeEmailToken: token }).exec();
     return token;
   }
 

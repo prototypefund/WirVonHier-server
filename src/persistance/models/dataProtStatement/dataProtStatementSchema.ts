@@ -44,3 +44,8 @@ export const DataProtectionStatementSchema = new Schema<IDataProtStatement>({
     enum: ['de', 'en'],
   },
 });
+
+// Document middlewares
+DataProtectionStatementSchema.pre<IDataProtStatement>('save', function () {
+  this.modifiedAt = Date.now().toLocaleString();
+});

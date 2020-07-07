@@ -102,12 +102,8 @@ UserSchema.statics.findMyBusinesses = function (this: IUserModel, id: string): I
 
 // Document middlewares
 UserSchema.pre<IUser>('save', async function () {
+  this.modifiedAt = Date.now().toLocaleString();
   if (this.isModified('password')) {
     this.password = await hs.hashPassword(this.password);
   }
-});
-
-// Query middlewares
-UserSchema.post<IUser>('save', function (doc) {
-  doc.modifiedAt = Date.now().toLocaleString();
 });

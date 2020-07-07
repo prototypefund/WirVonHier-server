@@ -16,3 +16,8 @@ export const RoleSchema = new Schema<IRole>({
   },
   name: String,
 });
+
+// Document middlewares
+RoleSchema.pre<IRole>('save', function () {
+  this.modifiedAt = Date.now().toLocaleString();
+});

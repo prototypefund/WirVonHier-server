@@ -1,6 +1,6 @@
 import { IUserFilter } from './service.types';
 import { User, IUser } from 'persistance/models';
-import { authService } from 'modules';
+import { authService } from 'modules/services';
 
 class UserService {
   createUsers(users: IUser[]): Promise<IUser[]> {

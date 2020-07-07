@@ -155,7 +155,7 @@ BusinessSchema.pre('validate', function () {
 
 // Document pre Hook
 BusinessSchema.pre<IBusiness>('save', function () {
-  // placeholder
+  this.modifiedAt = Date.now().toLocaleString();
 });
 
 // Document post Hook

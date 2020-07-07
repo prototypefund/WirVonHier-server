@@ -1,6 +1,6 @@
 import { Document, Model, Types } from 'mongoose';
 
-type VideoStatusType = 'complete' | 'uploaded' | 'transcoding' | 'error';
+type VideoStatusType = 'complete' | 'uploaded' | 'transcoding' | 'error' | 'init';
 
 export interface IVideo extends Document {
   _id: Types.ObjectId;

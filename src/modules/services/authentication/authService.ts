@@ -145,7 +145,7 @@ class AuthService {
     return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/verify-email?token=${token}`;
   }
   private async createForgotPasswordLink(user: IUser): Promise<string> {
-    const token = ts.createResetPasswordToken(user);
+    const token = await ts.createResetPasswordToken(user);
     user.resetPasswordToken = token;
     await user.save();
     return `${APP_BASE_URL || 'http://0.0.0.0:8080'}/reset-password?token=${token}`;
