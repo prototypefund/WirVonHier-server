@@ -1,6 +1,5 @@
 import Agenda from 'agenda';
 import mongoose from 'mongoose';
-import { geolocateBusinesses } from './geoserviceAgenda';
 import { imageCleanupJob } from './imageCleanup';
 import { videoTranscodingCheckJob } from './videoTranscodingCheck';
 
@@ -22,7 +21,6 @@ export class Jobs {
 
   public async start(): Promise<void> {
     await this.agenda.start();
-    geolocateBusinesses(this.agenda);
     imageCleanupJob(this.agenda);
     videoTranscodingCheckJob(this.agenda);
   }
