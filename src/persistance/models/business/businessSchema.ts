@@ -17,7 +17,7 @@ export const BusinessSchema = new Schema<IBusiness>(
     },
     active: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     verification: {
       email: {
