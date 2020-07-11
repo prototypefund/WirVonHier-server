@@ -2,7 +2,7 @@ import joi from '@hapi/joi';
 
 const envVarsSchema = joi
   .object({
-    NODE_ENV: joi.string().allow(['development', 'production', 'test', 'provision']).required(),
+    NODE_ENV: joi.string().allow('development', 'production', 'test', 'provision').required(),
     PORT: joi.number().required(),
     MONGO_USER: joi.string().required(),
     MONGO_PASSWORD: joi.string().required(),
