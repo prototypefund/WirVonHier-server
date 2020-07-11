@@ -1,5 +1,5 @@
-import Joi from 'joi';
-import { imageService as is, ICreateImagePayload, UpdateImagePayload } from 'modules/services';
+import Joi from '@hapi/joi';
+import { imageService as is } from 'modules/services';
 import { RequestHandler } from 'express';
 
 export class ImagesController {
@@ -13,7 +13,7 @@ export class ImagesController {
       description: Joi.string(),
       imageType: Joi.valid('logo', 'profile', 'story'),
     });
-    const { error, value } = Joi.validate<ICreateImagePayload[]>(req.body, schema);
+    const { error, value } = schema.validate(req.body);
     if (error) return res.status(406).end(error.details[0].message);
     const { status, message, images } = await is.createImages(userId, value);
     return res.status(status).json({ message, images }).end();
@@ -22,15 +22,15 @@ export class ImagesController {
   public updateImage: RequestHandler = async (req, res): Promise<void> => {
     if (!req.token || !req.token.roles || !req.token.roles.includes('admin')) return res.status(401).end();
     const imageId = req.params.id;
-    const schema = {
+    const schema = Joi.object({
       _id: Joi.string(),
       title: Joi.string(),
       businessId: Joi.string(),
       description: Joi.string(),
       imageType: Joi.valid('logo', 'profile', 'story'),
       uploadVerified: Joi.bool(),
-    };
-    const { error, value } = Joi.validate<UpdateImagePayload>(req.body, schema);
+    });
+    const { error, value } = schema.validate(req.body);
     if (error) return res.status(406).end(error.details[0].message);
     const { status, message } = await is.updateImage(imageId, value);
     return res.status(status).json({ message }).end();

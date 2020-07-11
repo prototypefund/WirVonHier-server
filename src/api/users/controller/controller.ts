@@ -1,5 +1,5 @@
 import { Request, Response } from 'express-serve-static-core';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { IUserController } from './controller.types';
 import { userService as us } from '../service';
 
@@ -59,10 +59,10 @@ export class UserController implements IUserController {
       return;
     }
     if (req.token.type && req.token.type === 'changeEmail') {
-      const schema = Joi.object().keys({
+      const schema = Joi.object({
         newPassword: Joi.string().required(),
       });
-      const { error, value } = Joi.validate<{ newPassword: string }>(req.body, schema);
+      const { error, value } = schema.validate(req.body);
       if (error) {
         res.status(400).send(error.details[0].message);
       }

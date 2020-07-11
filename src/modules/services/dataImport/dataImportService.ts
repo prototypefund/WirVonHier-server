@@ -1,17 +1,17 @@
 import { IBusiness, User, Business } from 'persistance/models';
 import cryptoRandomString from 'crypto-random-string';
-import Joi from 'joi';
+import Joi from '@hapi/joi';
 import { transformDataService } from '../transformData';
 import { IDataImportBody, IDataImportResponse } from './dataImportService.types';
 import { Types } from 'mongoose';
 
 export class DataImportService {
   async businessImport(body: IDataImportBody): Promise<IDataImportResponse> {
-    const schema = Joi.object().keys({
+    const schema = Joi.object({
       type: Joi.string().allow(['csv', 'json']),
       businesses: Joi.required(),
     });
-    const { error, value } = Joi.validate<IDataImportBody>(body, schema);
+    const { error, value } = schema.validate(body);
     if (error) {
       return { status: 400, message: error.details[0].message };
     }

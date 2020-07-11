@@ -1,9 +1,9 @@
 import { Request, RequestHandler } from 'express-serve-static-core';
-import * as Joi from 'joi';
+import * as Joi from '@hapi/joi';
 import { User } from 'persistance/models';
 import { tokenService as ts } from 'modules/services';
 import { hashingService as hs } from 'modules/services';
-import { IAuthResponse, ILocalRegisterBody, IAuthErrorResponse } from '../../authService.types';
+import { IAuthResponse, IAuthErrorResponse } from '../../authService.types';
 import { DataProtStatement } from 'persistance/models';
 import { authService } from 'modules/services/authentication';
 
@@ -14,7 +14,7 @@ export async function register(this: typeof authService, req: Request): Promise<
     dataProtStatement: Joi.string().required(),
     dataProtStatementLang: Joi.string().allow(['en', 'de']).required(),
   });
-  const { error, value } = Joi.validate<ILocalRegisterBody>(req.body, schema);
+  const { error, value } = schema.validate(req.body);
   if (error) {
     return { error: { status: 406, message: error.details[0].message } };
   }
@@ -46,7 +46,7 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
     email: Joi.string().required(),
     password: Joi.string().required(),
   });
-  const { error } = Joi.validate<{ email: string; password: string }>(req.body, schema);
+  const { error } = schema.validate(req.body);
   if (error) {
     return { error: { status: 406, message: error.details[0].message } };
   }
@@ -71,7 +71,7 @@ export async function requestNewPassword(
   const schema = Joi.object().keys({
     email: Joi.string().required(),
   });
-  const { error, value } = Joi.validate<{ email: string }>(req.body, schema);
+  const { error, value } = schema.validate(req.body);
   if (error) {
     return { status: 406, message: error.details[0].message };
   }
@@ -94,7 +94,7 @@ export async function resetPassword(req: Request): Promise<{ status: number; mes
     password: Joi.string().required(),
     token: Joi.string().required(),
   });
-  const { error, value } = Joi.validate<{ password: string; token: string }>(req.body, schema);
+  const { error, value } = schema.validate(req.body);
   if (error) {
     return { status: 406, message: error.details[0].message };
   }
