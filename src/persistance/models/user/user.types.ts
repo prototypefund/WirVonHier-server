@@ -15,7 +15,7 @@ interface IUserSchema extends Document {
   lastName?: string;
   username?: string;
   password: string;
-  acceptedDataProtStatement: Array<IDataProtStatement['_id']>;
+  acceptedDataProtStatements: Array<IDataProtStatement['_id']>;
   // leave the company field
   friends: Types.Array<string>;
   verification: {

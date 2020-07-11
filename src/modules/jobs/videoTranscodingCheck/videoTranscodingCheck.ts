@@ -13,13 +13,17 @@ interface IVideoTranscodingOptions {
 const jobHandler = async (job: Agenda.Job<IVideoTranscodingOptions>): Promise<void> => {
   const { videoId } = job.attrs.data;
   const video = await Video.findById(videoId);
-  if (!video || video.status === 'complete') return job.remove();
+  if (!video || video.status === 'complete') {
+    job.remove();
+    return;
+  }
 
   // Delete Video if upload failed for more than one hour
   if (new Date(video.createdAt) < new Date(Date.now() - 1000 * 60 * 60)) {
     await videoService.deleteVideo(videoId);
     await video.remove();
-    return job.remove();
+    job.remove();
+    return;
   }
 
   try {

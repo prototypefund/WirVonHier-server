@@ -64,7 +64,8 @@ class ImageService {
         if (!business.owner.equals(userId)) {
           return { status: 403, message: 'User not authorized.' };
         }
-        const img = await Image.create(newImage);
+        const img = new Image(newImage);
+        await img.save();
         jobs.agenda.schedule('15 minutes from now', 'image-cleanup', {
           imageId: img._id,
           businessId: img.businessId,

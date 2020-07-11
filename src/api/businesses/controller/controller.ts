@@ -20,7 +20,7 @@ class BusinessesController implements IBusinessesController {
    */
   public allBusinesses: RequestHandler = async function allBusinesses(req: Request, res: Response): Promise<void> {
     const { query } = req;
-    const response = await bs.getFilteredBusinesses(query);
+    const response = await bs.getFilteredBusinesses(query as { [key: string]: string });
     if (response instanceof Error) return res.status(400).end(response.message);
     return res.status(200).json(response).end();
   };

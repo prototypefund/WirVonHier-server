@@ -5,7 +5,8 @@ import { User } from 'persistance/models';
 
 class AuthenticationController implements IAuthenticationController {
   login: RequestHandler = async function login(req, res, next): Promise<void> {
-    const type = req.query.strategy || 'local';
+    const type = typeof req.query.strategy === 'string' && req.query.strategy === 'local' ? 'local' : null;
+    if (!type) return res.status(400).end('No strategy defined.');
     const result = await as.loginUser(type, req, res, next);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
     res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
@@ -15,7 +16,8 @@ class AuthenticationController implements IAuthenticationController {
 
   /* eslint-disable */
   register: RequestHandler = async function login(req, res): Promise<void> {
-    const type = req.query.strategy || 'local';
+    const type = typeof req.query.strategy === 'string' && req.query.strategy === 'local' ? 'local' : null;
+    if (!type) return res.status(400).end('No strategy defined.');
     const result = await as.registerUser(type, req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
     res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });

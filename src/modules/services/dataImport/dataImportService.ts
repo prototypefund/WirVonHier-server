@@ -124,7 +124,8 @@ export class DataImportService {
     for (const email of emails) {
       let user = await User.findOne({ email });
       if (!user) {
-        user = await User.create({ email, password: cryptoRandomString({ length: 16 }) });
+        user = new User({ email, password: cryptoRandomString({ length: 16 }) });
+        await user.save();
       }
       ownerIds.push(user._id);
     }

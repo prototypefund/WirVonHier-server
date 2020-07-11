@@ -19,7 +19,7 @@ export class UserController implements IUserController {
       return;
     }
     const { query } = req;
-    const allUsers = await us.getFilteredUsers(query);
+    const allUsers = await us.getFilteredUsers(query as { [key: string]: string });
     res.status(200).json(allUsers);
   }
 

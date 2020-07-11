@@ -297,12 +297,13 @@ class BusinessesService {
   }
 
   private async processLocation(lngLat: [number, number]): Promise<mongoose.Types.ObjectId | null> {
-    const loc = await Location.create({
+    const loc = new Location({
       geo: {
         type: 'Point',
         coordinates: lngLat,
       },
     });
+    await loc.save();
     return loc._id;
   }
 

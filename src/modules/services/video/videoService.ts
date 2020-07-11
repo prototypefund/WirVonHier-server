@@ -17,7 +17,7 @@ class VideoService {
   public async createVideo(options: ICreateVideoOptions): Promise<ICreateVideoResponse> {
     const { uri, title, description, businessId } = options;
     try {
-      const video = await Video.create({
+      const video = new Video({
         vimeoURI: uri,
         title,
         description,
@@ -25,6 +25,7 @@ class VideoService {
         type: 'story',
         businessId,
       });
+      await video.save();
       return { status: 200, video };
     } catch (e) {
       if (e.response) {

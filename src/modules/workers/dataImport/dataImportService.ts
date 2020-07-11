@@ -144,11 +144,12 @@ export class DataImportService {
     for (const email of emails) {
       let user = await User.findOne({ email });
       if (!user) {
-        user = await User.create({
+        user = new User({
           email,
           password: cryptoRandomString({ length: 16 }),
           acceptedDataProtStatements: ['5e8c68d554213b1c0beb61dc'],
         });
+        user.save();
       }
       ownerIds.push(user._id);
     }
@@ -159,7 +160,8 @@ export class DataImportService {
     for (const pair of coordinates) {
       let location = await Location.findOne({ geo: { type: 'Point', coordinates: [pair[1], pair[0]] } });
       if (!location) {
-        location = await Location.create({ geo: { type: 'Point', coordinates: [pair[1], pair[0]] } });
+        location = new Location({ geo: { type: 'Point', coordinates: [pair[1], pair[0]] } });
+        await location.save();
       }
       locations.push(location._id);
     }

@@ -29,8 +29,8 @@ export async function register(this: typeof authService, req: Request): Promise<
   const { email, password } = value;
   const user = await User.findOne({ email });
   if (user) return { error: { status: 406, message: 'User already exists.' } };
-  const newUser = await User.create({ email, password, acceptedDataProtStatements: [dataProtStatement._id] });
-
+  const newUser = new User({ email, password, acceptedDataProtStatements: [dataProtStatement._id] });
+  await newUser.save();
   await this.sendVerificationEmail(newUser);
 
   // Authentication Token

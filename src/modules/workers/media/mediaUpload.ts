@@ -23,11 +23,12 @@ function uploadImage(path: string): void {
     const fileName = path.split('.')[0].split('/').pop() as string;
     const businessId = fileName.split('_')[1];
     const imageType = fileName.split('_')[2];
-    const image = await Image.create({
+    const image = new Image({
       title: businessId,
       src: result.url,
       publicId: result.public_id,
     });
+    await image.save();
     const business = await Business.findOne({ id: businessId });
     if (!business) return;
     if (imageType.includes('Logo')) {
