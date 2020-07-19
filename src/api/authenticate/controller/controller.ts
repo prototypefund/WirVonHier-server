@@ -2,6 +2,7 @@ import { RequestHandler } from 'express-serve-static-core';
 import { IAuthenticationController } from './controller.types';
 import { authService as as } from 'modules/services';
 import { User } from 'persistance/models';
+import { config } from 'config';
 
 class AuthenticationController implements IAuthenticationController {
   login: RequestHandler = async function login(req, res, next): Promise<void> {
@@ -9,8 +10,8 @@ class AuthenticationController implements IAuthenticationController {
     if (!type) return res.status(400).end('No strategy defined.');
     const result = await as.loginUser(type, req, res, next);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
-    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: config.appDomain });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: config.appDomain });
     return res.status(200).json({ token: result.token }).end();
   };
 
@@ -20,14 +21,14 @@ class AuthenticationController implements IAuthenticationController {
     if (!type) return res.status(400).end('No strategy defined.');
     const result = await as.registerUser(type, req);
     if ('error' in result) return res.status(result.error.status).send(result.error.message).end();
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
-    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: config.appDomain });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: config.appDomain });
     return res.status(200).json({ token: result.token }).end();
   };
 
   logout: RequestHandler = async function logout(_req, res): Promise<void> {
-    res.clearCookie('refresh_token', { httpOnly: true, domain: APP_DOMAIN });
-    res.clearCookie('public_refresh_token', { domain: APP_DOMAIN });
+    res.clearCookie('refresh_token', { httpOnly: true, domain: config.appDomain });
+    res.clearCookie('public_refresh_token', { domain: config.appDomain });
     return res.status(204).end();
   }
 
@@ -44,12 +45,12 @@ class AuthenticationController implements IAuthenticationController {
   refreshToken: RequestHandler = async function refreshToken(req, res): Promise<void> {
     const result = await as.refreshToken(req);
     if ('error' in result) {
-      res.clearCookie('refresh_token', { httpOnly: true, domain: APP_DOMAIN });
-      res.clearCookie('public_refresh_token', { domain: APP_DOMAIN });
+      res.clearCookie('refresh_token', { httpOnly: true, domain: config.appDomain });
+      res.clearCookie('public_refresh_token', { domain: config.appDomain });
       return res.status(result.error.status).send(result.error.message).end();
     }
-    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: APP_DOMAIN });
-    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: APP_DOMAIN });
+    res.cookie('refresh_token', result.refreshToken, { httpOnly: true, domain: config.appDomain });
+    res.cookie('public_refresh_token', result.publicRefreshToken, { domain: config.appDomain });
     return res.status(200).json({ token: result.token }).end();
   }
 

@@ -1,7 +1,10 @@
+import 'dotenv/config';
 import joi from '@hapi/joi';
 
 const envVarsSchema = joi
   .object({
+    APP_BASE_URL: joi.string().required(),
+    APP_DOMAIN: joi.string().required(),
     NODE_ENV: joi.string().allow('development', 'production', 'test', 'provision').required(),
     PORT: joi.number().required(),
     MONGO_USER: joi.string().required(),
@@ -29,6 +32,8 @@ if (error) {
 
 export const config = {
   env: envVars.NODE_ENV,
+  appBaseURL: envVars.APP_BASE_URL,
+  appDomain: envVars.APP_DOMAIN,
   isTest: envVars.NODE_ENV === 'test',
   isDevelopment: envVars.NODE_ENV === 'development',
   server: {

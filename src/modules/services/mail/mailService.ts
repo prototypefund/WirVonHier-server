@@ -11,7 +11,7 @@ const dummyMailer = {
     return `Email sent to ${data.to}`;
   },
 };
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = config.env === 'production';
 const sendgrid = isProd ? sgMail : dummyMailer;
 export interface IMailOptions {
   from: string;
