@@ -118,3 +118,4 @@ temp/
 **/.ssh/known_hosts
 
 # End of https://www.gitignore.io/api/ssh,node
+secrets
