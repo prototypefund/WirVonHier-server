@@ -1,5 +1,4 @@
 name: CI/CD - Server
-description: Builds docker containers for the server on every PUSH/PR to production 
 
 on:
   push:
