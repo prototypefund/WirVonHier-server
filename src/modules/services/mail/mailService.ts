@@ -22,7 +22,12 @@ export interface IMailOptions {
 
 export class MailService {
   constructor() {
-    sendgrid.setApiKey(`${config.sendgrid.apiKey}`);
+    try {
+      sendgrid.setApiKey(`${config.sendgrid.apiKey}`);
+    } catch (e) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      this.send = dummyMailer.send.bind(this) as any;
+    }
   }
 
   send(options: IMailOptions): Promise<[ClientResponse, {}]> {

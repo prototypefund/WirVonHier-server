@@ -10,10 +10,12 @@ export async function mongooseLoader(): Promise<typeof mongoose> {
     useUnifiedTopology: true,
     useCreateIndex: true,
     useFindAndModify: false,
+    serverSelectionTimeoutMS: 120000,
+    connectTimeoutMS: 120000,
+    socketTimeoutMS: 120000,
   };
   try {
     const db = await mongoose.connect(mongoURI, options);
-    // eslint-disable-next-line no-console
     console.log('Successfully Connected mongoDB!');
     return db;
   } catch (err) {

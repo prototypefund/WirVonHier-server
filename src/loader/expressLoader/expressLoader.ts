@@ -34,7 +34,7 @@ export function expressLoader(app: Application): void {
   app.disable('etag');
 
   // configure cross origin resource sharing
-  const corsWhitelist = config.hosts;
+  const corsWhitelist = [config.clientBaseURL];
   app.use(
     cors({
       origin: (requestOrigin, callback) => {

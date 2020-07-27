@@ -1,21 +1,16 @@
-import 'dotenv/config';
 import joi from '@hapi/joi';
 
 const envVarsSchema = joi
   .object({
-    APP_BASE_URL: joi.string().required(),
+    CLIENT_BASE_URL: joi.string().required(),
     APP_DOMAIN: joi.string().required(),
-    NODE_ENV: joi.string().allow('development', 'production', 'test', 'provision').required(),
+    NODE_ENV: joi.string().allow('development', 'production', 'test', 'staging').required(),
     PORT: joi.number().required(),
     MONGO_USER: joi.string().required(),
     MONGO_PASSWORD: joi.string().required(),
     MONGO_PATH: joi.string().required(),
     MONGO_AUTH_SOURCE: joi.string().required(),
     SENDGRID_API_KEY: joi.string().required(),
-    HOST_LOCAL: joi.string().required(),
-    HOST_LOCAL_TWO: joi.string().required(),
-    HOST_TEST: joi.string().required(),
-    HOST_PROD: joi.string().required(),
     CLOUDINARY_CLOUD_NAME: joi.string().required(),
     CLOUDINARY_API_SECRET: joi.string().required(),
     CLOUDINARY_API_KEY: joi.string().required(),
@@ -32,7 +27,7 @@ if (error) {
 
 export const config = {
   env: envVars.NODE_ENV,
-  appBaseURL: envVars.APP_BASE_URL,
+  clientBaseURL: envVars.CLIENT_BASE_URL,
   appDomain: envVars.APP_DOMAIN,
   isTest: envVars.NODE_ENV === 'test',
   isDevelopment: envVars.NODE_ENV === 'development',
@@ -48,7 +43,6 @@ export const config = {
   sendgrid: {
     apiKey: envVars.SENDGRID_API_KEY,
   },
-  hosts: [envVars.HOST_LOCAL_TWO, envVars.HOST_LOCAL, envVars.HOST_PROD, envVars.HOST_TEST],
   cloudinary: {
     cloudName: envVars.CLOUDINARY_CLOUD_NAME,
     apiKey: envVars.CLOUDINARY_API_KEY,

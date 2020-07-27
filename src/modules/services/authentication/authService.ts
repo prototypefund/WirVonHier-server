@@ -143,13 +143,13 @@ class AuthService {
 
   private createVerificationLink(user: IUser): string {
     const token = ts.createVerificationToken(user);
-    return `${config.appBaseURL || 'http://0.0.0.0:8080'}/verify-email?token=${token}`;
+    return `${config.clientBaseURL || 'http://0.0.0.0:8080'}/verify-email?token=${token}`;
   }
   private async createForgotPasswordLink(user: IUser): Promise<string> {
     const token = await ts.createResetPasswordToken(user);
     user.resetPasswordToken = token;
     await user.save();
-    return `${config.appBaseURL || 'http://0.0.0.0:8080'}/reset-password?token=${token}`;
+    return `${config.clientBaseURL || 'http://0.0.0.0:8080'}/reset-password?token=${token}`;
   }
 }
 

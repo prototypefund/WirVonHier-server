@@ -6,13 +6,20 @@ import cloudinary from 'cloudinary';
 import { Image, Business, IImage } from 'persistance/models';
 
 const cloud = cloudinary.v2;
-cloud.config({
-  cloud_name: config.cloudinary.cloudName, // eslint-disable-line @typescript-eslint/camelcase
-  api_key: config.cloudinary.apiKey, // eslint-disable-line @typescript-eslint/camelcase
-  api_secret: config.cloudinary.apiSecret, // eslint-disable-line @typescript-eslint/camelcase
-});
 
 class ImageService {
+  constructor() {
+    try {
+      cloud.config({
+        cloud_name: config.cloudinary.cloudName, // eslint-disable-line @typescript-eslint/camelcase
+        api_key: config.cloudinary.apiKey, // eslint-disable-line @typescript-eslint/camelcase
+        api_secret: config.cloudinary.apiSecret, // eslint-disable-line @typescript-eslint/camelcase
+      });
+    } catch (e) {
+      console.log('Cloudinary config failed: ', e);
+    }
+  }
+
   public async createImage(newImageData: ICreateImagePayload): Promise<IImage | null> {
     try {
       const image = new Image(newImageData);
