@@ -64,12 +64,12 @@ jobs:
 
       - name: Update Docker Secrets
         run: |
-          docker secret rm test_mongo_user
-          docker secret rm test_mongo_password
-          docker secret rm test_sendgrid_api_key
-          docker secret rm test_cloudinary_api_key
-          docker secret rm test_cloudinary_api_secret
-          docker secret rm test_vimeo_access_token
+          docker secret rm test_mongo_user || 0
+          docker secret rm test_mongo_password || 0
+          docker secret rm test_sendgrid_api_key || 0
+          docker secret rm test_cloudinary_api_key || 0
+          docker secret rm test_cloudinary_api_secret || 0
+          docker secret rm test_vimeo_access_token || 0
 
           echo "${{ secrets.MONGO_USER }}" | docker secret create test_mongo_user -
           echo "${{ secrets.MONGO_PASSWORD }}" | docker secret create test_mongo_password -
