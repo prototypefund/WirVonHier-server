@@ -50,16 +50,16 @@ jobs:
       - name: SET ssh keys
         run: |
           mkdir "$HOME/.ssh"
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
-          chmod 600 "$HOME/.ssh/id_rsa"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/wvh_rsa"
+          chmod 600 "$HOME/.ssh/wvh_rsa"
       
       - name: SSH-agent
         run: |
           eval $(ssh-agent)
-          ssh-add "$HOME/.ssh/id_rsa"
+          ssh-add "$HOME/.ssh/wvh_rsa"
       
       - name: read
-        run: cat "$HOME/.ssh/id_rsa"
+        run: cat "$HOME/.ssh/wvh_rsa"
 
         # run: |
         #   sudo mkdir "$HOME/.ssh"
