@@ -32,8 +32,10 @@ jobs:
 
       - name: Tag Image
         run: |
-          tag="test-$(date +%secrets)""
+          tag="test-$(date +%secrets)"
           echo $tag
           docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:$tag"
           docker image ls
           docker push "${{ secrets.DOCKER_ORGANIZATION }}/server:$tag"
+      - name: echo
+        run: echo $tag
