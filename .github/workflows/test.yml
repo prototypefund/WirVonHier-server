@@ -51,6 +51,14 @@ jobs:
         run: |
           mkdir "$HOME/.ssh"
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
+      
+      - name: SSH-agent
+        run: |
+          eval $(ssh-agent)
+          ssh-add "$HOME/.ssh/id_rsa"
+      
+      - name: read
+        - run: cat "$HOME/.ssh/id_rsa"
 
         # run: |
         #   sudo mkdir "$HOME/.ssh"
