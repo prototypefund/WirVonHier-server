@@ -50,8 +50,9 @@ jobs:
       - name: SET ssh keys
         run: |
           sudo mkdir "$HOME/.ssh"
-          sudo printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
-          sudo chmod 600 "$HOME/.ssh/id_rsa"
+          sudo chown $USER "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
+          chmod 600 "$HOME/.ssh/id_rsa"
           eval $(ssh-agent)
           ssh-add "$HOME/.ssh/id_rsa"
           sudo printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_PUBLIC_KEY }}" > /etc/ssh/ssh_known_hosts
