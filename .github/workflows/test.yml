@@ -48,7 +48,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get install openssh-client
 
       - name: SET ssh keys
-        run: mkdir "$HOME/.ssh"
+        run: |
+          mkdir "$HOME/.ssh"
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
 
         # run: |
         #   sudo mkdir "$HOME/.ssh"
