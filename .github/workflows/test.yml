@@ -44,6 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: whoami
+        runs: whoami
+      
+      - name: Update
+        runs: sudo apt-get update
+
       - name: Install Open SSH
         run: apt-get update && apt-get install openssh-client
 
