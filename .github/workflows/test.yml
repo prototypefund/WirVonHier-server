@@ -6,77 +6,35 @@ on:
       - 'test'
 
 jobs:
-  # test:
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: node:12.18.2-alpine3.12
-
-  #   steps:
-  #   - name: Checkout
-  #     uses: actions/checkout@v2
-
-  #   - name: Install dependencies
-  #     run: npm install # should run npm run test next
-  
-  # docker:
-  #   runs-on: ubuntu-latest
-  #   needs: test
-  #   steps:
-  #     - uses: actions/checkout@v2
-
-  #     - name: Docker Login
-  #       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
-
-  #     - name: Build Image
-  #       run: docker build -t server .
-
-  #     - name: Tag Image
-  #       run: |
-  #         docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:test-${{ github.sha }}
-
-  #     - name: Push Image
-  #       run: |
-  #         docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:test-${{ github.sha }}
-
-  redeploy: # need to update secrets on server just to make sure they are up-to-date
+  test:
     runs-on: ubuntu-latest
-    # needs: docker
+    container:
+      image: node:12.18.2-alpine3.12
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: npm install # should run npm run test next
+  
+  docker:
+    runs-on: ubuntu-latest
+    needs: test
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install Open SSH
-        run: sudo apt-get update && sudo apt-get install openssh-client
+      - name: Docker Login
+        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: SET ssh keys
+      - name: Build Image
+        run: docker build -t server .
+
+      - name: Tag Image
         run: |
-          mkdir "$HOME/.ssh"
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}a" > "$HOME/.ssh/id_rsa"
-          chmod 600 "$HOME/.ssh/id_rsa"
-          eval $(ssh-agent)
-          ssh-add "$HOME/.ssh/id_rsa"
-          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_SERVER_KEY }}" > "$HOME/.ssh/known_hosts"
+          now=$(date)
+          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:test-$now
 
-
-      - name: Set Docker Remote Context
+      - name: Push Image
         run: |
-          docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
-          docker context use wirvonhier
-
-      - name: Update Docker Secrets
-        run: |
-          docker secret rm test_mongo_user || true
-          docker secret rm test_mongo_password || true
-          docker secret rm test_sendgrid_api_key || true
-          docker secret rm test_cloudinary_api_key || true
-          docker secret rm test_cloudinary_api_secret || true
-          docker secret rm test_vimeo_access_token || true
-
-          echo "${{ secrets.MONGO_USER }}" | docker secret create test_mongo_user -
-          echo "${{ secrets.MONGO_PASSWORD }}" | docker secret create test_mongo_password -
-          echo "${{ secrets.SENDGRID_API_KEY }}" | docker secret create test_sendgrid_api_key -
-          echo "${{ secrets.CLOUDINARY_API_KEY }}" | docker secret create test_cloudinary_api_key -
-          echo "${{ secrets.CLOUDINARY_API_SECRET }}" | docker secret create test_cloudinary_api_secret -
-          echo "${{ secrets.VIMEO_ACCESS_TOKEN }}" | docker secret create test_vimeo_access_token -
-
-      # - name: Update Service
-      #   run: docker service update server_test # HOW to get right image tag?
+          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:test-$now

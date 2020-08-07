@@ -32,44 +32,11 @@ jobs:
         
       - name: Tags
         run: |
-          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:release-${{ github.sha }}
+          now=$(date)
+          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now
           docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
 
       - name: Push
         run: |
-          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:release-${{ github.sha }}
+          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now
           docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
-
-  redeploy: # need to update secrets on server just to make sure they are up-to-date
-    runs-on: ubuntu-latest
-    needs: docker
-    steps:
-      - uses: action/checkout@v2
-
-      - name: SET ssh keys
-        run: |
-          mkdir "$HOME/.ssh"
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
-          chmod 600 "$HOME/.ssh/id_rsa"
-          eval $(ssh-agent)
-          ssh-add "$HOME/.ssh/id_rsa"
-
-          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "$INPUT_SSH_PUBLIC_KEY" > /etc/ssh/ssh_known_hosts
-
-      - name: Create & Use Docker Remote Context
-        run: | 
-          docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
-          docker context use wirvonhier
-
-      - name: Update Docker Secrets
-        run: |
-          echo "${{ secrets.MONGO_USER }} | docker secret create mongo_user -
-          echo "${{ secrets.MONGO_PASSWORD }} | docker secret create mongo_password -
-          echo "${{ secrets.SENDGRID_API_KEY }} | docker secret create sendgrid_api_key -
-          echo "${{ secrets.CLOUDINARY_API_KEY }} | docker secret create cloudinary_api_key -
-          echo "${{ secrets.CLOUDINARY_API_SECRET }} | docker secret create cloudinary_api_secret -
-          echo "${{ secrets.VIMEO_ACCESS_TOKEN }} | docker secret create vimeo_access_token -
-          echo "${{ secrets.GOOGLE_MAPS_API_KEY }} | docker secret create google_maps_api_key -
-
-      - name: Update Service
-        run: docker service update server # HOW to get right image tag?
