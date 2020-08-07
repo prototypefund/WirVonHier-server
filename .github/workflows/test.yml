@@ -62,7 +62,7 @@ jobs:
         run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://wvh@185.185.26.56"
 
       - name: TEST Remote
-        run: docker --context wirvonhier secret ls
+        run: docker --context wirvonhier image ls
 
       # - name: Update Docker Secrets
       #   run: |
