@@ -66,13 +66,12 @@ jobs:
           ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
           args: |
             ps
-            echo "${{ secrets.MONGO_USER }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create mongo_user -
-            echo "${{ secrets.MONGO_PASSWORD }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create mongo_password -
-            echo "${{ secrets.SENDGRID_API_KEY }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create sendgrid_api_key -
-            echo "${{ secrets.CLOUDINARY_API_KEY }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create cloudinary_api_key -
-            echo "${{ secrets.CLOUDINARY_API_SECRET }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create cloudinary_api_secret -
-            echo "${{ secrets.VIMEO_ACCESS_TOKEN }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create vimeo_access_token -
-            echo "${{ secrets.GOOGLE_MAPS_API_KEY }} | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create google_maps_api_key -
+            echo "${{ secrets.MONGO_USER }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create mongo_user -
+            echo "${{ secrets.MONGO_PASSWORD }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create mongo_password -
+            echo "${{ secrets.SENDGRID_API_KEY }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create sendgrid_api_key -
+            echo "${{ secrets.CLOUDINARY_API_KEY }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create cloudinary_api_key -
+            echo "${{ secrets.CLOUDINARY_API_SECRET }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create cloudinary_api_secret -
+            echo "${{ secrets.VIMEO_ACCESS_TOKEN }}" | docker --host ssh://${{ secrets.DOCKER_HOST }} secret create vimeo_access_token -
 
       # - name: Update Service
       #   run: docker service update server_test # HOW to get right image tag?
