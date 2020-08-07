@@ -51,13 +51,11 @@ jobs:
         run: |
           mkdir "$HOME/.ssh"
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
+          printf '%s\n' "${{ secrets.SSH_PUBLIC_KEY }}" > "$HOME/.ssh/id_rsa.pub"
           chmod 600 "$HOME/.ssh/id_rsa"
           eval $(ssh-agent)
           ssh-add "$HOME/.ssh/id_rsa"
-          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_PUBLIC_KEY }}" > "$HOME/.ssh/known_hosts"
-
-      - name: Try
-        run: cat "$HOME/.ssh/known_hosts"
+          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_SERVER_KEY }}" > "$HOME/.ssh/known_hosts"
 
       # - name: Set Docker Remote Context
       #   run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
