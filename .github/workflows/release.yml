@@ -33,10 +33,10 @@ jobs:
       - name: Tags
         run: |
           now=$(date)
-          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now
-          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
+          docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now"
+          docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:latest"
 
       - name: Push
         run: |
-          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now
+          docker push "${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now"
           docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
