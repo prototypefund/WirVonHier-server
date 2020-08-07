@@ -6,17 +6,17 @@ on:
       - 'test'
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    container:
-      image: node:12.18.2-alpine3.12
+  # test:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: node:12.18.2-alpine3.12
 
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+  #   steps:
+  #   - name: Checkout
+  #     uses: actions/checkout@v2
 
-    - name: Install dependencies
-      run: npm install # should run npm run test next
+  #   - name: Install dependencies
+  #     run: npm install # should run npm run test next
   
   # docker:
   #   runs-on: ubuntu-latest
