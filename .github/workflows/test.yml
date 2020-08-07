@@ -32,7 +32,7 @@ jobs:
 
       - name: Tag Image
         run: |
-          now=$(date +%s)
+          now=$(date +%secrets)
           docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:test-$now
 
       - name: Push Image
