@@ -64,12 +64,19 @@ jobs:
 
       - name: Update Docker Secrets
         run: |
-          echo "${{ secrets.MONGO_USER }}" | docker secret create mongo_user -
-          echo "${{ secrets.MONGO_PASSWORD }}" | docker secret create mongo_password -
-          echo "${{ secrets.SENDGRID_API_KEY }}" | docker secret create sendgrid_api_key -
-          echo "${{ secrets.CLOUDINARY_API_KEY }}" | docker secret create cloudinary_api_key -
-          echo "${{ secrets.CLOUDINARY_API_SECRET }}" | docker secret create cloudinary_api_secret -
-          echo "${{ secrets.VIMEO_ACCESS_TOKEN }}" | docker secret create vimeo_access_token -
+          docker secret rm test_mongo_user
+          docker secret rm test_mongo_password
+          docker secret rm test_sendgrid_api_key
+          docker secret rm test_cloudinary_api_key
+          docker secret rm test_cloudinary_api_secret
+          docker secret rm test_vimeo_access_token
+
+          echo "${{ secrets.MONGO_USER }}" | docker secret create test_mongo_user -
+          echo "${{ secrets.MONGO_PASSWORD }}" | docker secret create test_mongo_password -
+          echo "${{ secrets.SENDGRID_API_KEY }}" | docker secret create test_sendgrid_api_key -
+          echo "${{ secrets.CLOUDINARY_API_KEY }}" | docker secret create test_cloudinary_api_key -
+          echo "${{ secrets.CLOUDINARY_API_SECRET }}" | docker secret create test_cloudinary_api_secret -
+          echo "${{ secrets.VIMEO_ACCESS_TOKEN }}" | docker secret create test_vimeo_access_token -
 
       # - name: Update Service
       #   run: docker service update server_test # HOW to get right image tag?
