@@ -40,7 +40,7 @@ jobs:
 
   redeploy: # need to update secrets on server just to make sure they are up-to-date
     runs-on: ubuntu-latest
-    needs: docker
+    # needs: docker
     steps:
       - uses: actions/checkout@v2
 
