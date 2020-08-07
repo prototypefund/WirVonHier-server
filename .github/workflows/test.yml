@@ -58,8 +58,10 @@ jobs:
           eval $(ssh-agent)
           ssh-add "$HOME/.ssh/wvh_rsa"
 
+      # - name: Set Docker Remote Context
+      #   run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
       - name: Set Docker Remote Context
-        run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
+        run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://wvh@185.185.26.56"
 
       - name: TEST Remote
         run: docker --context wirvonhier secret ls
