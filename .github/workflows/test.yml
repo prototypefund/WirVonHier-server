@@ -45,7 +45,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Install Open SSH
-        run: apt install --no-cache openssh-client
+        run: apt-get update && apt-get install openssh-client
 
       - name: SET ssh keys
         run: |
