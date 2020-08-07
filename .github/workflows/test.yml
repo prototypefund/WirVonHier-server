@@ -1,4 +1,4 @@
-name: Release - Server - Test, Build & Redeploy
+name: Test - Server - Test, Build & Delploy on test.wirvonhier.net
 
 on:
   push:
@@ -18,33 +18,31 @@ jobs:
     - name: Install dependencies
       run: npm install # should run npm run test next
   
-  docker:
-    runs-on: ubuntu-latest
-    needs: test
-    steps:
-      - uses: actions/checkout@v2
+  # docker:
+  #   runs-on: ubuntu-latest
+  #   needs: test
+  #   steps:
+  #     - uses: actions/checkout@v2
 
-      - name: Docker Login
-        run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
+  #     - name: Docker Login
+  #       run: docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build
-        run: docker build -t server .
-        
-      - name: Tags
-        run: |
-          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:release-${{ github.sha }}
-          docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
+  #     - name: Build Image
+  #       run: docker build -t server .
 
-      - name: Push
-        run: |
-          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:release-${{ github.sha }}
-          docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:latest
+  #     - name: Tag Image
+  #       run: |
+  #         docker tag server ${{ secrets.DOCKER_ORGANIZATION }}/server:test-${{ github.sha }}
+
+  #     - name: Push Image
+  #       run: |
+  #         docker push ${{ secrets.DOCKER_ORGANIZATION }}/server:test-${{ github.sha }}
 
   redeploy: # need to update secrets on server just to make sure they are up-to-date
     runs-on: ubuntu-latest
     needs: docker
     steps:
-      - uses: action/checkout@v2
+      - uses: actions/checkout@v2
 
       - name: SET ssh keys
         run: |
@@ -53,7 +51,6 @@ jobs:
           chmod 600 "$HOME/.ssh/id_rsa"
           eval $(ssh-agent)
           ssh-add "$HOME/.ssh/id_rsa"
-
           printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_PUBLIC_KEY }}" > /etc/ssh/ssh_known_hosts
 
       - name: Create & Use Docker Remote Context
