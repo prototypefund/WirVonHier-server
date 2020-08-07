@@ -58,7 +58,7 @@ jobs:
           ssh-add "$HOME/.ssh/id_rsa"
       
       - name: read
-        - run: cat "$HOME/.ssh/id_rsa"
+        run: cat "$HOME/.ssh/id_rsa"
 
         # run: |
         #   sudo mkdir "$HOME/.ssh"
