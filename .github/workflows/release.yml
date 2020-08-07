@@ -32,7 +32,7 @@ jobs:
         
       - name: Tags
         run: |
-          now=$(date)
+          now=$(date +%s)
           docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:release-$now"
           docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:latest"
 
