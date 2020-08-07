@@ -60,18 +60,15 @@ jobs:
       - name: Set Docker Remote Context
         run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
 
-      - name: TEST Remote
-        run: docker --context wirvonhier image ls
-
-      # - name: Update Docker Secrets
-      #   run: |
-      #     echo "${{ secrets.MONGO_USER }} | docker --context wirvonhier secret create mongo_user -
-      #     echo "${{ secrets.MONGO_PASSWORD }} | docker --context wirvonhier secret create mongo_password -
-      #     echo "${{ secrets.SENDGRID_API_KEY }} | docker --context wirvonhier secret create sendgrid_api_key -
-      #     echo "${{ secrets.CLOUDINARY_API_KEY }} | docker --context wirvonhier secret create cloudinary_api_key -
-      #     echo "${{ secrets.CLOUDINARY_API_SECRET }} | docker --context wirvonhier secret create cloudinary_api_secret -
-      #     echo "${{ secrets.VIMEO_ACCESS_TOKEN }} | docker --context wirvonhier secret create vimeo_access_token -
-      #     echo "${{ secrets.GOOGLE_MAPS_API_KEY }} | docker --context wirvonhier secret create google_maps_api_key -
+      - name: Update Docker Secrets
+        run: |
+          echo "${{ secrets.MONGO_USER }} | docker --context wirvonhier secret create mongo_user -
+          echo "${{ secrets.MONGO_PASSWORD }} | docker --context wirvonhier secret create mongo_password -
+          echo "${{ secrets.SENDGRID_API_KEY }} | docker --context wirvonhier secret create sendgrid_api_key -
+          echo "${{ secrets.CLOUDINARY_API_KEY }} | docker --context wirvonhier secret create cloudinary_api_key -
+          echo "${{ secrets.CLOUDINARY_API_SECRET }} | docker --context wirvonhier secret create cloudinary_api_secret -
+          echo "${{ secrets.VIMEO_ACCESS_TOKEN }} | docker --context wirvonhier secret create vimeo_access_token -
+          echo "${{ secrets.GOOGLE_MAPS_API_KEY }} | docker --context wirvonhier secret create google_maps_api_key -
 
       # - name: Update Service
       #   run: docker service update server_test # HOW to get right image tag?
