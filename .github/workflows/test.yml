@@ -56,16 +56,13 @@ jobs:
           ssh-add "$HOME/.ssh/id_rsa"
           printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_PUBLIC_KEY }}" > "$HOME/.ssh/ssh_known_hosts"
 
-      - name: TEST1
-        run: ssh wvh@185.185.26.56
-
       # - name: Set Docker Remote Context
       #   run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://${{ secrets.DOCKER_HOST_USER }}@${{ secrets.DOCKER_HOST }}"
-      # - name: Set Docker Remote Context
-      #   run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://wvh@185.185.26.56"
+      - name: Set Docker Remote Context
+        run: docker context create wirvonhier --default-stack-orchestrator=swarm --docker "host=ssh://wvh@185.185.26.56"
 
-      # - name: TEST Remote
-      #   run: docker --context wirvonhier image ls
+      - name: TEST Remote
+        run: docker --context wirvonhier image ls
 
       # - name: Update Docker Secrets
       #   run: |
