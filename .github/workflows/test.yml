@@ -51,6 +51,7 @@ jobs:
         run: |
           mkdir "$HOME/.ssh"
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
+          chmod 600 "$HOME/.ssh/id_rsa"
       
       - name: SSH-agent
         run: |
