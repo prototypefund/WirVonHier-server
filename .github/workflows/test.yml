@@ -30,7 +30,7 @@ jobs:
       - name: Build Image
         run: docker build -t server .
 
-      - name: Tag Image
+      - name: Tag + Push Image
         run: |
           tag="test-$(date +%s)"
           docker tag server "${{ secrets.DOCKER_ORGANIZATION }}/server:$tag"
