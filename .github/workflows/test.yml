@@ -57,9 +57,11 @@ jobs:
           ssh-add "$HOME/.ssh/id_rsa"
       
       - name: sth
-        run: |
-          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_SERVER_KEY }}" > "$HOME/.ssh/known_hosts"
-          printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_SERVER_KEY }}" | sudo tee "/etc/ssh/ssh_known_hosts"
+        # run: printf '%s %s\n' "${{ secrets.DOCKER_HOST }}" "${{ secrets.SSH_SERVER_KEY }}" > "$HOME/.ssh/known_hosts"
+        run: printf '%s %s\n' "185.185.26.56" "KEY" > "$HOME/.ssh/known_hosts"
+
+      - name: print
+        run: cat "$HOME/.ssh/known_hosts"
 
       - name: test ssh
         run: ssh wvh@185.185.26.56
