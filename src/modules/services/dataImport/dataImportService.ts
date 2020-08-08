@@ -8,7 +8,7 @@ import { Types } from 'mongoose';
 export class DataImportService {
   async businessImport(body: IDataImportBody): Promise<IDataImportResponse> {
     const schema = Joi.object({
-      type: Joi.string().allow(['csv', 'json']),
+      type: Joi.string().allow('csv', 'json'),
       businesses: Joi.required(),
     });
     const { error, value } = schema.validate(body);

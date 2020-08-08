@@ -12,7 +12,7 @@ export async function register(this: typeof authService, req: Request): Promise<
     email: Joi.string().required(),
     password: Joi.string().required(),
     dataProtStatement: Joi.string().required(),
-    dataProtStatementLang: Joi.string().allow(['en', 'de']).required(),
+    dataProtStatementLang: Joi.string().allow('en', 'de').required(),
   });
   const { error, value } = schema.validate(req.body);
   if (error) {
