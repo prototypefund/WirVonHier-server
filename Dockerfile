@@ -40,7 +40,7 @@ RUN apk add curl \
   && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin \
   && trivy filesystem --no-progress /
 
-FROM node:12.18.2-alpine3.12 AS server
+FROM node:12.18.3-alpine3.12 AS server
 
 WORKDIR /home/node/server
 STOPSIGNAL SIGTERM
@@ -53,9 +53,6 @@ USER node
 ENV CLIENT_BASE_URL=https://app.wirvonhier.net \
   NODE_ENV=production \
   APP_DOMAIN=wirvonhier.net \
-  MONGO_INITDB_ROOT_USERNAME=dbrootnamehere \
-  MONGO_INITDB_ROOT_PASSWORD=dbrootpasshere \
-  MONGO_INITDB_DATABASE=wirvonhier \
   PORT=3000 \
   MONGO_USER=dbusernamehere \
   MONGO_PASSWORD=dbuserpasshere \
@@ -72,6 +69,7 @@ RUN npm ci --quiet --only=production && npm cache clean --force --loglevel=error
 
 ## We just need the build to execute the command
 COPY --chown=node:node --from=server-builder /home/node/server/dist ./
+COPY docker-entrypoint.sh /
 
-ENTRYPOINT [ "/bin/bash", "docker-entrypoint.sh" ]
+ENTRYPOINT [ "/bin/sh", "/docker-entrypoint.sh" ]
 CMD [ "node", "-r", "tsconfig-paths/register", "./src/index.js" ]
