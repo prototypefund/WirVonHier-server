@@ -36,7 +36,7 @@ RUN npm run lint \
 # trivy scans our image for vulnerabilities
 # by default it exits with 0 even if vulnerabilities are found
 # optional add "--exit-code 1"
-RUN apk add curl \
+RUN apt-get install curl \
   && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin \
   && trivy filesystem --no-progress /
 
