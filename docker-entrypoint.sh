@@ -10,13 +10,14 @@ file_env() {
 	local fileVar="${var}_FILE"
 	local def="${2:-}"
 	if [ "${!var:-}" ] && [ "${!fileVar:-}" ]; then
-		echo >&2 "warn: both $var and $fileVar are set (but are exclusive)"
+		echo >&2 "error: both $var and $fileVar are set (but are exclusive)"
+		exit 1
 	fi
 	local val="$def"
-	if [ "${!fileVar:-}" ]; then
-		val="$(< "${!fileVar}")"
-	elif [ "${!var:-}" ]; then
+	if [ "${!var:-}" ]; then
 		val="${!var}"
+	elif [ "${!fileVar:-}" ]; then
+		val="$(< "${!fileVar}")"
 	fi
 	export "$var"="$val"
 	unset "$fileVar"

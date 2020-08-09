@@ -50,20 +50,6 @@ RUN chown -R node:node /home/node/server
 
 USER node
 
-ENV CLIENT_BASE_URL=https://app.wirvonhier.net \
-  NODE_ENV=production \
-  APP_DOMAIN=wirvonhier.net \
-  PORT=3000 \
-  MONGO_USER=dbusernamehere \
-  MONGO_PASSWORD=dbuserpasshere \
-  MONGO_PATH=mongo:27017/wirvonhier \
-  MONGO_AUTH_SOURCE=wirvonhier \
-  SENDGRID_API_KEY=apikeyhere \
-  CLOUDINARY_CLOUD_NAME=wirvonhier \
-  CLOUDINARY_API_KEY=apikeyhere \
-  CLOUDINARY_API_SECRET=apisecrethere \
-  VIMEO_ACCESS_TOKEN=vimeotokenhere
-
 COPY --chown=node:node package.json package-lock.json tsconfig.json ./
 RUN npm ci --quiet --only=production && npm cache clean --force --loglevel=error
 
