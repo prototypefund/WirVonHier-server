@@ -2,7 +2,7 @@
 
 
 # alpine build for smaller image size https://hub.docker.com/_/node/
-FROM node:12.18.2-alpine3.12 AS server-builder
+FROM node:12.18.2 AS server-builder
 
 WORKDIR /home/node/server
 
@@ -40,7 +40,7 @@ RUN apk add curl \
   && curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/master/contrib/install.sh | sh -s -- -b /usr/local/bin \
   && trivy filesystem --no-progress /
 
-FROM node:12.18.3-alpine3.12 AS server
+FROM node:12.18.3 AS server
 
 WORKDIR /home/node/server
 STOPSIGNAL SIGTERM
