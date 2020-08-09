@@ -4,7 +4,7 @@ import { config } from 'config';
 export async function mongooseLoader(): Promise<typeof mongoose> {
   const { user, pass, path, authSource } = config.mongo;
   const mongoURI = `mongodb://${user}:${pass}@${path}?authSource=${authSource}`;
-
+  console.log('MONGO URI: ', mongoURI);
   const options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
