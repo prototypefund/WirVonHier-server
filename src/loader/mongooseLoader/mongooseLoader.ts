@@ -19,6 +19,8 @@ export async function mongooseLoader(): Promise<typeof mongoose> {
     console.log('Successfully Connected mongoDB!');
     return db;
   } catch (err) {
+    console.log('mongoURI: ', mongoURI);
+    console.log('Error: ', err);
     throw new Error(`Mongoose error: ${err.message}`);
   }
 }
