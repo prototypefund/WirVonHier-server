@@ -20,7 +20,6 @@ file_env() {
 	elif [ "${!fileVar:-}" ]; then
 		val="$(< "${!fileVar}")"
 	fi
-	echo "setting $var to $val"
 	export "$var"="$val"
 	unset "$fileVar"
 }
@@ -31,5 +30,6 @@ file_env 'SENDGRID_API_KEY'
 file_env 'CLOUDINARY_API_KEY'
 file_env 'CLOUDINARY_API_SECRET'
 file_env 'VIMEO_ACCESS_TOKEN'
+echo "mongo_user = '$MONGO_USER'"
 
 exec "$@"
