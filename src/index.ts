@@ -11,8 +11,8 @@ export class App {
 
     await loader.init(app);
     this.server = app.listen(config.server.port, () => {
-      // eslint-disable-next-line no-console
       console.log(`Server running at port: ${config.server.port}`);
+      console.log(`variables`, process.env);
     });
 
     //
