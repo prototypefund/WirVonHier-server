@@ -10,7 +10,7 @@ export async function mongooseLoader(): Promise<typeof mongoose> {
     useUnifiedTopology: true,
     useCreateIndex: true,
     useFindAndModify: false,
-    serverSelectionTimeoutMS: 120000,
+    serverSelectionTimeoutMS: 60000,
     connectTimeoutMS: 120000,
     socketTimeoutMS: 120000,
   };
