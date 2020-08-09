@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-set -e
+set -euo pipefail
 
 # usage: file_env VAR [DEFAULT]
 #    ie: file_env 'XYZ_DB_PASSWORD' 'example'
@@ -30,6 +30,5 @@ file_env 'SENDGRID_API_KEY'
 file_env 'CLOUDINARY_API_KEY'
 file_env 'CLOUDINARY_API_SECRET'
 file_env 'VIMEO_ACCESS_TOKEN'
-echo "mongo_user = '$MONGO_USER'"
 
 exec "$@"
