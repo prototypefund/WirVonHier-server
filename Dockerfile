@@ -71,5 +71,5 @@ RUN npm ci --quiet --only=production && npm cache clean --force --loglevel=error
 COPY --chown=node:node --from=server-builder /home/node/server/dist ./
 COPY docker-entrypoint.sh /
 
-ENTRYPOINT [ "/bin/sh", "/docker-entrypoint.sh" ]
+ENTRYPOINT [ "/bin/bash", "/docker-entrypoint.sh" ]
 CMD [ "node", "-r", "tsconfig-paths/register", "./src/index.js" ]
