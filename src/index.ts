@@ -12,7 +12,6 @@ export class App {
     await loader.init(app);
     this.server = app.listen(config.server.port, () => {
       console.log(`Server running at port: ${config.server.port}`);
-      console.log(`variables`, process.env);
     });
 
     //
