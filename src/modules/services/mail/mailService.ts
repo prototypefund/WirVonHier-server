@@ -12,7 +12,7 @@ const dummyMailer = {
   },
 };
 const isProd = config.env === 'production';
-const sendgrid = isProd ? sgMail : dummyMailer;
+const sendgrid = isProd ? sgMail : sgMail; //dummyMailer;
 export interface IMailOptions {
   from: string;
   to: string;
