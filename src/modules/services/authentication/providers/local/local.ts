@@ -58,6 +58,10 @@ export const login: RequestHandler = async function login(req): Promise<IAuthRes
   if (!hs.checkPassword(password, user.password))
     return { error: { status: 406, message: 'Email or password incorrect.' } };
 
+  if (!user.verification.email) {
+    return { error: { status: 409, message: 'User not verified' } };
+  }
+
   const token = ts.generateToken({ id: user.id, email: user.email, roles: user.roles });
   const refreshToken = ts.generateRefreshToken({ id: user.id, email: user.email, roles: user.roles });
   const publicRefreshToken = ts.generateRefreshToken({ id: user.id });
