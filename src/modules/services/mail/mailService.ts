@@ -33,8 +33,7 @@ export class MailService {
   send(options: IMailOptions): Promise<[ClientResponse, {}]> {
     const { to, from, subject, html } = options;
     const data = {
-      //to: isProd ? to : '',
-      to,
+      to: isProd ? to : to,
       subject,
       html,
       from: `WirVonHier <${from || 'hallo'}@wirvonhier.net>`,
